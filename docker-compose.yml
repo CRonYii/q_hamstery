@@ -1,0 +1,60 @@
+version: '2'
+services:
+  q_hamstery_backend:
+    hostname: backend
+    container_name: q_hamstery_backend
+    build:
+      context: q_hamstery_backend
+      dockerfile: Dockerfile
+      args:
+        - SECRET_KEY=${SECRET_KEY}
+    environment:
+      - DJANGO_SUPERUSER_USERNAME=${USER_USERNAME}
+      - DJANGO_SUPERUSER_PASSWORD=${USER_PASSWORD}
+      - DJANGO_SUPERUSER_EMAIL=${USER_EMAIL}
+    volumes:
+      - ${LIBRARY_PATH}:/home/library/
+      - ./appdata/backend/:/app/app_data/
+  q_hamstery_backend_migrate:
+    hostname: backend_migrate
+    container_name: q_hamstery_backend_migrate
+    extends:
+      service: q_hamstery_backend
+    command: bash -c "
+      python3 ./manage.py migrate 
+      && python3 ./manage.py createsuperuser --noinput"
+  q_hamstery_backend_run:
+    hostname: backend_run
+    container_name: q_hamstery_backend_run
+    extends:
+      service: q_hamstery_backend
+    command: gunicorn --bind 0.0.0.0 q_hamstery_backend.wsgi
+    ports:
+      - 8000:8000
+    restart: unless-stopped
+    depends_on:
+      - qbittorrent
+      - q_hamstery_backend_migrate
+  q_hamstery_qbt_monitor:
+    hostname: qbt_monitor
+    container_name: q_hamstery_qbt_monitor
+    extends:
+      service: q_hamstery_backend
+    command: python3 ./manage.py qbt_monitor
+    restart: unless-stopped
+    depends_on: 
+      - qbittorrent
+      - q_hamstery_backend_migrate
+  qbittorrent:
+    container_name: qbittorrent
+    image: linuxserver/qbittorrent
+    environment:
+      - WEBUI_PORT=8080
+    volumes:
+        - ./appdata/qbt_config/:/config
+        - ${LIBRARY_PATH}:/home/library/
+    ports:
+      - 8080:8080
+      - 6881:6881
+      - 6881:6881/udp
+    restart: unless-stopped
