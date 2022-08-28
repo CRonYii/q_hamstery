@@ -29,9 +29,9 @@ services:
     container_name: q_hamstery_backend_run
     extends:
       service: q_hamstery_backend
-    command: gunicorn --bind 0.0.0.0:8000 q_hamstery_backend.wsgi
+    command: gunicorn --bind 0.0.0.0:${HAMSTERY_PORT} q_hamstery_backend.wsgi
     ports:
-      - ${HAMSTERY_PORT}:8000
+      - ${HAMSTERY_PORT}:${HAMSTERY_PORT}
     restart: unless-stopped
     depends_on:
       - qbittorrent
