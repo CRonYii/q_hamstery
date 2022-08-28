@@ -1,4 +1,4 @@
-version: '2'
+version: '2.1'
 services:
   q_hamstery_backend:
     hostname: backend
@@ -9,10 +9,10 @@ services:
       args:
         - SECRET_KEY=${SECRET_KEY}
     environment:
-      - HOST=${HOST}
-      - DJANGO_SUPERUSER_USERNAME=${USER_USERNAME}
-      - DJANGO_SUPERUSER_PASSWORD=${USER_PASSWORD}
-      - DJANGO_SUPERUSER_EMAIL=${USER_EMAIL}
+      - HOST=${HOST:-localhost}
+      - DJANGO_SUPERUSER_USERNAME=admin
+      - DJANGO_SUPERUSER_PASSWORD=hamsteryadmin
+      - DJANGO_SUPERUSER_EMAIL=example@domain.com
     volumes:
       - ${LIBRARY_PATH}:/home/library/
       - ./appdata/backend/:/app/app_data/
@@ -29,9 +29,9 @@ services:
     container_name: q_hamstery_backend_run
     extends:
       service: q_hamstery_backend
-    command: gunicorn --bind 0.0.0.0 q_hamstery_backend.wsgi
+    command: gunicorn --bind 0.0.0.0:8000 q_hamstery_backend.wsgi
     ports:
-      - 8000:8000
+      - ${HAMSTERY_PORT}:8000
     restart: unless-stopped
     depends_on:
       - qbittorrent
@@ -52,8 +52,9 @@ services:
     environment:
       - WEBUI_PORT=8080
     volumes:
-      - ./appdata/qbt_config/:/config
       - ${LIBRARY_PATH}:/home/library/
+      - ./appdata/qbt_config/:/config
+      - ./appdata/qbt_downloads/:/downloads
     ports:
       - 8080:8080
       - 6881:6881
