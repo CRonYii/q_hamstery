@@ -1,4 +1,0 @@
-[submodule "q_hamstery_backend/app"]
-	path = q_hamstery_backend/app
-	url = https://github.com/CRonYii/q_hamstery_backend.git
-	branch = main

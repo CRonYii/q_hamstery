@@ -2,8 +2,8 @@ FROM python:3.8.13-buster
 
 ARG SECRET_KEY
 
+RUN git clone https://github.com/CRonYii/q_hamstery_backend.git app 
 WORKDIR /app
-COPY ./app .
 ADD backend.env .env
 
 RUN sed -i "s/\$secret_key/${SECRET_KEY}/" .env
