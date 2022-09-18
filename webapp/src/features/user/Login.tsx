@@ -1,13 +1,11 @@
-import React from 'react';
 import { LockOutlined, UserOutlined } from '@ant-design/icons';
 import { Button, Form, Input, Spin } from 'antd';
-import { useSelector } from 'react-redux';
-import { useAppDispatch } from '../../app/hook';
+import { useAppDispatch, useAppSelector } from '../../app/hook';
 import { loginHamstery, userSelector } from './userSlice';
 
 function Login() {
     const dispatch = useAppDispatch()
-    const user = useSelector(userSelector)
+    const user = useAppSelector(userSelector)
 
     const onLogin = (credentials: { username: string, password: string }) => {
         dispatch(loginHamstery(credentials))

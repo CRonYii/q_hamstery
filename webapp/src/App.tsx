@@ -1,43 +1,67 @@
 import { LaptopOutlined, NotificationOutlined, UserOutlined } from '@ant-design/icons';
-import { Breadcrumb, Col, Layout, Menu, MenuProps, Row } from 'antd';
-import React from 'react';
+import { Breadcrumb, Col, Empty, Layout, Menu, MenuProps, Row } from 'antd';
+import { MenuItemType } from 'antd/lib/menu/hooks/useItems';
+import React, { useEffect } from 'react';
 import { useSelector } from 'react-redux';
+import { Link, Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import './App.css';
 import { useAppDispatch } from './app/hook';
+import TopNavMenu from './features/nav/TopNavMenu';
+import TvLibrary from './features/tv-libraries/TvLibrary';
+import { fetchTvLibs, tvLibrariesSelectors } from './features/tv-libraries/tvshowsSlice';
 import Login from './features/user/Login';
 import LogoutButton from './features/user/LogutButton';
 import { userSelector } from './features/user/userSlice';
 
 const { Header, Content, Footer, Sider } = Layout;
 
-const items1: MenuProps['items'] = ['1', '2', '3'].map(key => ({
-  key,
-  label: `nav ${key}`,
-}));
+const AppContent = () => {
+  return (<Routes>
+    <Route path='/tvshows/library/:id' element={<TvLibrary />} />
+    <Route path='/tvshows/' element={<Empty description={<span>Please select a TV Library</span>} />} />
+    <Route path='/indexers' element={<div>Indexers</div>} />
+    <Route path='*' element={<Navigate to={'/tvshows'} replace />} />
+  </Routes>)
+}
 
-const items2: MenuProps['items'] = [UserOutlined, LaptopOutlined, NotificationOutlined].map(
-  (icon, index) => {
-    const key = String(index + 1);
+const AppSideNavMenu = () => {
+  return (<Routes>
+    <Route path='/tvshows/*' element={<SideNavMenu type='tvshows' />} />
+  </Routes>)
+}
 
-    return {
-      key: `sub${key}`,
-      icon: React.createElement(icon),
-      label: `subnav ${key}`,
+const SideNavMenu: React.FC<{ type: 'tvshows' }> = ({ type }) => {
+  const libs = useSelector(tvLibrariesSelectors.selectAll)
 
-      children: new Array(4).fill(null).map((_, j) => {
-        const subKey = index * 4 + j + 1;
-        return {
-          key: subKey,
-          label: `option${subKey}`,
-        };
-      }),
-    };
-  },
-);
+  const sideNavItems = () => {
+    switch (type) {
+      case 'tvshows':
+        return libs.map((lib) => {
+          return { key: String(lib.id), label: <Link to={`/tvshows/library/${lib.id}`}>{lib.name}</Link> }
+        })
+    }
+  }
+
+  return (<Sider className="site-layout-background" width={200}>
+    <Menu
+      mode="inline"
+      style={{ height: '100%' }}
+      items={sideNavItems()}
+    />
+  </Sider>)
+}
 
 const App: React.FC = () => {
   const dispatch = useAppDispatch()
   const user = useSelector(userSelector)
+  const libs = useSelector(tvLibrariesSelectors.selectAll)
+
+  const location = useLocation()
+  const path = location.pathname
+
+  useEffect(() => {
+    dispatch(fetchTvLibs())
+  }, [])
 
   if (!user.logged_in) {
     return <Login />;
@@ -45,7 +69,7 @@ const App: React.FC = () => {
     return (<Layout>
       <Header className="header">
         <div className="logo" />
-        <Menu theme="dark" mode="horizontal" defaultSelectedKeys={['2']} items={items1} />
+        <TopNavMenu />
       </Header>
       <Content style={{ padding: '0 50px' }}>
         <Row align='middle' gutter={16}>
@@ -53,7 +77,7 @@ const App: React.FC = () => {
             <Breadcrumb style={{ margin: '16px 0' }}>
               <Breadcrumb.Item>Home</Breadcrumb.Item>
               <Breadcrumb.Item>List</Breadcrumb.Item>
-              <Breadcrumb.Item>App</Breadcrumb.Item>
+              <Breadcrumb.Item>{path}</Breadcrumb.Item>
             </Breadcrumb>
           </Col>
           <Col flex="auto"></Col>
@@ -62,16 +86,10 @@ const App: React.FC = () => {
           </Col>
         </Row>
         <Layout className="site-layout-background" style={{ padding: '24px 0' }}>
-          <Sider className="site-layout-background" width={200}>
-            <Menu
-              mode="inline"
-              defaultSelectedKeys={['1']}
-              defaultOpenKeys={['sub1']}
-              style={{ height: '100%' }}
-              items={items2}
-            />
-          </Sider>
-          <Content style={{ padding: '0 24px', minHeight: '40vh' }}>Content</Content>
+          <AppSideNavMenu />
+          <Content style={{ padding: '0 24px', minHeight: '40vh' }}>
+            <AppContent />
+          </Content>
         </Layout>
       </Content>
       <Footer style={{ textAlign: 'center' }}>Hamstery - Tech otakus save the world</Footer>

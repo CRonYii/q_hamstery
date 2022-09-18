@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice, isRejected } from '@reduxjs/toolkit';
-import { message, notification } from 'antd';
+import { notification } from 'antd';
 import Cookies from 'js-cookie';
 import { RootState } from '../../app/store';
 import hamstery from '../api/hamstery';
@@ -18,7 +18,6 @@ interface UserState {
     loading: boolean,
     logged_in: boolean,
     username?: string,
-    error_message?: string,
 }
 
 const initialState: UserState = {
@@ -50,9 +49,9 @@ const userSlice = createSlice({
             .addCase(loginHamstery.pending, (state, action) => { state.loading = true; })
             .addCase(loginHamstery.rejected, (state, action) => {
                 state.loading = false;
-                notification.error({ 
+                notification.error({
                     message: 'The provided credentials are invalid or the user does not exist',
-                 });
+                });
             })
             .addCase(loginHamstery.fulfilled, (state, action) => {
                 state.loading = false;
