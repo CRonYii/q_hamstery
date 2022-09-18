@@ -4,10 +4,12 @@ import { useSelector } from 'react-redux';
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import './App.css';
 import { useAppDispatch } from './app/hook';
-import SideNavMenu from './features/nav/SideNavMenu';
+import { TvLibrarySideNavMenu, TvSeasonSideNavMenu, TvShowSideNavMenu } from './features/nav/SideNavMenu';
 import TopNavMenu from './features/nav/TopNavMenu';
 import TvLibrary from './features/tv-libraries/TvLibrary';
-import { fetchTvLibs, tvLibrariesSelectors } from './features/tv-libraries/tvshowsSlice';
+import { TVSeasonPage } from './features/tv-libraries/TvSeasonPage';
+import TvShowPage from './features/tv-libraries/TvShowPage';
+import { fetchTvLibraries, tvLibrariesSelectors } from './features/tv-libraries/tvshowsSlice';
 import Login from './features/user/Login';
 import LogoutButton from './features/user/LogutButton';
 import { userSelector } from './features/user/userSlice';
@@ -16,30 +18,33 @@ const { Header, Content, Footer, Sider } = Layout;
 
 const AppContent = () => {
   return (<Routes>
-    <Route path='/tvshows/library/:id' element={<TvLibrary />} />
-    <Route path='/tvshows/library' element={<Empty description={<span>Please select a TV Library</span>} />} />
+    <Route path='/tvshows/:library_id/:show_id/:season_id' element={<TVSeasonPage />} />
+    <Route path='/tvshows/:library_id/:show_id' element={<TvShowPage />} />
+    <Route path='/tvshows/:library_id' element={<TvLibrary />} />
+    <Route path='/tvshows/' element={<Empty description={<span>Please select a TV Library</span>} />} />
     <Route path='/indexers' element={<div>Indexers</div>} />
-    <Route path='*' element={<Navigate to={'/tvshows/library'} replace />} />
+    <Route path='*' element={<Navigate to={'/tvshows'} replace />} />
   </Routes>)
 }
 
 const AppSideNavMenu = () => {
   return (<Routes>
-    <Route path='/tvshows/library' element={<SideNavMenu type='tvshows' />} />
-    <Route path='/tvshows/library/:id' element={<SideNavMenu type='tvshows' />} />
+    <Route path='/tvshows/:library_id/:show_id/:season_id' element={<TvSeasonSideNavMenu />} />
+    <Route path='/tvshows/:library_id/:show_id' element={<TvShowSideNavMenu />} />
+    <Route path='/tvshows/:library_id' element={<TvLibrarySideNavMenu />} />
+    <Route path='/tvshows/' element={<TvLibrarySideNavMenu />} />
   </Routes>)
 }
 
 const App: React.FC = () => {
   const dispatch = useAppDispatch()
   const user = useSelector(userSelector)
-  const libs = useSelector(tvLibrariesSelectors.selectAll)
 
   const location = useLocation()
   const path = location.pathname
 
   useEffect(() => {
-    dispatch(fetchTvLibs())
+    dispatch(fetchTvLibraries())
   }, [])
 
   if (!user.logged_in) {

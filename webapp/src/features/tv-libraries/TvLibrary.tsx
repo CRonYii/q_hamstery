@@ -2,13 +2,13 @@ import { Col, Empty, Row, Skeleton } from 'antd';
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import { useAppSelector } from '../../app/hook';
-import { datetimeSort } from '../../app/utils';
-import { TVShowCard } from './TvShowCard';
+import TVShowCard from './TvShowCard';
 import { selectAllShowsByLibrary } from './tvshowsSlice';
 
 const TvLibrary: React.FC = () => {
-    const { id } = useParams()
-    const shows = useAppSelector(selectAllShowsByLibrary(id as string))
+    const params = useParams()
+    const library_id = params.library_id as string
+    const shows = useAppSelector(selectAllShowsByLibrary(library_id))
     if (!shows) {
         return <Skeleton active />
     }
@@ -18,8 +18,7 @@ const TvLibrary: React.FC = () => {
     return <div>
         <Row gutter={24} style={{ margin: 16 }} align='bottom'>
             {shows
-                .sort((a, b) => datetimeSort(a.air_date, b.air_date))
-                .map(show => <Col key={show.id}><TVShowCard id={String(show.id)} /></Col>)}
+                .map(show => <Col key={show.id}><TVShowCard library_id={library_id} id={String(show.id)} /></Col>)}
         </Row>
     </div>
 

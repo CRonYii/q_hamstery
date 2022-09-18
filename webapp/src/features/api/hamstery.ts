@@ -1,5 +1,5 @@
 import axios from "axios";
-import { TvLibrary } from "../../app/entities";
+import { TvLibrary, TvShow } from "../../app/entities";
 
 const hamstery = {
     test() {
@@ -13,6 +13,9 @@ const hamstery = {
     },
     getTvLibraryList() {
         return axios.get<TvLibrary[]>('/hamstery/api/tvlib/');
+    },
+    getTvShowById(id: string) {
+        return axios.get<TvShow>(`/hamstery/api/tvshow/${id}/`);
     }
 };
 

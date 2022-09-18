@@ -3,7 +3,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 
 const pages = [
-    { key: 'tvshows', label: <Link to={'/tvshows'}>Tv Shows</Link>, },
+    { key: 'tvshows', label: <Link to={'/tvshows'}>TV Shows</Link>, },
     { key: 'indexers', label: <Link to={'/indexers'}>Indexers</Link>, },
 ]
 
