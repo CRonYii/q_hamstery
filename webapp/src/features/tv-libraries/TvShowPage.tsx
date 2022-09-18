@@ -12,7 +12,7 @@ const TvShowPage: React.FC = () => {
     const show = useAppSelector(state => tvShowsSelectors.selectById(state, show_id));
     useEffect(() => {
         dispatch(fetchTvShow(show_id))
-    }, [show_id]);
+    }, [dispatch, show_id]);
 
     if (!show || !show.seasons) {
         return <Skeleton />

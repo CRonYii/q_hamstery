@@ -45,7 +45,7 @@ const App: React.FC = () => {
 
   useEffect(() => {
     dispatch(fetchTvLibraries())
-  }, [])
+  }, [dispatch])
 
   if (!user.logged_in) {
     return <Login />;

@@ -50,6 +50,11 @@ export const fetchTvShow = createAsyncThunk('tvshows/fetchTvShow', async (id: st
         },
     }, number[]> = normalize(response.data, tvShowEntity)
     return data;
+}, {
+    condition: (id, { getState }) => {
+        const show = tvShowsSelectors.selectById(getState() as RootState, id)
+        return !show || !show.seasons
+    }
 })
 
 const tvShowsSlice = createSlice({
@@ -70,7 +75,6 @@ const tvShowsSlice = createSlice({
                 tvShowsAdapter.upsertMany(state.tvshows, action.payload.entities.tvshows)
             })
             .addCase(fetchTvShow.fulfilled, (state, action) => {
-                console.log(action.payload)
                 tvShowsAdapter.upsertMany(state.tvshows, action.payload.entities.tvshows)
                 tvSeasonsAdapter.upsertMany(state.tvseasons, action.payload.entities.tvseasons)
                 tvEpisodesAdapter.upsertMany(state.tvepisodes, action.payload.entities.tvepisodes)
