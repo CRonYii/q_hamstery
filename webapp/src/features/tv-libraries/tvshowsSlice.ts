@@ -40,7 +40,6 @@ const tvShowsSlice = createSlice({
     extraReducers: builder => {
         builder
             .addCase(fetchTvLibs.fulfilled, (state, action) => {
-                console.log(action.payload.entities.tvlibraries);
                 tvLibrariesAdapter.upsertMany(state.tvlibraries, action.payload.entities.tvlibraries)
                 tvStoragesAdapter.upsertMany(state.tvstorages, action.payload.entities.tvstorages)
                 tvShowsAdapter.upsertMany(state.tvshows, action.payload.entities.tvshows)
