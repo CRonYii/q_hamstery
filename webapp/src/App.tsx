@@ -1,11 +1,10 @@
-import { LaptopOutlined, NotificationOutlined, UserOutlined } from '@ant-design/icons';
-import { Breadcrumb, Col, Empty, Layout, Menu, MenuProps, Row } from 'antd';
-import { MenuItemType } from 'antd/lib/menu/hooks/useItems';
+import { Breadcrumb, Col, Empty, Layout, Row } from 'antd';
 import React, { useEffect } from 'react';
 import { useSelector } from 'react-redux';
-import { Link, Navigate, Route, Routes, useLocation } from 'react-router-dom';
+import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import './App.css';
 import { useAppDispatch } from './app/hook';
+import SideNavMenu from './features/nav/SideNavMenu';
 import TopNavMenu from './features/nav/TopNavMenu';
 import TvLibrary from './features/tv-libraries/TvLibrary';
 import { fetchTvLibs, tvLibrariesSelectors } from './features/tv-libraries/tvshowsSlice';
@@ -18,37 +17,17 @@ const { Header, Content, Footer, Sider } = Layout;
 const AppContent = () => {
   return (<Routes>
     <Route path='/tvshows/library/:id' element={<TvLibrary />} />
-    <Route path='/tvshows/' element={<Empty description={<span>Please select a TV Library</span>} />} />
+    <Route path='/tvshows/library' element={<Empty description={<span>Please select a TV Library</span>} />} />
     <Route path='/indexers' element={<div>Indexers</div>} />
-    <Route path='*' element={<Navigate to={'/tvshows'} replace />} />
+    <Route path='*' element={<Navigate to={'/tvshows/library'} replace />} />
   </Routes>)
 }
 
 const AppSideNavMenu = () => {
   return (<Routes>
-    <Route path='/tvshows/*' element={<SideNavMenu type='tvshows' />} />
+    <Route path='/tvshows/library' element={<SideNavMenu type='tvshows' />} />
+    <Route path='/tvshows/library/:id' element={<SideNavMenu type='tvshows' />} />
   </Routes>)
-}
-
-const SideNavMenu: React.FC<{ type: 'tvshows' }> = ({ type }) => {
-  const libs = useSelector(tvLibrariesSelectors.selectAll)
-
-  const sideNavItems = () => {
-    switch (type) {
-      case 'tvshows':
-        return libs.map((lib) => {
-          return { key: String(lib.id), label: <Link to={`/tvshows/library/${lib.id}`}>{lib.name}</Link> }
-        })
-    }
-  }
-
-  return (<Sider className="site-layout-background" width={200}>
-    <Menu
-      mode="inline"
-      style={{ height: '100%' }}
-      items={sideNavItems()}
-    />
-  </Sider>)
 }
 
 const App: React.FC = () => {
