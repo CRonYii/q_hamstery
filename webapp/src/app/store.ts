@@ -1,12 +1,14 @@
 import { configureStore } from "@reduxjs/toolkit";
-import tvlibsReducer from "../features/tv-libraries/tvshowsSlice";
+import { hamsterySlice } from "../features/api/hamsterySlice";
 import userSlice from "../features/user/userSlice";
 
 const store = configureStore({
     reducer: {
+        [hamsterySlice.reducerPath]: hamsterySlice.reducer,
         user: userSlice,
-        tvshows: tvlibsReducer,
-    }
+    },
+    middleware: getDefaultMiddleware =>
+        getDefaultMiddleware().concat(hamsterySlice.middleware)
 });
 
 export default store;

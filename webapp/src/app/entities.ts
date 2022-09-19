@@ -1,19 +1,18 @@
-import { schema } from "normalizr"
 
-export interface TvLibrary {
+export interface ITvLibrary {
     id: number,
     name: string,
     lang: string,
-    storages: string[]
+    storages: ITvStorage[]
 }
 
-export interface TvStorage {
+export interface ITvStorage {
     id: number,
     path: string,
-    shows: string[]
+    shows: ITvShow[]
 }
 
-export interface TvShow {
+export interface ITvShow {
     id: number,
     tmdb_id: number,
     name: string,
@@ -21,10 +20,9 @@ export interface TvShow {
     number_of_seasons: number,
     poster_path?: string,
     air_date?: string,
-    seasons?: string[],
 }
 
-export interface TvSeason {
+export interface ITvSeason {
     id: number,
     show: number,
     tmdb_id: number,
@@ -33,10 +31,10 @@ export interface TvSeason {
     number_of_episodes: number,
     poster_path?: string,
     air_date?: string,
-    episodes: string[],
+    episodes: ITvEpisode[],
 }
 
-export interface TvEpisode {
+export interface ITvEpisode {
     id: number,
     season: number,
     tmdb_id: number,
@@ -47,18 +45,3 @@ export interface TvEpisode {
     poster_path?: string,
     air_date?: string,
 }
-
-export const tvEpisodeEntity = new schema.Entity<TvShow>("tvepisodes")
-export const tvSeasonEntity = new schema.Entity<TvShow>("tvseasons", {
-    episodes: [tvEpisodeEntity],
-})
-export const tvShowEntity = new schema.Entity<TvShow>("tvshows", {
-    seasons: [tvSeasonEntity]
-})
-export const tvStorageEntity = new schema.Entity<TvStorage>("tvstorages", {
-    shows: [tvShowEntity],
-})
-export const tvLibraryEntity = new schema.Entity<TvLibrary>("tvlibraries", {
-    storages: [tvStorageEntity],
-})
-export const tvLibraryArray = new schema.Array(tvLibraryEntity)

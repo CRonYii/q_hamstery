@@ -1,15 +1,14 @@
 import { Breadcrumb, Col, Empty, Layout, Row } from 'antd';
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useSelector } from 'react-redux';
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import './App.css';
 import { useAppDispatch } from './app/hook';
 import { TvLibrarySideNavMenu, TvSeasonSideNavMenu, TvShowSideNavMenu } from './features/nav/SideNavMenu';
 import TopNavMenu from './features/nav/TopNavMenu';
-import TvLibrary from './features/tv-libraries/TvLibrary';
+import TvLibraryPage from './features/tv-libraries/TvLibraryPage';
 import { TVSeasonPage } from './features/tv-libraries/TvSeasonPage';
 import TvShowPage from './features/tv-libraries/TvShowPage';
-import { fetchTvLibraries, tvLibrariesSelectors } from './features/tv-libraries/tvshowsSlice';
 import Login from './features/user/Login';
 import LogoutButton from './features/user/LogutButton';
 import { userSelector } from './features/user/userSlice';
@@ -20,7 +19,7 @@ const AppContent = () => {
   return (<Routes>
     <Route path='/tvshows/:library_id/:show_id/:season_id' element={<TVSeasonPage />} />
     <Route path='/tvshows/:library_id/:show_id' element={<TvShowPage />} />
-    <Route path='/tvshows/:library_id' element={<TvLibrary />} />
+    <Route path='/tvshows/:library_id' element={<TvLibraryPage />} />
     <Route path='/tvshows/' element={<Empty description={<span>Please select a TV Library</span>} />} />
     <Route path='/indexers' element={<div>Indexers</div>} />
     <Route path='*' element={<Navigate to={'/tvshows'} replace />} />
@@ -43,9 +42,9 @@ const App: React.FC = () => {
   const location = useLocation()
   const path = location.pathname
 
-  useEffect(() => {
-    dispatch(fetchTvLibraries())
-  }, [dispatch])
+  // useEffect(() => {
+  //   dispatch(fetchTvLibraries())
+  // }, [dispatch])
 
   if (!user.logged_in) {
     return <Login />;

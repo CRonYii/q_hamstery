@@ -1,18 +1,11 @@
-import { Card, Skeleton } from 'antd';
+import { Card } from 'antd';
 import React from 'react';
-import { useAppSelector } from '../../app/hook';
+import { ITvEpisode } from '../../app/entities';
 import { toTMDBPosterURL } from '../../app/utils';
-import { tvEpisodesSelectors } from './tvshowsSlice';
 
 const { Meta } = Card;
 
-const TvEpisodeCard: React.FC<{ id: string }> = ({ id }) => {
-    const episode = useAppSelector(state => tvEpisodesSelectors.selectById(state, id));
-
-    if (!episode) {
-        return <Skeleton />
-    }
-
+const TvEpisodeCard: React.FC<{ episode: ITvEpisode }> = ({ episode }) => {
     const poster_path = toTMDBPosterURL(episode.poster_path, "w185")
     return <Card
         hoverable

@@ -1,18 +1,16 @@
 import { Card, Skeleton } from 'antd';
 import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useAppSelector } from '../../app/hook';
+import { ITvSeason } from '../../app/entities';
 import { toTMDBPosterURL } from '../../app/utils';
-import { tvSeasonsSelectors } from './tvshowsSlice';
 
 const { Meta } = Card;
 
-const TvSeasonCard: React.FC<{ id: string }> = ({ id }) => {
+const TvSeasonCard: React.FC<{ season: ITvSeason }> = ({ season }) => {
     const navigate = useNavigate();
     const params = useParams()
     const library_id = params.library_id as string
     const show_id = params.show_id as string
-    const season = useAppSelector(state => tvSeasonsSelectors.selectById(state, id));
 
     if (!season) {
         return <Skeleton active />

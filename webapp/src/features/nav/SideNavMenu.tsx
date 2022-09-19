@@ -1,8 +1,8 @@
 import { Layout, Menu, Tooltip } from 'antd';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { useAppSelector } from '../../app/hook';
-import { selectAllSeasonsByShow, selectAllShowsByLibrary, tvLibrariesSelectors, tvSeasonsSelectors, tvShowsSelectors } from '../tv-libraries/tvshowsSlice';
+import { getShowsOfLibrary } from '../../app/utils';
+import { hamsterySlice } from '../api/hamsterySlice';
 
 const { Sider } = Layout;
 
@@ -24,8 +24,8 @@ const SideNavMenuBase: React.FC<{ id: string, items: any[] }> = ({ id, items }) 
 
 export const TvLibrarySideNavMenu: React.FC = () => {
     const { library_id } = useParams()
-    const libs = useAppSelector(tvLibrariesSelectors.selectAll)
-    const items = libs.map((lib) => {
+    const { data = [] } = hamsterySlice.useGetTvLibrariesQuery()
+    const items = data.map((lib) => {
         return {
             key: String(lib.id),
             label: <Link to={`/tvshows/${lib.id}`}>{lib.name}</Link>
@@ -37,7 +37,8 @@ export const TvLibrarySideNavMenu: React.FC = () => {
 
 export const TvShowSideNavMenu: React.FC = () => {
     const { library_id, show_id } = useParams()
-    const shows = useAppSelector(selectAllShowsByLibrary(library_id as string)) || []
+    const { data: library } = hamsterySlice.useGetTvLibraryQuery(library_id as string)
+    const shows = useMemo(() => getShowsOfLibrary(library), [library])
     const items = shows.map((show) => {
         const title = `${show.name} (${show.air_date})`
         return {
@@ -55,7 +56,8 @@ export const TvShowSideNavMenu: React.FC = () => {
 
 export const TvSeasonSideNavMenu: React.FC = () => {
     const { library_id, show_id, season_id } = useParams()
-    const seasons = useAppSelector(selectAllSeasonsByShow(show_id as string)) || []
+    const show = hamsterySlice.useGetTvShowQuery(show_id as string).data
+    const seasons = show ? show.seasons : []
     const items = seasons.map((season) => {
         const title = `${season.name} - ${season.number_of_episodes} episodes (${season.air_date})`
         return {
