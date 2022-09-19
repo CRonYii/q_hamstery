@@ -1,7 +1,8 @@
 import { HomeOutlined } from '@ant-design/icons';
 import { Breadcrumb } from 'antd';
-import React, { useMemo } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import React from 'react';
+import { Link, useParams, useLocation } from 'react-router-dom';
+import { capitalizeFirstLetter } from '../../app/utils';
 import { hamsterySlice } from '../api/hamsterySlice';
 
 interface BreadcrumbNavItem {
@@ -70,6 +71,23 @@ export const TvShowsBreadcrumbNav: React.FC = () => {
         items.push({
             key: `season-${season_id}`,
             label: season.name || '',
+        })
+    return <BreadcrumbNav items={items} />
+}
+
+export const IndexerBreadcrumbNav: React.FC = () => {
+    const location = useLocation()
+    const path = location.pathname.split('/')[2]
+    const items: BreadcrumbNavItem[] = [
+        {
+            key: 'indexers',
+            label: 'Indexers',
+        }
+    ]
+    if (path)
+        items.push({
+            key: `indexer-${path}`,
+            label: capitalizeFirstLetter(path),
         })
     return <BreadcrumbNav items={items} />
 }

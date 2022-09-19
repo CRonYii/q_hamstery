@@ -17,3 +17,7 @@ export const getShowsOfLibrary = (library?: ITvLibrary) => {
         .reduce<ITvShow[]>((shows, storage) => [...shows, ...storage.shows], [])
         .sort((a, b) => datetimeSort(a.air_date, b.air_date))
 }
+
+export const capitalizeFirstLetter = (str: string) => {
+    return str.charAt(0).toUpperCase() + str.slice(1);
+}

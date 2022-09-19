@@ -45,3 +45,10 @@ export interface ITvEpisode {
     poster_path?: string,
     air_date?: string,
 }
+
+export interface ITorznabIndexer {
+    id: number,
+    name: string,
+    url: string,
+    apikey: string,
+}

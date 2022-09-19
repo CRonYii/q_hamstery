@@ -1,12 +1,12 @@
 import { Layout, Menu, Tooltip } from 'antd';
 import React, { useMemo } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useLocation } from 'react-router-dom';
 import { getShowsOfLibrary } from '../../app/utils';
 import { hamsterySlice } from '../api/hamsterySlice';
 
 const { Sider } = Layout;
 
-const SideNavMenuBase: React.FC<{ id: string, items: any[] }> = ({ id, items }) => {
+const SideNavMenuBase: React.FC<{ id?: string, items: any[] }> = ({ id, items }) => {
     return (<Sider className="site-layout-background" width={200}>
         <Menu
             mode="inline"
@@ -71,4 +71,15 @@ export const TvSeasonSideNavMenu: React.FC = () => {
     })
 
     return (<SideNavMenuBase items={items} id={season_id as string} />)
+}
+
+export const IndexerSideNavMenu: React.FC = () => {
+    const locaiton = useLocation()
+    const selected = locaiton.pathname.split('/')[2]
+    const items = [{
+            key: 'torznab',
+            label: <Link to={`/indexers/torznab`}>Torznab</Link>
+        }]
+
+    return (<SideNavMenuBase items={items} id={selected} />)
 }
