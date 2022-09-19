@@ -6,7 +6,7 @@ import { hamsterySlice } from '../api/hamsterySlice';
 
 interface BreadcrumbNavItem {
     key: string,
-    label: JSX.Element | JSX.Element[] | string,
+    label: JSX.Element | string,
     to?: string
 }
 
@@ -15,9 +15,13 @@ const BreadcrumbNav: React.FC<{
 }> = ({ items }) => {
     return (<Breadcrumb style={{ margin: '16px 0' }}>
         {items.map(({ key, label, to }) => {
-            const item = to ? <Link to={to}>
-                {label}
-            </Link> : label
+            const item = to
+                ?
+                <Link to={to}>
+                    {label}
+                </Link>
+                :
+                label
             return <Breadcrumb.Item key={key}>
                 {item}
             </Breadcrumb.Item>
@@ -45,26 +49,26 @@ export const TvShowsBreadcrumbNav: React.FC = () => {
 
     const items: BreadcrumbNavItem[] = [
         {
-            key: library_id,
-            label: [<HomeOutlined />, <span> TV Shows</span>],
+            key: 'tvshows',
+            label: <span><HomeOutlined /> TV Shows</span>,
             to: '/tvshows',
         }
     ]
     if (library && !libraryIsUninitialized)
         items.push({
-            key: library_id,
+            key: `library-${library_id}`,
             label: library.name,
             to: '/tvshows/' + library_id,
         })
     if (show && !showIsUninitialized)
         items.push({
-            key: show_id,
+            key: `show-${show_id}`,
             label: show.name || '',
             to: `/tvshows/${library_id}/${show_id}`,
         })
     if (season && !seasonIsUninitialized)
         items.push({
-            key: season_id,
+            key: `season-${season_id}`,
             label: season.name || '',
         })
     return <BreadcrumbNav items={items} />
