@@ -1,4 +1,4 @@
-import { Layout, Menu, Tooltip } from 'antd';
+import { Affix, Layout, Menu, Tooltip } from 'antd';
 import React, { useMemo } from 'react';
 import { Link, useParams, useLocation } from 'react-router-dom';
 import { getShowsOfLibrary } from '../../app/utils';
@@ -7,19 +7,21 @@ import { hamsterySlice } from '../api/hamsterySlice';
 const { Sider } = Layout;
 
 const SideNavMenuBase: React.FC<{ id?: string, items: any[] }> = ({ id, items }) => {
-    return (<Sider className="site-layout-background" width={200}>
-        <Menu
-            mode="inline"
-            style={{
-                height: '100%',
-                overflowX: 'hidden',
-                overflowY: 'auto',
-                maxHeight: '80vh',
-            }}
-            items={items}
-            selectedKeys={id ? [id] : []}
-        />
-    </Sider>)
+    return (<Affix>
+            <Sider className="site-layout-background" width={200}>
+                <Menu
+                    mode="inline"
+                    style={{
+                        height: '100%',
+                        overflowX: 'hidden',
+                        overflowY: 'auto',
+                        maxHeight: '80vh',
+                    }}
+                    items={items}
+                    selectedKeys={id ? [id] : []}
+                />
+            </Sider>
+        </Affix>)
 }
 
 export const TvLibrarySideNavMenu: React.FC = () => {
@@ -77,9 +79,9 @@ export const IndexerSideNavMenu: React.FC = () => {
     const locaiton = useLocation()
     const selected = locaiton.pathname.split('/')[2]
     const items = [{
-            key: 'torznab',
-            label: <Link to={`/indexers/torznab`}>Torznab</Link>
-        }]
+        key: 'torznab',
+        label: <Link to={`/indexers/torznab`}>Torznab</Link>
+    }]
 
     return (<SideNavMenuBase items={items} id={selected} />)
 }
