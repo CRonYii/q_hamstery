@@ -8,7 +8,6 @@ export const hamsterySlice = createApi({
     baseQuery: fetchBaseQuery({
         baseUrl: '/hamstery/api', prepareHeaders: (headers) => {
             const token = Cookies.get('csrftoken')
-            console.log(token);
             if (token)
                 headers.set('X-CSRFToken', token)
             return headers
