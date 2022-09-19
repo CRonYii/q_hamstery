@@ -1,11 +1,13 @@
 import { configureStore } from "@reduxjs/toolkit";
 import { hamsterySlice } from "../features/api/hamsterySlice";
 import torznabIndexerSlice from "../features/indexers/torznabIndexerSlice";
+import navSlice from "../features/nav/navSlice";
 import userSlice from "../features/user/userSlice";
 
 const store = configureStore({
     reducer: {
         [hamsterySlice.reducerPath]: hamsterySlice.reducer,
+        nav: navSlice,
         user: userSlice,
         torznab: torznabIndexerSlice,
     },

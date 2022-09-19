@@ -81,7 +81,7 @@ export const IndexerBreadcrumbNav: React.FC = () => {
     const items: BreadcrumbNavItem[] = [
         {
             key: 'indexers',
-            label: 'Indexers',
+            label: <span><HomeOutlined /> Indexers</span>,
         }
     ]
     if (path)
