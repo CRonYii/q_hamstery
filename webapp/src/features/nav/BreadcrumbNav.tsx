@@ -1,21 +1,24 @@
 import { HomeOutlined } from '@ant-design/icons';
 import { Breadcrumb } from 'antd';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { hamsterySlice } from '../api/hamsterySlice';
 
+interface BreadcrumbNavItem {
+    key: string,
+    label: JSX.Element | JSX.Element[] | string,
+    to?: string
+}
+
 const BreadcrumbNav: React.FC<{
-    items: {
-        label: JSX.Element | JSX.Element[] | string,
-        to?: string
-    }[]
+    items: BreadcrumbNavItem[]
 }> = ({ items }) => {
     return (<Breadcrumb style={{ margin: '16px 0' }}>
-        {items.map(({ label, to }) => {
+        {items.map(({ key, label, to }) => {
             const item = to ? <Link to={to}>
                 {label}
             </Link> : label
-            return <Breadcrumb.Item>
+            return <Breadcrumb.Item key={key}>
                 {item}
             </Breadcrumb.Item>
         })}
@@ -24,56 +27,45 @@ const BreadcrumbNav: React.FC<{
 
 export default BreadcrumbNav
 
-export const TvLibraryBreadcrumbNav: React.FC = () => {
-    const params = useParams()
-    const library_id = params.library_id as string
-    const { data: library } = hamsterySlice.useGetTvLibraryQuery(library_id)
-    const items = [
-        {
-            label: [<HomeOutlined />, <span>{library?.name}</span>],
-        }
-    ]
-    return <BreadcrumbNav items={items} />
-}
-
-export const TvShowBreadcrumbNav: React.FC = () => {
-    const params = useParams()
-    const library_id = params.library_id as string
-    const show_id = params.show_id as string
-    const { data: library } = hamsterySlice.useGetTvLibraryQuery(library_id)
-    const { data: show } = hamsterySlice.useGetTvShowQuery(show_id)
-    const items = [
-        {
-            label: [<HomeOutlined />, <span> {library?.name}</span>],
-            to: '/tvshows/' + library_id,
-        },
-        {
-            label: show?.name || '',
-        },
-    ]
-    return <BreadcrumbNav items={items} />
-}
-
-export const TvSeasonBreadcrumbNav: React.FC = () => {
+export const TvShowsBreadcrumbNav: React.FC = () => {
     const params = useParams()
     const library_id = params.library_id as string
     const show_id = params.show_id as string
     const season_id = params.season_id as string
-    const { data: library } = hamsterySlice.useGetTvLibraryQuery(library_id)
-    const { data: show } = hamsterySlice.useGetTvShowQuery(show_id)
-    const { data: season } = hamsterySlice.useGetTvSeasonQuery(season_id)
-    const items = [
+
+    const { data: library, isUninitialized: libraryIsUninitialized } = hamsterySlice.useGetTvLibraryQuery(library_id, {
+        skip: !library_id
+    })
+    const { data: show, isUninitialized: showIsUninitialized } = hamsterySlice.useGetTvShowQuery(show_id, {
+        skip: !show_id
+    })
+    const { data: season, isUninitialized: seasonIsUninitialized } = hamsterySlice.useGetTvSeasonQuery(season_id, {
+        skip: !season_id
+    })
+
+    const items: BreadcrumbNavItem[] = [
         {
-            label: [<HomeOutlined />, <span> {library?.name}</span>],
-            to: '/tvshows/' + library_id,
-        },
-        {
-            label: show?.name || '',
-            to: `/tvshows/${library_id}/${show_id}`,
-        },
-        {
-            label: season?.name || '',
-        },
+            key: library_id,
+            label: [<HomeOutlined />, <span> TV Shows</span>],
+            to: '/tvshows',
+        }
     ]
+    if (library && !libraryIsUninitialized)
+        items.push({
+            key: library_id,
+            label: library.name,
+            to: '/tvshows/' + library_id,
+        })
+    if (show && !showIsUninitialized)
+        items.push({
+            key: show_id,
+            label: show.name || '',
+            to: `/tvshows/${library_id}/${show_id}`,
+        })
+    if (season && !seasonIsUninitialized)
+        items.push({
+            key: season_id,
+            label: season.name || '',
+        })
     return <BreadcrumbNav items={items} />
 }

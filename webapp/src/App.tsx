@@ -3,7 +3,7 @@ import React from 'react';
 import { useSelector } from 'react-redux';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import './App.css';
-import { TvLibraryBreadcrumbNav, TvSeasonBreadcrumbNav, TvShowBreadcrumbNav } from './features/nav/BreadcrumbNav';
+import { TvShowsBreadcrumbNav } from './features/nav/BreadcrumbNav';
 import { TvLibrarySideNavMenu, TvSeasonSideNavMenu, TvShowSideNavMenu } from './features/nav/SideNavMenu';
 import TopNavMenu from './features/nav/TopNavMenu';
 import TvLibraryPage from './features/tv-libraries/TvLibraryPage';
@@ -37,9 +37,10 @@ const AppSideNavMenu = () => {
 
 const AppBreadcrumbNav = () => {
   return (<Routes>
-    <Route path='/tvshows/:library_id/:show_id/:season_id' element={<TvSeasonBreadcrumbNav />} />
-    <Route path='/tvshows/:library_id/:show_id' element={<TvShowBreadcrumbNav />} />
-    <Route path='/tvshows/:library_id' element={<TvLibraryBreadcrumbNav />} />
+    <Route path='/tvshows/:library_id/:show_id/:season_id' element={<TvShowsBreadcrumbNav />} />
+    <Route path='/tvshows/:library_id/:show_id' element={<TvShowsBreadcrumbNav />} />
+    <Route path='/tvshows/:library_id' element={<TvShowsBreadcrumbNav />} />
+    <Route path='/tvshows/' element={<TvShowsBreadcrumbNav />} />
   </Routes>)
 }
 
