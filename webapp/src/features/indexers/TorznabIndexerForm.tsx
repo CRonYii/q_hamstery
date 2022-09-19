@@ -23,7 +23,7 @@ const TorznabIndexerForm: React.FC<{
         } else {
             form.resetFields()
         }
-    }, [editId, indexer])
+    }, [form, isEditing, editId, indexer])
 
     return <Form
         form={form}
