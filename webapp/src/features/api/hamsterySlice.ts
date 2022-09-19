@@ -16,32 +16,32 @@ export const hamsterySlice = createApi({
     tagTypes: ['torznab'],
     endpoints: builder => ({
         getTvLibraries: builder.query<ITvLibrary[], void>({
-            query: () => '/tvlib',
+            query: () => '/tvlib/',
         }),
         getTvLibrary: builder.query<ITvLibrary, string>({
-            query: (id) => '/tvlib/' + id,
+            query: (id) => `/tvlib/${id}/`,
         }),
         getTvStorage: builder.query<ITvStorage, string>({
-            query: (id) => '/tvstorage/' + id,
+            query: (id) => `/tvstorage/${id}/`,
         }),
         getTvShow: builder.query<ITvShow & { seasons: ITvSeason[] }, string>({
-            query: (id) => '/tvshow/' + id,
+            query: (id) => `/tvshow/${id}/`,
         }),
         getTvSeason: builder.query<ITvSeason, string>({
-            query: (id) => '/tvseason/' + id,
+            query: (id) => `/tvseason/${id}/`,
         }),
         getTvEpisode: builder.query<ITvEpisode, string>({
-            query: (id) => '/tvepisode/' + id,
+            query: (id) => `/tvepisode/${id}/`,
         }),
         getTorznabIndexers: builder.query<ITorznabIndexer[], void>({
-            query: () => '/torznab',
+            query: () => '/torznab/',
             providesTags: (result = [], error, arg) => [
                 'torznab',
                 ...result.map(({ id }): TagDescription<'torznab'> => ({ type: 'torznab', id: String(id) }))
             ]
         }),
         getTorznabIndexer: builder.query<ITorznabIndexer, string>({
-            query: (id) => '/torznab/' + id,
+            query: (id) => `/torznab/${id}`,
             providesTags: (result, error, arg) => [{ type: 'torznab', id: arg }]
         }),
         addTorznabIndexer: builder.mutation<void, { name: string, url: string, apikey: string, }>({
@@ -55,14 +55,14 @@ export const hamsterySlice = createApi({
         removeTorznabIndexer: builder.mutation<void, string>({
             query: (id) => ({
                 method: 'DELETE',
-                url: '/torznab/' + id,
+                url: `/torznab/${id}/`,
             }),
             invalidatesTags: ['torznab']
         }),
         editTorznabIndexer: builder.mutation<void, ITorznabIndexer>({
             query: (body) => ({
                 method: 'PUT',
-                url: '/torznab/' + body.id,
+                url: `/torznab/${body.id}/`,
                 body
             }),
             invalidatesTags: (result, error, arg) => [{ type: 'torznab', id: arg.id }]
