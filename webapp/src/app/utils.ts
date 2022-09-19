@@ -6,6 +6,12 @@ export const datetimeSort = (a: string | undefined, b: string | undefined) => {
     return atime - btime;
 }
 
+export const isInThePast = (date?: string) => {
+    if (!date)
+        return false
+    return new Date(date).getTime() < (new Date().getTime() + (1000 * 3600 * 24))
+}
+
 export const toTMDBPosterURL = (relativeURL?: string, size: 'w500' | 'w185' = 'w500') => {
     return relativeURL ? `https://image.tmdb.org/t/p/${size}/${relativeURL}` : ''
 }
