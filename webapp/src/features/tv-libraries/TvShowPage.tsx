@@ -1,6 +1,7 @@
 import { Alert, Col, Row, Skeleton } from 'antd';
 import React from 'react';
 import { useParams } from 'react-router-dom';
+import { datetimeSort } from '../../app/utils';
 import { hamsterySlice } from '../api/hamsterySlice';
 import TvSeasonCard from './TvSeasonCard';
 
@@ -27,11 +28,14 @@ const TvShowPage: React.FC = () => {
     return <div>
         <Row gutter={24} style={{ margin: 16 }} align='bottom'>
             {
-                show.seasons.map((season) => {
-                    return <Col key={season.id}>
-                        <TvSeasonCard season={season} />
-                    </Col>;
-                })
+                show.seasons
+                    .slice()
+                    .sort((a, b) => datetimeSort(a.air_date, b.air_date))
+                    .map((season) => {
+                        return <Col key={season.id}>
+                            <TvSeasonCard season={season} />
+                        </Col>;
+                    })
             }
         </Row>
     </div>;

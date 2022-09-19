@@ -11,6 +11,10 @@ const TvSeasonCard: React.FC<{ season: ITvSeason }> = ({ season }) => {
     const params = useParams()
     const library_id = params.library_id as string
     const show_id = params.show_id as string
+    let title = season.name
+    if (season.air_date) {
+        title = `${title} (${season.air_date})`
+    }
 
     if (!season) {
         return <Skeleton active />
@@ -23,7 +27,7 @@ const TvSeasonCard: React.FC<{ season: ITvSeason }> = ({ season }) => {
         style={{ width: 300 }}
         cover={<img alt="Poster" src={poster_path} />}
     >
-        <Meta title={`${season.name} (${season.air_date})`} description={`${season.number_of_episodes} Episode${season.number_of_episodes !== 1 ? 's' : ''}`} />
+        <Meta title={title} description={`${season.number_of_episodes} Episode${season.number_of_episodes !== 1 ? 's' : ''}`} />
     </Card >
 }
 

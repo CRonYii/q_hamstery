@@ -12,9 +12,14 @@ const TVShowCard: React.FC<{ show: ITvShow }> = ({ show }) => {
     const params = useParams()
     const library_id = params.library_id as string
 
-    const description = show.number_of_seasons === 1 ?
-        `${show.number_of_episodes} episodes` :
-        `${show.number_of_seasons} seasons`
+    let description = <span>{
+        show.number_of_seasons === 1 ?
+            `${show.number_of_episodes} episodes` :
+            `${show.number_of_seasons} seasons`
+    }</span>
+    if (show.air_date) {
+        description = <div>{description}<br />{show.air_date}</div>
+    }
     const poster_path = toTMDBPosterURL(show.poster_path)
     return <Card
         hoverable

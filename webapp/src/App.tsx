@@ -8,7 +8,7 @@ import { IndexerBreadcrumbNav, TvShowsBreadcrumbNav } from './features/nav/Bread
 import { IndexerSideNavMenu, TvLibrarySideNavMenu, TvSeasonSideNavMenu, TvShowSideNavMenu } from './features/nav/SideNavMenu';
 import TopNavMenu from './features/nav/TopNavMenu';
 import TvLibraryPage from './features/tv-libraries/TvLibraryPage';
-import { TVSeasonPage } from './features/tv-libraries/TvSeasonPage';
+import TVSeasonPage from './features/tv-libraries/TvSeasonPage';
 import TvShowPage from './features/tv-libraries/TvShowPage';
 import Login from './features/user/Login';
 import LogoutButton from './features/user/LogutButton';

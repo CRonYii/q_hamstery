@@ -1,6 +1,6 @@
 import { PlusOutlined } from '@ant-design/icons';
 import { Alert, Button, Col, Modal, notification, Row, Skeleton } from 'antd';
-import React, { useState } from 'react';
+import React from 'react';
 import { useAppDispatch, useAppSelector } from '../../app/hook';
 import hamstery from '../api/hamstery';
 import { hamsterySlice } from '../api/hamsterySlice';
