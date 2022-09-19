@@ -1,4 +1,4 @@
-import { EditOutlined, DeleteTwoTone } from '@ant-design/icons';
+import { DeleteTwoTone, EditOutlined, SearchOutlined } from '@ant-design/icons';
 import { Card, notification, Popconfirm } from 'antd';
 import React from 'react';
 import { ITorznabIndexer } from '../../app/entities';
@@ -13,6 +13,9 @@ const TorznabIndexerCard: React.FC<{ indexer: ITorznabIndexer }> = ({ indexer })
     return <Card
         style={{ minWidth: '200px' }}
         actions={[
+            <SearchOutlined key="search"
+                onClick={() => dispatch(torznabIndexerActions.search(String(indexer.id)))}
+            />,
             <EditOutlined key="edit"
                 onClick={() => dispatch(torznabIndexerActions.edit(String(indexer.id)))}
             />,

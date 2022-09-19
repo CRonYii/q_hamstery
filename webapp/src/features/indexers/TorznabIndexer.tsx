@@ -1,8 +1,10 @@
 import { PlusOutlined } from '@ant-design/icons';
-import { Alert, Button, Col, Modal, Row, Skeleton } from 'antd';
-import React from 'react';
+import { Alert, Button, Col, Modal, notification, Row, Skeleton } from 'antd';
+import React, { useState } from 'react';
 import { useAppDispatch, useAppSelector } from '../../app/hook';
+import hamstery from '../api/hamstery';
 import { hamsterySlice } from '../api/hamsterySlice';
+import IndexerSearcher from './IndexerSearcher';
 import TorznabIndexerCard from './TorznabIndexerCard';
 import TorznabIndexerForm from './TorznabIndexerForm';
 import { torznabIndexerActions, torznabIndexerSelector } from './torznabIndexerSlice';
@@ -43,6 +45,33 @@ const TorznabIndexer: React.FC = () => {
                 close={() => dispatch(torznabIndexerActions.close())}
             />
         </Modal>
+
+        <Modal
+            title="Search"
+            style={{ minWidth: '100vh' }}
+            open={!!torznab.searchId}
+            onCancel={() => {
+                dispatch(torznabIndexerActions.closeSearch())
+            }}
+            footer={null}
+        >
+            <IndexerSearcher
+                onSearch={
+                    async (keyword) => {
+                        if (!torznab.searchId)
+                            return []
+                        try {
+                            const { data } = await hamstery.searchTorznabIndexer(torznab.searchId, keyword)
+                            return data
+                        } catch {
+                            notification.error({ message: 'Failed to search with indexer' })
+                            return []
+                        }
+                    }
+                }
+            />
+        </Modal>
+
         <Row gutter={24} style={{ margin: 16 }}>
             <Col>
                 <Button type='primary' onClick={() => dispatch(torznabIndexerActions.add())}>

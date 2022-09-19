@@ -52,3 +52,10 @@ export interface ITorznabIndexer {
     url: string,
     apikey: string,
 }
+
+export interface IndexerSearchResult {
+    title: string,
+    pub_date: string,
+    size: string,
+    link: string,
+}

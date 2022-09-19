@@ -1,4 +1,5 @@
 import axios from "axios";
+import { IndexerSearchResult } from "../../app/entities";
 
 const hamstery = {
     test() {
@@ -10,6 +11,9 @@ const hamstery = {
     logout() {
         return axios.get<'Ok'>('/hamstery/auth/logout');
     },
+    searchTorznabIndexer(id: string, keyword: string) {
+        return axios.get<IndexerSearchResult[]>(`/hamstery/api/torznab/${id}/search/?query=${keyword}`)
+    }
 };
 
 export default hamstery;
