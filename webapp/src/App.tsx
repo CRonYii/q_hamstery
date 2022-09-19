@@ -1,9 +1,9 @@
-import { Breadcrumb, Col, Empty, Layout, Row } from 'antd';
+import { Col, Empty, Layout, Row } from 'antd';
 import React from 'react';
 import { useSelector } from 'react-redux';
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import './App.css';
-import { useAppDispatch } from './app/hook';
+import { TvLibraryBreadcrumbNav, TvSeasonBreadcrumbNav, TvShowBreadcrumbNav } from './features/nav/BreadcrumbNav';
 import { TvLibrarySideNavMenu, TvSeasonSideNavMenu, TvShowSideNavMenu } from './features/nav/SideNavMenu';
 import TopNavMenu from './features/nav/TopNavMenu';
 import TvLibraryPage from './features/tv-libraries/TvLibraryPage';
@@ -35,16 +35,19 @@ const AppSideNavMenu = () => {
   </Routes>)
 }
 
+const AppBreadcrumbNav = () => {
+  return (<Routes>
+    <Route path='/tvshows/:library_id/:show_id/:season_id' element={<TvSeasonBreadcrumbNav />} />
+    <Route path='/tvshows/:library_id/:show_id' element={<TvShowBreadcrumbNav />} />
+    <Route path='/tvshows/:library_id' element={<TvLibraryBreadcrumbNav />} />
+  </Routes>)
+}
+
 const App: React.FC = () => {
-  const dispatch = useAppDispatch()
   const user = useSelector(userSelector)
 
   const location = useLocation()
   const path = location.pathname
-
-  // useEffect(() => {
-  //   dispatch(fetchTvLibraries())
-  // }, [dispatch])
 
   if (!user.logged_in) {
     return <Login />;
@@ -57,11 +60,7 @@ const App: React.FC = () => {
       <Content style={{ padding: '0 50px' }}>
         <Row align='middle' gutter={16}>
           <Col>
-            <Breadcrumb style={{ margin: '16px 0' }}>
-              <Breadcrumb.Item>Home</Breadcrumb.Item>
-              <Breadcrumb.Item>List</Breadcrumb.Item>
-              <Breadcrumb.Item>{path}</Breadcrumb.Item>
-            </Breadcrumb>
+            <AppBreadcrumbNav />
           </Col>
           <Col flex="auto"></Col>
           <Col>
