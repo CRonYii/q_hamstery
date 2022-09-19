@@ -1,7 +1,7 @@
 import { Col, Empty, Layout, Row } from 'antd';
 import React from 'react';
 import { useSelector } from 'react-redux';
-import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
+import { Navigate, Route, Routes } from 'react-router-dom';
 import './App.css';
 import { TvLibraryBreadcrumbNav, TvSeasonBreadcrumbNav, TvShowBreadcrumbNav } from './features/nav/BreadcrumbNav';
 import { TvLibrarySideNavMenu, TvSeasonSideNavMenu, TvShowSideNavMenu } from './features/nav/SideNavMenu';
@@ -13,7 +13,7 @@ import Login from './features/user/Login';
 import LogoutButton from './features/user/LogutButton';
 import { userSelector } from './features/user/userSlice';
 
-const { Header, Content, Footer, Sider } = Layout;
+const { Header, Content, Footer } = Layout;
 
 const AppContent = () => {
   return (<Routes>
@@ -45,9 +45,6 @@ const AppBreadcrumbNav = () => {
 
 const App: React.FC = () => {
   const user = useSelector(userSelector)
-
-  const location = useLocation()
-  const path = location.pathname
 
   if (!user.logged_in) {
     return <Login />;
