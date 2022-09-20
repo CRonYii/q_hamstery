@@ -28,9 +28,22 @@ const TvLibraryPage: React.FC = () => {
             type="error"
             showIcon
         />
-    } else if (shows.length === 0) {
-        return <Empty description={"The library is empty. Try to add a show!"} />
     }
+
+    const content = shows.length === 0
+        ? <Empty description={"The library is empty. Try to add a show!"} />
+        : <Row gutter={24} style={{ margin: 16 }} align='bottom'>
+            {
+                shows
+                    .map(show =>
+
+                        <Col key={show.id}>
+                            <TVShowCard show={show} />
+                        </Col>
+
+                    )
+            }
+        </Row>
 
     return <div>
         <Modal
@@ -65,13 +78,8 @@ const TvLibraryPage: React.FC = () => {
                 </Button>
             </Col>
         </Row>
-        <Row gutter={24} style={{ margin: 16 }} align='bottom'>
-            {shows
-                .map(show => <Col key={show.id}>
-                    <TVShowCard show={show} />
-                </Col>)}
-        </Row>
-    </div>
+        {content}
+    </div >
 
 }
 

@@ -30,6 +30,7 @@ const TvLibraryForm: React.FC<{
         form={form}
         id='tvlibrary-add-form'
         name='tvlibrary-add-form'
+        initialValues={{ lang: 'zh' }}
         labelCol={{ span: 4 }}
         onFinish={(data) => {
             if (isLoading)
