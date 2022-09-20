@@ -7,6 +7,7 @@ import TorznabIndexer from './features/indexers/TorznabIndexer';
 import { IndexerBreadcrumbNav, TvShowsBreadcrumbNav } from './features/nav/BreadcrumbNav';
 import { IndexerSideNavMenu, TvLibrarySideNavMenu, TvSeasonSideNavMenu, TvShowSideNavMenu } from './features/nav/SideNavMenu';
 import TopNavMenu from './features/nav/TopNavMenu';
+import TvLibraryHome from './features/tv-libraries/TvLibraryHome';
 import TvLibraryPage from './features/tv-libraries/TvLibraryPage';
 import TVSeasonPage from './features/tv-libraries/TvSeasonPage';
 import TvShowPage from './features/tv-libraries/TvShowPage';
@@ -21,7 +22,7 @@ const AppContent = () => {
     <Route path='/tvshows/:library_id/:show_id/:season_id' element={<TVSeasonPage />} />
     <Route path='/tvshows/:library_id/:show_id' element={<TvShowPage />} />
     <Route path='/tvshows/:library_id' element={<TvLibraryPage />} />
-    <Route path='/tvshows/' element={<Empty description={<span>Please select a TV Library</span>} />} />
+    <Route path='/tvshows/' element={<TvLibraryHome />} />
     <Route path='/indexers' element={<Empty description={<span>Please select an Indexer Category</span>} />} />
     <Route path='/indexers/torznab' element={<TorznabIndexer />} />
     <Route path='*' element={<Navigate to={'/tvshows'} replace />} />

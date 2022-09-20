@@ -1,7 +1,36 @@
 import { TagDescription } from '@reduxjs/toolkit/dist/query/endpointDefinitions';
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import Cookies from 'js-cookie';
-import { ITorznabIndexer, ITvEpisode, ITvLibrary, ITvSeason, ITvShow, ITvStorage } from '../../app/entities';
+import { ITorznabIndexer, ITvEpisode, ITvLibrary, ITvSeason, ITvShow } from '../../app/entities';
+
+interface IDjangoOptions {
+    name: string;
+    description: string;
+    renders: string[];
+    parses: string[];
+    actions: Actions;
+}
+type IParamOptions = Record<string, IParamOption>
+
+interface Actions {
+    POST?: IParamOptions;
+}
+
+interface IParamOption {
+    type: 'integer' | 'string' | 'choice' | 'field' | 'nested object';
+    required: boolean;
+    read_only: boolean;
+    label?: string;
+    choices?: Choice[];
+    max_length?: number;
+    child?: IParamOption;
+    children?: IParamOptions;
+}
+
+interface Choice {
+    value: string;
+    display_name: string;
+}
 
 export const hamsterySlice = createApi({
     reducerPath: 'hamstery',
@@ -25,6 +54,43 @@ export const hamsterySlice = createApi({
         getTvLibrary: builder.query<ITvLibrary, string>({
             query: (id) => `/tvlib/${id}/`,
             providesTags: (result, error, arg) => [{ type: 'tvlib', id: arg }]
+        }),
+        addTvLibrary: builder.mutation<void, { name: string, lang: string, }>({
+            query: (body) => ({
+                method: 'POST',
+                url: '/tvlib/',
+                body
+            }),
+            invalidatesTags: ['tvlib']
+        }),
+        removeTvLibrary: builder.mutation<void, string>({
+            query: (id) => ({
+                method: 'DELETE',
+                url: `/tvlib/${id}/`,
+            }),
+            invalidatesTags: ['tvlib']
+        }),
+        editTvLibrary: builder.mutation<void, { id: string, name: string, lang: string, }>({
+            query: (body) => ({
+                method: 'PUT',
+                url: `/tvlib/${body.id}/`,
+                body
+            }),
+            invalidatesTags: (result, error, arg) => [{ type: 'tvlib', id: arg.id }]
+        }),
+        getTvLibraryOptions: builder.query<{
+            languages: { value: string, display_name: string }[],
+        }, void>({
+            query: () => ({
+                method: 'OPTIONS',
+                url: '/tvlib/',
+                headers: {
+                    'Accept': 'application/json'
+                }
+            }),
+            transformResponse: (response: IDjangoOptions) => {
+                return { languages: response.actions.POST?.lang?.choices || [] }
+            }
         }),
         getTvShow: builder.query<ITvShow & { seasons: ITvSeason[] }, string>({
             query: (id) => `/tvshow/${id}/`,

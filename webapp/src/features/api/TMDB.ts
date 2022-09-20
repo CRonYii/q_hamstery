@@ -43,6 +43,14 @@ const TMDB = {
         })
         return data
     },
+    getLanguages: async (): Promise<{ iso_639_1: string, english_name: string, name: string }[]> => {
+        const { data } = await axios.get(`${TMDB_APIV3_BASE_URL}/configuration/languages`, {
+            params: {
+                api_key: TMDB_API_KEYV3
+            }
+        })
+        return data
+    },
     toPosterURL: (relativeURL?: string, size: 'w500' | 'w185' = 'w500') => {
         return relativeURL ? `https://image.tmdb.org/t/p/${size}/${relativeURL}` : ''
     },

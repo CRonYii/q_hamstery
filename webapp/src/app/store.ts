@@ -2,6 +2,7 @@ import { configureStore } from "@reduxjs/toolkit";
 import { hamsterySlice } from "../features/api/hamsterySlice";
 import torznabIndexerSlice from "../features/indexers/torznabIndexerSlice";
 import navSlice from "../features/nav/navSlice";
+import tvlibrarySlice from "../features/tv-libraries/tvlibrarySlice";
 import userSlice from "../features/user/userSlice";
 
 const store = configureStore({
@@ -9,6 +10,7 @@ const store = configureStore({
         [hamsterySlice.reducerPath]: hamsterySlice.reducer,
         nav: navSlice,
         user: userSlice,
+        tvlibrary: tvlibrarySlice,
         torznab: torznabIndexerSlice,
     },
     middleware: getDefaultMiddleware =>
