@@ -13,19 +13,30 @@ export const hamsterySlice = createApi({
             return headers
         }
     }),
-    tagTypes: ['torznab'],
+    tagTypes: ['tvlib', 'torznab'],
     endpoints: builder => ({
         getTvLibraries: builder.query<ITvLibrary[], void>({
             query: () => '/tvlib/',
+            providesTags: (result = [], error, arg) => [
+                'tvlib',
+                ...result.map(({ id }): TagDescription<'tvlib'> => ({ type: 'tvlib', id: String(id) }))
+            ]
         }),
         getTvLibrary: builder.query<ITvLibrary, string>({
             query: (id) => `/tvlib/${id}/`,
-        }),
-        getTvStorage: builder.query<ITvStorage, string>({
-            query: (id) => `/tvstorage/${id}/`,
+            providesTags: (result, error, arg) => [{ type: 'tvlib', id: arg }]
         }),
         getTvShow: builder.query<ITvShow & { seasons: ITvSeason[] }, string>({
             query: (id) => `/tvshow/${id}/`,
+        }),
+        addTvShowToStorage: builder.mutation<void, { library_id: string, id: string, tmdb_id: string, }>({
+            query: ({ id, tmdb_id }) => ({
+                method: 'POST',
+                url: `/tvstorage/${id}/add-show/`,
+                headers: { 'content-type': 'application/x-www-form-urlencoded' },
+                body: `tmdb_id=${tmdb_id}`
+            }),
+            invalidatesTags: (result, error, arg) => [{ type: 'tvlib', id: arg.library_id }]
         }),
         getTvSeason: builder.query<ITvSeason, string>({
             query: (id) => `/tvseason/${id}/`,
