@@ -2,7 +2,7 @@ import { configureStore } from "@reduxjs/toolkit";
 import { hamsterySlice } from "../features/api/hamsterySlice";
 import torznabIndexerSlice from "../features/indexers/torznabIndexerSlice";
 import navSlice from "../features/nav/navSlice";
-import tvlibrarySlice from "../features/tv-libraries/tvlibrarySlice";
+import tvlibrarySlice from "../features/tv/library/tvlibrarySlice";
 import userSlice from "../features/user/userSlice";
 
 const store = configureStore({

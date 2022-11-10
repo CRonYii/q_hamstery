@@ -1,8 +1,8 @@
 import { Card, Skeleton } from 'antd';
 import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ITvSeason } from '../../app/entities';
-import { toTMDBPosterURL } from '../../app/utils';
+import { ITvSeason } from '../../../app/entities';
+import { toTMDBPosterURL } from '../../../app/utils';
 
 const { Meta } = Card;
 

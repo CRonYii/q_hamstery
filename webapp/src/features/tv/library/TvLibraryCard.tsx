@@ -1,9 +1,9 @@
 import { DeleteTwoTone, EditOutlined } from '@ant-design/icons';
 import { Card, notification, Popconfirm } from 'antd';
 import React from 'react';
-import { ITvLibrary } from '../../app/entities';
-import { useAppDispatch } from '../../app/hook';
-import { hamsterySlice } from '../api/hamsterySlice';
+import { ITvLibrary } from '../../../app/entities';
+import { useAppDispatch } from '../../../app/hook';
+import { hamsterySlice } from '../../api/hamsterySlice';
 import { tvLibraryActions } from './tvlibrarySlice';
 
 const TvLibraryCard: React.FC<{ library: ITvLibrary }> = ({ library }) => {

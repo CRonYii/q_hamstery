@@ -1,9 +1,9 @@
 import { Form, Select } from 'antd';
 import debounce from 'lodash/debounce';
 import React, { useState } from 'react';
-import { ITvLibrary } from '../../app/entities';
-import { hamsterySlice } from '../api/hamsterySlice';
-import TMDB from '../api/TMDB';
+import { ITvLibrary } from '../../../app/entities';
+import { hamsterySlice } from '../../api/hamsterySlice';
+import TMDB from '../../api/TMDB';
 
 interface TMDBTVShowSearchResult {
     name: string, id: number, first_air_date: string, poster_path: string

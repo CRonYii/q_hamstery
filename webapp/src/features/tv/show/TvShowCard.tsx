@@ -2,8 +2,8 @@ import React from 'react';
 
 import { Card } from 'antd';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ITvShow } from '../../app/entities';
-import { toTMDBPosterURL } from '../../app/utils';
+import { ITvShow } from '../../../app/entities';
+import { toTMDBPosterURL } from '../../../app/utils';
 
 const { Meta } = Card;
 

@@ -2,10 +2,10 @@ import { PlusOutlined } from '@ant-design/icons';
 import { Alert, Button, Col, Empty, Modal, notification, Row, Skeleton } from 'antd';
 import React, { useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { getShowsOfLibrary } from '../../app/utils';
-import { hamsterySlice } from '../api/hamsterySlice';
+import { getShowsOfLibrary } from '../../../app/utils';
+import { hamsterySlice } from '../../api/hamsterySlice';
 import AddShowForm from './AddShowForm';
-import TVShowCard from './TvShowCard';
+import TVShowCard from '../show/TvShowCard';
 
 const TvLibraryPage: React.FC = () => {
     const params = useParams()

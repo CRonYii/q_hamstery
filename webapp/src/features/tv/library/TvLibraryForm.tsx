@@ -1,7 +1,7 @@
 import { Form, Input, Select } from 'antd';
 import React, { useEffect } from 'react';
-import { getDefaultLanguage } from '../../app/utils';
-import { hamsterySlice } from '../api/hamsterySlice';
+import { getDefaultLanguage } from '../../../app/utils';
+import { hamsterySlice } from '../../api/hamsterySlice';
 
 const TvLibraryForm: React.FC<{
     editId?: string,

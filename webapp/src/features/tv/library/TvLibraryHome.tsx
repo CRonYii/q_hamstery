@@ -1,8 +1,8 @@
 import { PlusOutlined } from '@ant-design/icons';
 import { Alert, Button, Col, Modal, notification, Row, Skeleton } from 'antd';
 import React, { useState } from 'react';
-import { useAppDispatch, useAppSelector } from '../../app/hook';
-import { hamsterySlice } from '../api/hamsterySlice';
+import { useAppDispatch, useAppSelector } from '../../../app/hook';
+import { hamsterySlice } from '../../api/hamsterySlice';
 import TvLibraryCard from './TvLibraryCard';
 import TvLibraryForm from './TvLibraryForm';
 import { tvLibraryActions, tvLibrarySelector } from './tvlibrarySlice';

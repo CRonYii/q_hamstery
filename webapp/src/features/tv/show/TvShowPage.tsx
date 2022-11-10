@@ -1,9 +1,9 @@
 import { Alert, Col, Row, Skeleton } from 'antd';
 import React from 'react';
 import { useParams } from 'react-router-dom';
-import { datetimeSort } from '../../app/utils';
-import { hamsterySlice } from '../api/hamsterySlice';
-import TvSeasonCard from './TvSeasonCard';
+import { datetimeSort } from '../../../app/utils';
+import { hamsterySlice } from '../../api/hamsterySlice';
+import TvSeasonCard from '../season/TvSeasonCard';
 
 const TvShowPage: React.FC = () => {
     const params = useParams()

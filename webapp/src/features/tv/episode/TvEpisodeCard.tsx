@@ -1,7 +1,7 @@
 import { Card } from 'antd';
 import React from 'react';
-import { ITvEpisode } from '../../app/entities';
-import { toTMDBPosterURL } from '../../app/utils';
+import { ITvEpisode } from '../../../app/entities';
+import { toTMDBPosterURL } from '../../../app/utils';
 
 const { Meta } = Card;
 
