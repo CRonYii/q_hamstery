@@ -12,7 +12,7 @@ const initialState: TvLibraryState = {
 }
 
 const tvLibrarySlice = createSlice({
-    name: 'torznab',
+    name: 'tvlibrary',
     initialState,
     reducers: {
         addLibrary(state, action: PayloadAction<void>) {
