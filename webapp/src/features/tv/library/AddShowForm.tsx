@@ -1,9 +1,10 @@
 import { Form, Select } from 'antd';
 import debounce from 'lodash/debounce';
 import React, { useState } from 'react';
-import { ITvLibrary } from '../../../app/entities';
+import { ITvLibrary, ITvStorage } from '../../../app/entities';
 import { hamsterySlice } from '../../api/hamsterySlice';
 import TMDB from '../../api/TMDB';
+import ApiLoading from '../../general/ApiLoading';
 
 interface TMDBTVShowSearchResult {
     name: string, id: number, first_air_date: string, poster_path: string
@@ -31,61 +32,73 @@ const AddShowForm: React.FC<{
         })))
     }
 
-    return (<div>
-        <Form
-            form={form}
-            id="tvshows-add"
-            name="tvshows-add"
-            labelCol={{ span: 4 }}
-            onFinish={(data) => {
-                const { storage, tmdb_id } = data;
+    return <ApiLoading getters={{ 'storages': () => hamsterySlice.useGetTvStoragesQuery({ lib: library.id }), }}>
+        {
+            ({ values }) => {
+                const storages: ITvStorage[] = values.storages.data
+                return (<div>
+                    <Form
+                        form={form}
+                        id="tvshows-add"
+                        name="tvshows-add"
+                        labelCol={{ span: 4 }}
+                        onFinish={(data) => {
+                            const { storage, tmdb_id } = data;
 
-                const task = addTvShowToStorage({ id: storage, tmdb_id, library_id: String(library.id) }).unwrap()
-                if (onFinish)
-                    onFinish(task)
-            }}
-            autoComplete="off"
-        >
-            <Form.Item
-                label="Storage"
-                name="storage"
-                rules={[{ required: true, message: 'Please select a storage!' }]}
-            >
-                <Select>
+                            const task = addTvShowToStorage({ id: storage, tmdb_id, library_id: String(library.id) }).unwrap()
+                            if (onFinish)
+                                onFinish(task)
+                        }}
+                        autoComplete="off"
+                    >
+                        <Form.Item
+                            label="Storage"
+                            name="storage"
+                            rules={[{ required: true, message: 'Please select a storage!' }]}
+                        >
+                            <Select>
+                                {
+                                    storages
+                                        .map((s) =>
+                                            <Select.Option key={s.id} value={s.id}>{s.path}</Select.Option>)
+                                }
+                            </Select>
+                        </Form.Item>
+                        <Form.Item
+                            label="TV Show"
+                            name="tmdb_id"
+                            rules={[{ required: true, message: 'Please select a TV Show!' }]}
+                        >
+                            <Select
+                                showSearch
+                                defaultActiveFirstOption={false}
+                                showArrow={false}
+                                filterOption={false}
+                                notFoundContent={null}
+                                onSearch={debounce(handleSearch, 250)}
+                                onSelect={(value: any, option: any) =>
+                                    setPoster(searchResults[Number(option.key)].poster_path)}
+                            >
+                                {
+                                    searchResults.map((show, idx) =>
+                                        <Select.Option key={idx} value={show.id}>
+                                            {show.name} - {show.first_air_date}
+                                        </Select.Option>)
+                                }
+                            </Select>
+                        </Form.Item>
+                    </Form>
                     {
-                        library
-                            .storages
-                            .map((s) =>
-                                <Select.Option key={s.id} value={s.id}>{s.path}</Select.Option>)
+                        poster.length !== 0
+                            ? <img src={poster} style={{ marginLeft: 'auto', marginRight: 'auto', display: 'block', maxHeight: '40vw' }} alt='Poster' />
+                            : null
                     }
-                </Select>
-            </Form.Item>
-            <Form.Item
-                label="TV Show"
-                name="tmdb_id"
-                rules={[{ required: true, message: 'Please select a TV Show!' }]}
-            >
-                <Select
-                    showSearch
-                    defaultActiveFirstOption={false}
-                    showArrow={false}
-                    filterOption={false}
-                    notFoundContent={null}
-                    onSearch={debounce(handleSearch, 250)}
-                    onSelect={(value: any, option: any) =>
-                        setPoster(searchResults[Number(option.key)].poster_path)}
-                >
-                    {
-                        searchResults.map((show, idx) =>
-                            <Select.Option key={idx} value={show.id}>
-                                {show.name} - {show.first_air_date}
-                            </Select.Option>)
-                    }
-                </Select>
-            </Form.Item>
-        </Form>
-        <img src={poster} style={{ marginLeft: 'auto', marginRight: 'auto', display: 'block' }} alt='Poster' />
-    </div>)
+
+                </div>)
+            }
+        }
+    </ApiLoading>
+
 }
 
 export default AddShowForm

@@ -1,4 +1,4 @@
-import { PlusOutlined } from '@ant-design/icons';
+import { PlusOutlined, ReloadOutlined } from '@ant-design/icons';
 import { Button, Col, Empty, Modal, notification, Row } from 'antd';
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
@@ -39,7 +39,7 @@ const TvLibraryPage: React.FC = () => {
                     </Row>
                 return <div>
                     <Modal
-                        style={{ minWidth: '80vh' }}
+                        style={{ minWidth: '60vw' }}
                         title={"Add Show to " + library.name}
                         open={addShowOpen}
                         onCancel={() => setAddShowOpen(false)}
@@ -63,10 +63,15 @@ const TvLibraryPage: React.FC = () => {
                             }
                         }} />
                     </Modal>
-                    <Row gutter={24} style={{ margin: 16 }}>
+                    <Row gutter={12} style={{ margin: 16 }}>
                         <Col>
                             <Button type='primary' onClick={() => setAddShowOpen(true)}>
                                 <PlusOutlined />Add Show
+                            </Button>
+                        </Col>
+                        <Col>
+                            <Button onClick={() => setAddShowOpen(true)}>
+                                <ReloadOutlined />Scan
                             </Button>
                         </Col>
                     </Row>

@@ -2,7 +2,6 @@ export interface ITvLibrary {
     id: number,
     name: string,
     lang: string,
-    storages: ITvStorage[]
 }
 
 export interface ITvStorage {
@@ -20,7 +19,6 @@ export interface ITvShow {
     number_of_seasons: number,
     poster_path?: string,
     air_date?: string,
-    seasons?: ITvSeason[],
 }
 
 export interface ITvSeason {
@@ -32,7 +30,6 @@ export interface ITvSeason {
     number_of_episodes: number,
     poster_path?: string,
     air_date?: string,
-    episodes: ITvEpisode[],
 }
 
 export interface ITvEpisode {
