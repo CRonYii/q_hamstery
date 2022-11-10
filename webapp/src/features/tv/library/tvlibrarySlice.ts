@@ -5,10 +5,13 @@ import { RootState } from '../../../app/store';
 interface TvLibraryState {
     addLibraryOpen: boolean,
     editId?: string,
+    editStorageOpen: boolean,
+    editStorageId?: string,
 }
 
 const initialState: TvLibraryState = {
     addLibraryOpen: false,
+    editStorageOpen: false,
 }
 
 const tvLibrarySlice = createSlice({
@@ -25,6 +28,13 @@ const tvLibrarySlice = createSlice({
         },
         close(state, action: PayloadAction<void>) {
             state.addLibraryOpen = false
+        },
+        editStorage(state, action: PayloadAction<string>) {
+            state.editStorageOpen = true
+            state.editStorageId = action.payload
+        },
+        closeStorage(state, action: PayloadAction<void>) {
+            state.editStorageOpen = false
         },
     },
 });

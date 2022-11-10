@@ -1,4 +1,4 @@
-import { DeleteTwoTone, EditOutlined } from '@ant-design/icons';
+import { DeleteTwoTone, EditOutlined, FolderAddOutlined } from '@ant-design/icons';
 import { Card, notification, Popconfirm } from 'antd';
 import React from 'react';
 import { ITvLibrary } from '../../../app/entities';
@@ -15,6 +15,9 @@ const TvLibraryCard: React.FC<{ library: ITvLibrary }> = ({ library }) => {
         actions={[
             <EditOutlined key="edit"
                 onClick={() => dispatch(tvLibraryActions.edit(String(library.id)))}
+            />,
+            <FolderAddOutlined key="storage"
+                onClick={() => dispatch(tvLibraryActions.editStorage(String(library.id)))}
             />,
             <Popconfirm title='Are you sure you want to delete this TV Library?'
                 onConfirm={async () => {

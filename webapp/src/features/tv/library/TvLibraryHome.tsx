@@ -5,6 +5,7 @@ import { ITvLibrary } from '../../../app/entities';
 import { useAppDispatch, useAppSelector } from '../../../app/hook';
 import { hamsterySlice } from '../../api/hamsterySlice';
 import ApiLoading from '../../general/ApiLoading';
+import TvStoragePage from '../storage/TvStoragePage';
 import TvLibraryCard from './TvLibraryCard';
 import TvLibraryForm from './TvLibraryForm';
 import { tvLibraryActions, tvLibrarySelector } from './tvlibrarySlice';
@@ -37,6 +38,22 @@ const TvLibraryHome: React.FC = () => {
                                 }
                             }}
                         />
+                    </Modal>
+                    <Modal
+                        title='Manage TV Library storage'
+                        style={{ minWidth: '60vw' }}
+                        open={tvlibrary.editStorageOpen}
+                        onCancel={() => dispatch(tvLibraryActions.closeStorage())}
+                        footer={[
+                            <Button key='done' type='primary'
+                                onClick={() => dispatch(tvLibraryActions.closeStorage())}>
+                                Done
+                            </Button>
+                        ]}
+                    >
+                        {
+                            tvlibrary.editStorageId ? <TvStoragePage library_id={tvlibrary.editStorageId} /> : null
+                        }
                     </Modal>
 
                     <Row gutter={24} style={{ margin: 16 }}>

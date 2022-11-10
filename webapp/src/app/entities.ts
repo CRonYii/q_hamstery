@@ -7,6 +7,7 @@ export interface ITvLibrary {
 
 export interface ITvStorage {
     id: number,
+    lib: number,
     path: string,
     shows: ITvShow[]
 }

@@ -1,9 +1,9 @@
 import { TagDescription } from '@reduxjs/toolkit/dist/query/endpointDefinitions';
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import Cookies from 'js-cookie';
-import { IDjangoOptions, IParamOptions, ITorznabIndexer, ITvEpisode, ITvLibrary, ITvSeason, ITvShow } from '../../app/entities';
+import { IDjangoOptions, IParamOptions, ITorznabIndexer, ITvEpisode, ITvLibrary, ITvSeason, ITvShow, ITvStorage } from '../../app/entities';
 
-type TagTypes = 'tvlib' | 'torznab'
+type TagTypes = 'tvlib' | 'tvstorage' | 'torznab'
 
 export const hamsterySlice = createApi({
     reducerPath: 'hamstery',
@@ -15,7 +15,7 @@ export const hamsterySlice = createApi({
             return headers
         }
     }),
-    tagTypes: ['tvlib', 'torznab'],
+    tagTypes: ['tvlib', 'tvstorage', 'torznab'],
     endpoints: builder => {
         const CRUDEntity = <T extends { id: number }>(name: TagTypes, url: string) => {
             // TODO: extra tags option
@@ -75,6 +75,7 @@ export const hamsterySlice = createApi({
             }
         }
         const tvlib = CRUDEntity<ITvLibrary>('tvlib', '/tvlib/')
+        const tvstorage = CRUDEntity<ITvStorage>('tvstorage', '/tvstorage/')
         const torznab = CRUDEntity<ITorznabIndexer>('torznab', '/torznab/')
         return {
             getTvLibraries: tvlib.getAll,
@@ -83,6 +84,12 @@ export const hamsterySlice = createApi({
             removeTvLibrary: tvlib.delete,
             editTvLibrary: tvlib.update,
             getTvLibraryOptions: tvlib.options,
+            getTvStorages: tvstorage.getAll,
+            getTvStorage: tvstorage.get,
+            addTvStorage: tvstorage.create,
+            removeTvStorage: tvstorage.delete,
+            editTvStorage: tvstorage.update,
+            getTvStorageOptions: tvstorage.options,
             getTvShow: builder.query<ITvShow & { seasons: ITvSeason[] }, string>({
                 query: (id) => `/tvshow/${id}/`,
             }),
