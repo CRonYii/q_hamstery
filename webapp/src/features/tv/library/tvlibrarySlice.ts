@@ -15,15 +15,15 @@ const tvLibrarySlice = createSlice({
     name: 'tvlibrary',
     initialState,
     reducers: {
-        addLibrary(state, action: PayloadAction<void>) {
+        add(state, action: PayloadAction<void>) {
             state.addLibraryOpen = true
             state.editId = undefined
         },
-        editLibrary(state, action: PayloadAction<string>) {
+        edit(state, action: PayloadAction<string>) {
             state.addLibraryOpen = true
             state.editId = action.payload
         },
-        closeLibrary(state, action: PayloadAction<void>) {
+        close(state, action: PayloadAction<void>) {
             state.addLibraryOpen = false
         },
     },

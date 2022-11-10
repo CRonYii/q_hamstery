@@ -1,4 +1,4 @@
-import { createEntityAdapter, createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createEntityAdapter, createSlice } from '@reduxjs/toolkit';
 import { RootState } from '../../app/store';
 
 interface INavTab {

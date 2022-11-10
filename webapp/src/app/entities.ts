@@ -1,4 +1,3 @@
-
 export interface ITvLibrary {
     id: number,
     name: string,
@@ -20,6 +19,7 @@ export interface ITvShow {
     number_of_seasons: number,
     poster_path?: string,
     air_date?: string,
+    seasons?: ITvSeason[],
 }
 
 export interface ITvSeason {
@@ -58,4 +58,37 @@ export interface IndexerSearchResult {
     pub_date: string,
     size: string,
     link: string,
+}
+
+export interface IDjangoOptions {
+    name: string;
+    description: string;
+    renders: string[];
+    parses: string[];
+    actions: Actions;
+}
+
+export type IParamOptions = Record<string, IParamOption>
+
+interface Actions {
+    POST?: IParamOptions;
+}
+
+export interface IParamOption {
+    type: 'integer' | 'string' | 'boolean' | 'choice' | 'email' | 'field' | 'date' | 'nested object';
+    required: boolean;
+    read_only: boolean;
+    label?: string;
+    choices?: Choice[];
+    max_length?: number;
+    min_length?: number;
+    max_value?: number;
+    min_value?: number;
+    child?: IParamOption;
+    children?: IParamOptions;
+}
+
+export interface Choice {
+    value: string;
+    display_name: string;
 }

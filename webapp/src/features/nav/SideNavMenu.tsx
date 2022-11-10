@@ -26,7 +26,7 @@ const SideNavMenuBase: React.FC<{ id?: string, items: any[] }> = ({ id, items })
 
 export const TvLibrarySideNavMenu: React.FC = () => {
     const { library_id } = useParams()
-    const { data = [] } = hamsterySlice.useGetTvLibrariesQuery()
+    const { data = [] } = hamsterySlice.useGetTvLibrariesQuery({})
     const items = data.map((lib) => {
         return {
             key: String(lib.id),

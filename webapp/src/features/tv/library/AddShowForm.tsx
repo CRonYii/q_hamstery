@@ -84,7 +84,7 @@ const AddShowForm: React.FC<{
                 </Select>
             </Form.Item>
         </Form>
-        <img src={poster} style={{ marginLeft: 'auto', marginRight: 'auto', display: 'block' }} />
+        <img src={poster} style={{ marginLeft: 'auto', marginRight: 'auto', display: 'block' }} alt='Poster' />
     </div>)
 }
 

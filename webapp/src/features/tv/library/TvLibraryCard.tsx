@@ -14,7 +14,7 @@ const TvLibraryCard: React.FC<{ library: ITvLibrary }> = ({ library }) => {
         style={{ minWidth: '200px' }}
         actions={[
             <EditOutlined key="edit"
-                onClick={() => dispatch(tvLibraryActions.editLibrary(String(library.id)))}
+                onClick={() => dispatch(tvLibraryActions.edit(String(library.id)))}
             />,
             <Popconfirm title='Are you sure you want to delete this TV Library?'
                 onConfirm={async () => {

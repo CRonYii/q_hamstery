@@ -9,6 +9,7 @@ const IndexerSearcher: React.FC<{
 }> = ({ defaultKeyword, onSearch, }) => {
     const [data, setData] = useState<IndexerSearchResult[]>([])
     const [loading, setLoading] = useState<boolean>(false)
+
     return (<div>
         <Input.Search
             placeholder='keyword'
