@@ -39,3 +39,7 @@ export function formatBytes(bytes: number, decimals = 2) {
 
     return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
 }
+
+export const getDefaultLanguage = () => {
+    return window.navigator.language.split(/-|_/)[0]
+}

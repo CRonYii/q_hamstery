@@ -1,5 +1,6 @@
 import { Form, Input, Select } from 'antd';
 import React, { useEffect } from 'react';
+import { getDefaultLanguage } from '../../app/utils';
 import { hamsterySlice } from '../api/hamsterySlice';
 
 const TvLibraryForm: React.FC<{
@@ -30,7 +31,7 @@ const TvLibraryForm: React.FC<{
         form={form}
         id='tvlibrary-add-form'
         name='tvlibrary-add-form'
-        initialValues={{ lang: 'zh' }}
+        initialValues={{ lang: getDefaultLanguage() }}
         labelCol={{ span: 4 }}
         onFinish={(data) => {
             if (isLoading)
