@@ -20,9 +20,6 @@ const navSlice = createSlice({
     name: 'user',
     initialState,
     reducers: {
-        // updateRoute(state, action: PayloadAction<{ key: string, to: string }>) {
-        //     navAdapter.updateOne(state.entities, { id: key, changes: {} })
-        // },
         updateRoute: navAdapter.updateOne,
     },
 });
