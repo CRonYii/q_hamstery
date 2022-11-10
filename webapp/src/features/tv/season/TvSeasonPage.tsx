@@ -1,7 +1,7 @@
 import { Col, Radio, Row } from 'antd';
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { ITvSeason } from '../../../app/entities';
+import { ITvEpisode } from '../../../app/entities';
 import { datetimeSort, isInThePast } from '../../../app/utils';
 import { hamsterySlice } from '../../api/hamsterySlice';
 import ApiLoading from '../../general/ApiLoading';
@@ -12,11 +12,11 @@ const TVSeasonPage: React.FC = () => {
     const season_id = params.season_id as string
     const [displayFilter, setDisplayFilter] = useState<'all' | 'onair'>('onair')
 
-    return <ApiLoading getters={{ 'season': () => hamsterySlice.useGetTvSeasonQuery(season_id) }}>
+    return <ApiLoading getters={{ 'episodes': () => hamsterySlice.useGetTvEpisodesQuery({ season: season_id }) }}>
         {
             ({ values }) => {
-                const season: ITvSeason = values.season.data
-                let episodes = season.episodes
+                let episodes: ITvEpisode[] = values.episodes.data
+                episodes = episodes
                     .slice()
                     .sort((a, b) => datetimeSort(a.air_date, b.air_date))
                 if (displayFilter === 'onair') {

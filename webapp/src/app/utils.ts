@@ -1,4 +1,4 @@
-import { ITvLibrary, ITvShow } from "./entities";
+import { ITvShow, ITvStorage } from "./entities";
 
 export const datetimeSort = (a: string | undefined, b: string | undefined) => {
     const atime = a ? new Date(a).getTime() : Number.MAX_SAFE_INTEGER;
@@ -16,10 +16,10 @@ export const toTMDBPosterURL = (relativeURL?: string, size: 'w500' | 'w185' = 'w
     return relativeURL ? `https://image.tmdb.org/t/p/${size}/${relativeURL}` : ''
 }
 
-export const getShowsOfLibrary = (library?: ITvLibrary) => {
-    if (!library)
+export const getShowsOfLibrary = (storages?: ITvStorage[]) => {
+    if (!storages)
         return []
-    return library.storages
+    return storages
         .reduce<ITvShow[]>((shows, storage) => [...shows, ...storage.shows], [])
         .sort((a, b) => datetimeSort(b.air_date, a.air_date))
 }

@@ -3,7 +3,7 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import Cookies from 'js-cookie';
 import { IDjangoOptions, IParamOptions, ITorznabIndexer, ITvEpisode, ITvLibrary, ITvSeason, ITvShow, ITvStorage } from '../../app/entities';
 
-type TagTypes = 'tvlib' | 'tvstorage' | 'torznab'
+type TagTypes = 'tvlib' | 'tvstorage' | 'tvseason' | 'tvepisode' | 'torznab'
 
 export const hamsterySlice = createApi({
     reducerPath: 'hamstery',
@@ -15,7 +15,7 @@ export const hamsterySlice = createApi({
             return headers
         }
     }),
-    tagTypes: ['tvlib', 'tvstorage', 'torznab'],
+    tagTypes: ['tvlib', 'tvstorage', 'tvseason', 'tvepisode', 'torznab'],
     endpoints: builder => {
         const CRUDEntity = <T extends { id: number }>(name: TagTypes, url: string) => {
             // TODO: extra tags option
@@ -76,6 +76,8 @@ export const hamsterySlice = createApi({
         }
         const tvlib = CRUDEntity<ITvLibrary>('tvlib', '/tvlib/')
         const tvstorage = CRUDEntity<ITvStorage>('tvstorage', '/tvstorage/')
+        const tvseason = CRUDEntity<ITvSeason>('tvseason', '/tvseason/')
+        const tvepisode = CRUDEntity<ITvStorage>('tvepisode', '/tvepisode/')
         const torznab = CRUDEntity<ITorznabIndexer>('torznab', '/torznab/')
         return {
             getTvLibraries: tvlib.getAll,
@@ -102,9 +104,11 @@ export const hamsterySlice = createApi({
                 }),
                 invalidatesTags: (result, error, arg) => [{ type: 'tvlib', id: arg.library_id }]
             }),
+            getTvSeasons: tvseason.getAll,
             getTvSeason: builder.query<ITvSeason, string>({
                 query: (id) => `/tvseason/${id}/`,
             }),
+            getTvEpisodes: tvepisode.getAll,
             getTvEpisode: builder.query<ITvEpisode, string>({
                 query: (id) => `/tvepisode/${id}/`,
             }),

@@ -2,6 +2,7 @@ import { PlusOutlined } from '@ant-design/icons';
 import { Button, Col, Empty, Modal, notification, Row } from 'antd';
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { ITvLibrary, ITvStorage } from '../../../app/entities';
 import { getShowsOfLibrary } from '../../../app/utils';
 import { hamsterySlice } from '../../api/hamsterySlice';
 import ApiLoading from '../../general/ApiLoading';
@@ -14,11 +15,15 @@ const TvLibraryPage: React.FC = () => {
     const [addShowOpen, setAddShowOpen] = useState(false)
     const [addShowLoading, setAddShowLoading] = useState(false)
 
-    return <ApiLoading getters={{ 'library': () => hamsterySlice.useGetTvLibraryQuery(library_id) }}>
+    return <ApiLoading getters={{
+        'library': () => hamsterySlice.useGetTvLibraryQuery(library_id),
+        'storages': () => hamsterySlice.useGetTvStoragesQuery({ lib: library_id }),
+    }}>
         {
             ({ values }) => {
-                const library = values.library.data
-                const shows = getShowsOfLibrary(library)
+                const library: ITvLibrary = values.library.data
+                const storages: ITvStorage[] = values.storages.data
+                const shows = getShowsOfLibrary(storages)
                 const content = shows.length === 0
                     ? <Empty description={"The library is empty. Try to add a show!"} />
                     : <Row gutter={24} style={{ margin: 16 }} align='bottom'>

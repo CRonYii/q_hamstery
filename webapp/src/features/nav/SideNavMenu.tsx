@@ -39,8 +39,8 @@ export const TvLibrarySideNavMenu: React.FC = () => {
 
 export const TvShowSideNavMenu: React.FC = () => {
     const { library_id, show_id } = useParams()
-    const { data: library } = hamsterySlice.useGetTvLibraryQuery(library_id as string)
-    const shows = useMemo(() => getShowsOfLibrary(library), [library])
+    const { data: storages } = hamsterySlice.useGetTvStoragesQuery({ lib: library_id })
+    const shows = useMemo(() => getShowsOfLibrary(storages), [storages])
     const items = shows.map((show) => {
         const title = `${show.name} (${show.air_date})`
         return {
@@ -58,8 +58,7 @@ export const TvShowSideNavMenu: React.FC = () => {
 
 export const TvSeasonSideNavMenu: React.FC = () => {
     const { library_id, show_id, season_id } = useParams()
-    const show = hamsterySlice.useGetTvShowQuery(show_id as string).data
-    const seasons = show ? show.seasons : []
+    const { data: seasons = [] } = hamsterySlice.useGetTvSeasonsQuery({ show: show_id })
     const items = seasons
         .slice()
         .sort((a, b) => datetimeSort(a.air_date, b.air_date))
