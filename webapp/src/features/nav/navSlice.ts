@@ -17,7 +17,7 @@ const initialState = navAdapter.setAll(navAdapter.getInitialState(), [
 ])
 
 const navSlice = createSlice({
-    name: 'user',
+    name: 'nav',
     initialState,
     reducers: {
         updateRoute: navAdapter.updateOne,
