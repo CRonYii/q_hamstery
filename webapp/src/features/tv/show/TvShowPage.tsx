@@ -1,4 +1,4 @@
-import { Alert, Col, Row, Skeleton } from 'antd';
+import { Col, Row } from 'antd';
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import { ITvShow } from '../../../app/entities';
