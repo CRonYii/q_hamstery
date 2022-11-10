@@ -14,6 +14,7 @@ const TvLibraryPage: React.FC = () => {
     const library_id = params.library_id as string
     const [addShowOpen, setAddShowOpen] = useState(false)
     const [addShowLoading, setAddShowLoading] = useState(false)
+    const [scan, { isLoading }] = hamsterySlice.useScanTvLibraryMutation()
 
     return <ApiLoading getters={{
         'library': () => hamsterySlice.useGetTvLibraryQuery(library_id),
@@ -70,8 +71,8 @@ const TvLibraryPage: React.FC = () => {
                             </Button>
                         </Col>
                         <Col>
-                            <Button onClick={() => setAddShowOpen(true)}>
-                                <ReloadOutlined />Scan
+                            <Button onClick={() => scan(library_id)} loading={isLoading}>
+                                {!isLoading ? <span><ReloadOutlined /> Scan</span> : <span>Scanning</span>}
                             </Button>
                         </Col>
                     </Row>

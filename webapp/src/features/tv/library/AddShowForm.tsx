@@ -12,7 +12,7 @@ interface TMDBTVShowSearchResult {
 
 const AddShowForm: React.FC<{
     library: ITvLibrary,
-    onFinish?: (task: Promise<void>) => void,
+    onFinish?: (task: Promise<any>) => void,
 }> = ({ library, onFinish }) => {
     const [form] = Form.useForm()
     const [searchResults, setSearchResults] = useState<TMDBTVShowSearchResult[]>([])

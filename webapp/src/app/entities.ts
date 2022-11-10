@@ -13,6 +13,7 @@ export interface ITvStorage {
 
 export interface ITvShow {
     id: number,
+    storage: number,
     tmdb_id: number,
     name: string,
     number_of_episodes: number,
