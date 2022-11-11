@@ -1,6 +1,6 @@
 import React from 'react';
-import { hamsterySlice } from '../api/hamsterySlice';
-import DjangoRestframeworkForm from '../general/DjangoRestframeworkForm';
+import { hamsterySlice } from '../../api/hamsterySlice';
+import DjangoRestframeworkForm from '../../general/DjangoRestframeworkForm';
 
 const TorznabIndexerForm: React.FC<{
     id: string,

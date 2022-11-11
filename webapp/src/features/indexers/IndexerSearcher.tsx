@@ -1,24 +1,41 @@
-import { Input, Table } from 'antd';
+import { Button, Input, notification, Table } from 'antd';
 import React, { useState } from 'react';
-import { IndexerSearchResult } from '../../app/entities';
+import { IndexerSearchResult, IndexerType } from '../../app/entities';
 import { formatBytes } from '../../app/utils';
+import hamstery from '../api/hamstery';
 
 const IndexerSearcher: React.FC<{
     defaultKeyword?: string,
-    onSearch: (keyword: string) => Promise<IndexerSearchResult[]>,
-}> = ({ defaultKeyword, onSearch, }) => {
+    indexer: { type?: IndexerType, searchId?: string, },
+    onDownloadChosen?: (downlaods: IndexerSearchResult[]) => void,
+}> = ({ defaultKeyword, indexer, onDownloadChosen }) => {
     const [data, setData] = useState<IndexerSearchResult[]>([])
     const [loading, setLoading] = useState<boolean>(false)
+
+    const search = async (keyword: string) => {
+        if (!indexer.searchId) {
+            return []
+        }
+        switch (indexer.type) {
+            case 'torznab': return (await hamstery.searchTorznabIndexer(indexer.searchId, keyword)).data
+            default: return []
+        }
+    }
 
     return (<div>
         <Input.Search
             placeholder='keyword'
-            enterButton="Search" size="large"
+            enterButton={<Button type='primary' disabled={indexer.searchId === undefined} loading={loading}>Search</Button>}
+            size="large"
             defaultValue={defaultKeyword}
-            loading={loading}
-            onSearch={async (keyword) => {
+            onSearch={async (keyword: string) => {
                 setLoading(true)
-                setData(await onSearch(keyword))
+                try {
+                    setData(await search(keyword))
+                } catch {
+                    setData([])
+                    notification.error({ message: 'Failed to search with indexer' })
+                }
                 setLoading(false)
             }}
         />
@@ -45,6 +62,10 @@ const IndexerSearcher: React.FC<{
             ]}
             rowSelection={{
                 type: 'checkbox',
+                onChange: (selectedRowKeys, selectedRows) => {
+                    if (onDownloadChosen)
+                        onDownloadChosen(selectedRows)
+                }
             }}
         />
     </div>)

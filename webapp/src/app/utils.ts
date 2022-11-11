@@ -43,3 +43,5 @@ export function formatBytes(bytes: number, decimals = 2) {
 export const getDefaultLanguage = () => {
     return window.navigator.language.split(/-|_/)[0]
 }
+
+export const getEpNumber = (title: string) => (title.match(/Ep|EP|[ E第【[](\d{2,3})(v\d)?[ 话回集\].】]/) || [])[1] || '0'

@@ -1,11 +1,10 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { RootState } from '../../app/store';
+import { RootState } from '../../../app/store';
 
 
 interface TorznabIndexerState {
     open: boolean,
     editId?: string,
-    searchId?: string,
 }
 
 const initialState: TorznabIndexerState = {
@@ -16,12 +15,6 @@ const torznabIndexerSlice = createSlice({
     name: 'torznab',
     initialState,
     reducers: {
-        search(state, action: PayloadAction<string>) {
-            state.searchId = action.payload
-        },
-        closeSearch(state, action: PayloadAction<void>) {
-            state.searchId = undefined
-        },
         add(state, action: PayloadAction<void>) {
             state.open = true
             state.editId = undefined

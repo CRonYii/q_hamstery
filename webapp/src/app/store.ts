@@ -1,6 +1,7 @@
 import { configureStore } from "@reduxjs/toolkit";
 import { hamsterySlice } from "../features/api/hamsterySlice";
-import torznabIndexerSlice from "../features/indexers/torznabIndexerSlice";
+import indexerSlice from "../features/indexers/indexerSlice";
+import torznabIndexerSlice from "../features/indexers/torznab/torznabIndexerSlice";
 import navSlice from "../features/nav/navSlice";
 import tvlibrarySlice from "../features/tv/library/tvlibrarySlice";
 import userSlice from "../features/user/userSlice";
@@ -11,6 +12,7 @@ const store = configureStore({
         nav: navSlice,
         user: userSlice,
         tvlibrary: tvlibrarySlice,
+        indexer: indexerSlice,
         torznab: torznabIndexerSlice,
     },
     middleware: getDefaultMiddleware =>

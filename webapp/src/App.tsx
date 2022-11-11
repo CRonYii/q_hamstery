@@ -3,7 +3,8 @@ import React from 'react';
 import { useSelector } from 'react-redux';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import './App.css';
-import TorznabIndexer from './features/indexers/TorznabIndexer';
+import GlobalModal from './features/general/GlobalModal';
+import TorznabIndexer from './features/indexers/torznab/TorznabIndexer';
 import { IndexerBreadcrumbNav, TvShowsBreadcrumbNav } from './features/nav/BreadcrumbNav';
 import { IndexerSideNavMenu, TvLibrarySideNavMenu, TvSeasonSideNavMenu, TvShowSideNavMenu } from './features/nav/SideNavMenu';
 import TopNavMenu from './features/nav/TopNavMenu';
@@ -74,6 +75,7 @@ const App: React.FC = () => {
           <AppSideNavMenu />
           <Content style={{ padding: '0 24px', minHeight: '40vh' }}>
             <AppContent />
+            <GlobalModal />
           </Content>
         </Layout>
       </Content>

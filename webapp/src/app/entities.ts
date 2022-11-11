@@ -33,17 +33,24 @@ export interface ITvSeason {
     air_date?: string,
 }
 
+export enum TvEpisodeStatus {
+    MISSING = 1,
+    READY = 3
+}
+
 export interface ITvEpisode {
     id: number,
     season: number,
     tmdb_id: number,
-    status: number,
+    status: TvEpisodeStatus,
     name: string,
     season_number: number,
     episode_number: number,
     poster_path?: string,
     air_date?: string,
 }
+
+export type IndexerType = 'torznab'
 
 export interface ITorznabIndexer {
     id: number,

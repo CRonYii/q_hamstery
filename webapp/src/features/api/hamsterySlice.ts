@@ -136,7 +136,7 @@ export const hamsterySlice = createApi({
             getTvStorageOptions: tvstorage.options,
             // TV Show
             getTvShow: tvshow.get,
-            addTvShowToStorage: builder.mutation<void, { library_id: string, id: string, tmdb_id: string, }>({
+            addTvShowToStorage: builder.mutation<void, { id: string, tmdb_id: string, }>({
                 query: ({ id, tmdb_id }) => ({
                     method: 'POST',
                     url: `/tvstorage/${id}/add-show/`,
@@ -158,6 +158,14 @@ export const hamsterySlice = createApi({
             // TV Episode
             getTvEpisodes: tvepisode.getAll,
             getTvEpisode: tvepisode.get,
+            downloadTvEpisode: builder.mutation<void, { id: string, url: string }>({
+                query:  ({ id, url }) => ({
+                    method: 'POST',
+                    url: `/tvepisode/${id}/download/`,
+                    headers: { 'content-type': 'application/x-www-form-urlencoded' },
+                    body: `url=${url}`
+                }),
+            }),
             // Torznab Indexers
             getTorznabIndexers: torznab.getAll,
             getTorznabIndexer: torznab.get,

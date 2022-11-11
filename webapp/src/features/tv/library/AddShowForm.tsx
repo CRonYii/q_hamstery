@@ -45,7 +45,7 @@ const AddShowForm: React.FC<{
                         onFinish={(data) => {
                             const { storage, tmdb_id } = data;
 
-                            const task = addTvShowToStorage({ id: storage, tmdb_id, library_id: String(library.id) }).unwrap()
+                            const task = addTvShowToStorage({ id: storage, tmdb_id }).unwrap()
                             if (onFinish)
                                 onFinish(task)
                         }}

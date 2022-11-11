@@ -134,11 +134,11 @@ const DjangoRestframeworkForm: React.FC<IDjangoRestframeworkFormProps> =
                 }
                 const rules: Rule[] = [];
                 if (option.required && option.type !== 'boolean')
-                    rules.push({ required: true, message: `请输入${displayName}` })
+                    rules.push({ required: true, message: `Please enter ${displayName}` })
                 if (option.max_length)
-                    rules.push({ max: option.max_length, message: `${displayName}最多只能有${option.max_length}字符长` })
+                    rules.push({ max: option.max_length, message: `${displayName} maximum length is ${option.max_length}` })
                 if (option.min_length)
-                    rules.push({ max: option.min_length, message: `${displayName}至少要${option.max_length}字符长` })
+                    rules.push({ max: option.min_length, message: `${displayName} minimum length is ${option.min_length}` })
                 if (option.type === 'email')
                     rules.push({ type: 'email' })
                 return <Form.Item
