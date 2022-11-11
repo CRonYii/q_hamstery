@@ -19,7 +19,12 @@ export const hamsterySlice = createApi({
     tagTypes: ['tvlib', 'tvstorage', 'tvshow', 'tvseason', 'tvepisode', 'torznab'],
     endpoints: builder => {
         const CRUDEntity = <T extends { id: number }>(
-            name: TagTypes, url: string, extraTags?: (item: T) => TagDescription<TagTypes>[]) => {
+            { name, url, extraArgTags, extraItemTags }: {
+                name: TagTypes, url: string,
+                extraArgTags?: (arg: any) => TagDescription<TagTypes>[],
+                extraItemTags?: (item: T) => TagDescription<TagTypes>[]
+            }
+        ) => {
             return {
                 getAll: builder.query<T[], any>({
                     query: (params) => ({
@@ -28,22 +33,30 @@ export const hamsterySlice = createApi({
                         params
                     }),
                     providesTags: (result = [], error, arg) => {
-                        const tags = extraTags
-                            ? flatten(result.map((item) => extraTags(item)))
-                            : []
-                        return [
+                        const tags = [
                             name,
                             ...result.map(({ id }): TagDescription<TagTypes> => ({ type: name, id: String(id) })),
-                            ...tags,
+                            ...(extraArgTags
+                                ? flatten(extraArgTags(arg))
+                                : []),
+                            ...(extraItemTags
+                                ? flatten(result.map((item) => extraItemTags(item)))
+                                : []),
                         ]
+
+                        return tags
                     }
                 }),
                 get: builder.query<T, string>({
                     query: (id) => `${url}${id}/`,
                     providesTags: (result, error, arg) => {
                         const tags: TagDescription<TagTypes>[] = [{ type: name, id: arg }]
-                        if (extraTags && result)
-                            extraTags(result).forEach((tag) => {
+                        if (extraItemTags && result)
+                            extraItemTags(result).forEach((tag) => {
+                                tags.push(tag)
+                            })
+                        if (extraArgTags)
+                            extraArgTags(arg).forEach((tag) => {
                                 tags.push(tag)
                             })
                         return tags
@@ -88,12 +101,14 @@ export const hamsterySlice = createApi({
                 }),
             }
         }
-        const tvlib = CRUDEntity<ITvLibrary>('tvlib', '/tvlib/')
-        const tvstorage = CRUDEntity<ITvStorage>('tvstorage', '/tvstorage/')
-        const tvshow = CRUDEntity<ITvShow>('tvshow', '/tvshow/', (show) => [{ type: 'tvstorage', id: show.storage }])
-        const tvseason = CRUDEntity<ITvSeason>('tvseason', '/tvseason/')
-        const tvepisode = CRUDEntity<ITvEpisode>('tvepisode', '/tvepisode/')
-        const torznab = CRUDEntity<ITorznabIndexer>('torznab', '/torznab/')
+        const tvlib = CRUDEntity<ITvLibrary>({ name: 'tvlib', url: '/tvlib/' })
+        const tvstorage = CRUDEntity<ITvStorage>({ name: 'tvstorage', url: '/tvstorage/' })
+        const tvshow = CRUDEntity<ITvShow>({ name: 'tvshow', url: '/tvshow/', })
+        const tvseason = CRUDEntity<ITvSeason>({
+            name: 'tvseason', url: '/tvseason/', extraArgTags: (arg) => [{ type: 'tvshow', id: arg.show }]
+        })
+        const tvepisode = CRUDEntity<ITvEpisode>({ name: 'tvepisode', url: '/tvepisode/' })
+        const torznab = CRUDEntity<ITorznabIndexer>({ name: 'torznab', url: '/torznab/' })
         return {
             // TV Library
             getTvLibraries: tvlib.getAll,
@@ -107,7 +122,10 @@ export const hamsterySlice = createApi({
                     method: 'POST',
                     url: `/tvlib/${id}/scan/`,
                 }),
-                invalidatesTags: (result, error, arg) => result?.map(id => ({ type: 'tvstorage', id })) || []
+                invalidatesTags: (result, error, arg) => [
+                    ...(result || []).map<TagDescription<TagTypes>>(id => ({ type: 'tvstorage', id })),
+                    'tvshow', 'tvseason', 'tvepisode'
+                ]
             }),
             // Tv Storage
             getTvStorages: tvstorage.getAll,
@@ -126,6 +144,13 @@ export const hamsterySlice = createApi({
                     body: `tmdb_id=${tmdb_id}`
                 }),
                 invalidatesTags: (result, error, arg) => [{ type: 'tvstorage', id: arg.id }]
+            }),
+            scanTvShow: builder.mutation<string[], string>({
+                query: (id) => ({
+                    method: 'POST',
+                    url: `/tvshow/${id}/scan/`,
+                }),
+                invalidatesTags: (result, error, arg) => [{ type: 'tvshow', id: arg }, 'tvseason', 'tvepisode']
             }),
             // TV Season
             getTvSeasons: tvseason.getAll,
