@@ -2,9 +2,9 @@ import { TagDescription } from '@reduxjs/toolkit/dist/query/endpointDefinitions'
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import Cookies from 'js-cookie';
 import flatten from 'lodash/flatten';
-import { IDjangoOptions, IParamOptions, ITorznabIndexer, ITvEpisode, ITvLibrary, ITvSeason, ITvShow, ITvStorage } from '../../app/entities';
+import { IDjangoOptions, IParamOptions, ITorznabIndexer, ITvDownload, ITvEpisode, ITvLibrary, ITvSeason, ITvShow, ITvStorage } from '../../app/entities';
 
-type TagTypes = 'tvlib' | 'tvstorage' | 'tvshow' | 'tvseason' | 'tvepisode' | 'torznab'
+type TagTypes = 'tvlib' | 'tvstorage' | 'tvshow' | 'tvseason' | 'tvepisode' | 'tvdownload' | 'torznab'
 
 export const hamsterySlice = createApi({
     reducerPath: 'hamstery',
@@ -16,13 +16,22 @@ export const hamsterySlice = createApi({
             return headers
         }
     }),
-    tagTypes: ['tvlib', 'tvstorage', 'tvshow', 'tvseason', 'tvepisode', 'torznab'],
+    tagTypes: ['tvlib', 'tvstorage', 'tvshow', 'tvseason', 'tvepisode', 'tvdownload', 'torznab'],
     endpoints: builder => {
-        const CRUDEntity = <T extends { id: number }>(
-            { name, url, extraArgTags, extraItemTags }: {
+        const CRUDEntity = <T>(
+            {
+                name,
+                url,
+                idSelector = (item: any) => item.id,
+                extraArgTags,
+                extraItemTags,
+                keepUnusedDataFor,
+            }: {
                 name: TagTypes, url: string,
+                idSelector?: (item: T) => string,
                 extraArgTags?: (arg: any) => TagDescription<TagTypes>[],
-                extraItemTags?: (item: T) => TagDescription<TagTypes>[]
+                extraItemTags?: (item: T) => TagDescription<TagTypes>[],
+                keepUnusedDataFor?: number,
             }
         ) => {
             return {
@@ -35,7 +44,7 @@ export const hamsterySlice = createApi({
                     providesTags: (result = [], error, arg) => {
                         const tags = [
                             name,
-                            ...result.map(({ id }): TagDescription<TagTypes> => ({ type: name, id: String(id) })),
+                            ...result.map((item): TagDescription<TagTypes> => ({ type: name, id: idSelector(item) })),
                             ...(extraArgTags
                                 ? flatten(extraArgTags(arg))
                                 : []),
@@ -45,7 +54,8 @@ export const hamsterySlice = createApi({
                         ]
 
                         return tags
-                    }
+                    },
+                    keepUnusedDataFor,
                 }),
                 get: builder.query<T, string>({
                     query: (id) => `${url}${id}/`,
@@ -60,7 +70,8 @@ export const hamsterySlice = createApi({
                                 tags.push(tag)
                             })
                         return tags
-                    }
+                    },
+                    keepUnusedDataFor
                 }),
                 create: builder.mutation<void, T | FormData>({
                     query: (body) => ({
@@ -108,6 +119,13 @@ export const hamsterySlice = createApi({
             name: 'tvseason', url: '/tvseason/', extraArgTags: (arg) => [{ type: 'tvshow', id: arg.show }]
         })
         const tvepisode = CRUDEntity<ITvEpisode>({ name: 'tvepisode', url: '/tvepisode/' })
+        const tvdownload = CRUDEntity<ITvDownload>({
+            name: 'tvdownload',
+            url: '/tvdownload/',
+            idSelector: d => d.hash,
+            extraArgTags: (arg) => [{ type: 'tvepisode', id: arg.episode }],
+            keepUnusedDataFor: 1,
+        })
         const torznab = CRUDEntity<ITorznabIndexer>({ name: 'torznab', url: '/torznab/' })
         return {
             // TV Library
@@ -159,13 +177,16 @@ export const hamsterySlice = createApi({
             getTvEpisodes: tvepisode.getAll,
             getTvEpisode: tvepisode.get,
             downloadTvEpisode: builder.mutation<void, { id: string, url: string }>({
-                query:  ({ id, url }) => ({
+                query: ({ id, url }) => ({
                     method: 'POST',
                     url: `/tvepisode/${id}/download/`,
                     headers: { 'content-type': 'application/x-www-form-urlencoded' },
                     body: `url=${url}`
                 }),
             }),
+            // TV Download,
+            getTvDownloads: tvdownload.getAll,
+            removeTvDownload: tvdownload.delete,
             // Torznab Indexers
             getTorznabIndexers: torznab.getAll,
             getTorznabIndexer: torznab.get,

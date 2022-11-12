@@ -50,6 +50,22 @@ export interface ITvEpisode {
     air_date?: string,
 }
 
+export interface ITvDownload {
+    hash: string,
+    done: boolean,
+    episode: number,
+    filename: string,
+    progress: number,
+    dlspeed: number,
+    completed: number,
+    completion_on: number,
+    size: number,
+    eta: number,
+    ratio: number,
+    uploaded: number,
+    upspeed: number,
+}
+
 export type IndexerType = 'torznab'
 
 export interface ITorznabIndexer {

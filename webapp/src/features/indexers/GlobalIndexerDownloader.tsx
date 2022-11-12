@@ -12,7 +12,8 @@ import { indexerActions, indexerSelector } from './indexerSlice';
 
 const GlobalIndexerDownloader: React.FC = () => {
   const indexer = useSelector(indexerSelector)
-
+  if (!indexer.season)
+    return <div />
   return <div>
     <ApiLoading getters={{
       'torznab': hamsterySlice.useGetTorznabIndexersQuery,
@@ -52,6 +53,7 @@ const EpisodeDownloader: React.FC<{
           onChange={(idx) => {
             const { type, id } = indexers[idx]
             setSearcher({ type, searchId: String(id) })
+            setDownloads([])
           }}
         />
       </Col>
@@ -63,7 +65,9 @@ const EpisodeDownloader: React.FC<{
             ? <IndexerSearcher
               defaultKeyword={indexer.defaultQuery}
               indexer={searcher}
-              onDownloadChosen={(downloads) => setDownloads(downloads)}
+              onDownloadChosen={(downloads) => {
+                setDownloads(downloads)
+              }}
             />
             : null}
 
@@ -72,6 +76,7 @@ const EpisodeDownloader: React.FC<{
   </div>
 
   const startDownloadTab = <Form
+    layout='vertical'
     id="downloadShows"
     name="downloadShows"
     labelCol={{ span: 24 }}
@@ -83,6 +88,7 @@ const EpisodeDownloader: React.FC<{
             await download({ id: String(episode.id), url: link }).unwrap()
           }
         }
+        setDownloads([])
         dispatch(indexerActions.closeSearch())
       } catch {
         notification.error({ message: 'Failed to start download' })
@@ -95,8 +101,6 @@ const EpisodeDownloader: React.FC<{
           validator: async (_, downloads: { episode_number: number }[]) => {
             if (downloads.some(download => download.episode_number === undefined))
               return Promise.reject(new Error('You must choose an episode for each resource selected.'));
-            if (new Set(downloads.map(download => download.episode_number)).size !== downloads.length)
-              return Promise.reject(new Error('Cannot download multiple resouces for a single episode.'));
           }
         }
       ]}>
@@ -106,6 +110,9 @@ const EpisodeDownloader: React.FC<{
             .map((item, index) => {
               const guessEp = Number(getEpNumber(item.title));
               return <Form.Item key={item.title}>
+                <Form.Item name={[index, 'title']} initialValue={item.title} hidden>
+                  <Input />
+                </Form.Item>
                 <Form.Item name={[index, 'link']} initialValue={item.link} hidden>
                   <Input />
                 </Form.Item>
@@ -128,6 +135,21 @@ const EpisodeDownloader: React.FC<{
     <Button key='submit' form="downloadShows" type="primary" htmlType="submit" loading={isLoading}>Download</Button>
   </Form>
 
+  const items = [
+    {
+      label: 'Search',
+      key: 'search',
+      children: searchTab
+    },
+  ]
+  if (downloads.length !== 0) {
+    items.push({
+      label: 'Start Download',
+      key: 'download',
+      children: startDownloadTab
+    })
+  }
+
   return <Modal
     title={`Download to ${indexer.defaultQuery} - ${indexer.season?.name}`}
     style={{ minWidth: '60vw' }}
@@ -138,18 +160,7 @@ const EpisodeDownloader: React.FC<{
     footer={null}
   >
     <Tabs
-      items={[
-        {
-          label: 'Search',
-          key: 'search',
-          children: searchTab
-        },
-        {
-          label: 'Start Download',
-          key: 'download',
-          children: startDownloadTab
-        }
-      ]} />
+      items={items} />
 
   </Modal>
 }

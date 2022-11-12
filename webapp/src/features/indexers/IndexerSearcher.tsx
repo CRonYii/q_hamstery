@@ -7,8 +7,9 @@ import hamstery from '../api/hamstery';
 const IndexerSearcher: React.FC<{
     defaultKeyword?: string,
     indexer: { type?: IndexerType, searchId?: string, },
+    onSearch?: (query: string) => void,
     onDownloadChosen?: (downlaods: IndexerSearchResult[]) => void,
-}> = ({ defaultKeyword, indexer, onDownloadChosen }) => {
+}> = ({ defaultKeyword, indexer, onSearch, onDownloadChosen }) => {
     const [data, setData] = useState<IndexerSearchResult[]>([])
     const [loading, setLoading] = useState<boolean>(false)
 
@@ -29,6 +30,8 @@ const IndexerSearcher: React.FC<{
             size="large"
             defaultValue={defaultKeyword}
             onSearch={async (keyword: string) => {
+                if (onSearch)
+                    onSearch(keyword)
                 setLoading(true)
                 try {
                     setData(await search(keyword))

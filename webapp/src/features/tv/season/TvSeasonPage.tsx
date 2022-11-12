@@ -74,7 +74,7 @@ const TVSeasonItems: React.FC<{ show: ITvShow, season: ITvSeason, episodes: ITvE
         </Row>
         <Row gutter={24} style={{ margin: 16 }} align='top'>
             {displayEpisodes.map((episode) =>
-                <Col key={episode.id}>
+                <Col key={episode.id} style={{ marginBottom: 12}}>
                     <TvEpisodeCard show={show} season={season} episode={episode} />
                     </Col>)}
         </Row>

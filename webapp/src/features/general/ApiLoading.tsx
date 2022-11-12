@@ -11,7 +11,7 @@ const ApiLoading: React.FC<{
     for (const key of Object.keys(getters)) {
         const getter = getters[key]
         const all = getter()
-        if (all.isFetching)
+        if (all.isLoading)
             isLoadingGlobal = true
         if (all.isError)
             isErrorGlobal = true
