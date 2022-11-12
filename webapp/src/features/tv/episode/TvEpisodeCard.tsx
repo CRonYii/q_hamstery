@@ -47,14 +47,22 @@ export const TvDownloadInfo: React.FC<{ episode_id: string }> = ({ episode_id })
         const deleteButton = <Popconfirm title={"The download will be cancelled!"} onConfirm={() => remove(download.hash)}>
             <DeleteTwoTone twoToneColor="#eb2f96" />
         </Popconfirm>
+        if (!download.extra_info) {
+            return <List.Item>
+                <List.Item.Meta
+                    title='Info not found...'
+                />
+            </List.Item>
+        }
+        const { extra_info } = download
         if (download.done) {
             return <List.Item>
                 <List.Item.Meta
                     title={download.filename}
                     description={<span>
-                        <b>Size: </b>{formatBytes(download.size)} |
-                        <b> Uploaded: </b>{formatBytes(download.uploaded)} |
-                        <b> Upspeed↑: </b>{formatBytes(download.upspeed)}/s
+                        <b>Size: </b>{formatBytes(extra_info.size)} |
+                        <b> Uploaded: </b>{formatBytes(extra_info.uploaded)} |
+                        <b> Upspeed↑: </b>{formatBytes(extra_info.upspeed)}/s
                     </span>}
                 />
                 <CheckCircleTwoTone twoToneColor="#52c41a" />
@@ -65,7 +73,7 @@ export const TvDownloadInfo: React.FC<{ episode_id: string }> = ({ episode_id })
                     title='Preparing...'
                 />
                 <span>
-                    {(100 * download.progress).toFixed(2)}%
+                    {(100 * extra_info.progress).toFixed(2)}%
                     {deleteButton}
                 </span>
             </List.Item>
@@ -74,14 +82,14 @@ export const TvDownloadInfo: React.FC<{ episode_id: string }> = ({ episode_id })
                 <List.Item.Meta
                     title={download.filename}
                     description={<span>
-                        <b>Size: </b>{formatBytes(download.size)} |
-                        <b> Downloaded: </b>{formatBytes(download.completed)} |
-                        <b> Dlspeed↓: </b>{formatBytes(download.dlspeed)}/s |
-                        <b> ETA: </b>{secondsToDhms(download.eta)}
+                        <b>Size: </b>{formatBytes(extra_info.size)} |
+                        <b> Downloaded: </b>{formatBytes(extra_info.completed)} |
+                        <b> Dlspeed↓: </b>{formatBytes(extra_info.dlspeed)}/s |
+                        <b> ETA: </b>{secondsToDhms(extra_info.eta)}
                     </span>}
                 />
                 <span>
-                    {(100 * download.progress).toFixed(2)}%
+                    {(100 * extra_info.progress).toFixed(2)}%
                     {deleteButton}
                 </span>
             </List.Item>
@@ -102,6 +110,8 @@ export const TvDownloadInfo: React.FC<{ episode_id: string }> = ({ episode_id })
                 }
 
                 if (episode.status === TvEpisodeStatus.MISSING && downloads.some((d) => d.done)) {
+                    console.log(episode, downloads);
+                    
                     dispatch(hamsterySlice.util.invalidateTags([{ type: 'tvepisode', id: episode.id }]))
                 }
 

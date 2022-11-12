@@ -44,6 +44,7 @@ const IndexerSearcher: React.FC<{
         />
         <Table
             rowKey='title'
+            showSorterTooltip={false}
             dataSource={data}
             columns={[
                 {

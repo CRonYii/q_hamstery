@@ -55,15 +55,17 @@ export interface ITvDownload {
     done: boolean,
     episode: number,
     filename: string,
-    progress: number,
-    dlspeed: number,
-    completed: number,
-    completion_on: number,
-    size: number,
-    eta: number,
-    ratio: number,
-    uploaded: number,
-    upspeed: number,
+    extra_info: {
+        progress: number,
+        dlspeed: number,
+        completed: number,
+        completion_on: number,
+        size: number,
+        eta: number,
+        ratio: number,
+        uploaded: number,
+        upspeed: number,
+    }
 }
 
 export type IndexerType = 'torznab'
