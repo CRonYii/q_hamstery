@@ -1,3 +1,5 @@
 .env
-appdata
+app_data
 *.swp
+
+docker-compose.yml
