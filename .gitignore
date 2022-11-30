@@ -2,4 +2,5 @@
 app_data
 *.swp
 
+nginx/build
 docker-compose.yml

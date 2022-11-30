@@ -1,11 +1,18 @@
 version: '2.1'
 services:
+  q_hamstery_nginx:
+    hostname: nginx
+    container_name: q_hamstery_nginx
+    image: cronyii/q_hamstery_nginx:latest
+    ports:
+      - "8000:80"
+    volumes:
+      - uwsgi_data:/tmp/uwsgi/
+    restart: unless-stopped
   q_hamstery_backend:
     hostname: backend
     container_name: q_hamstery_backend
     image: cronyii/q_hamstery_backend:latest
-    ports:
-      - "8000:8000"
     environment:
       - SECRET_KEY=
       - HOST_NAME=
@@ -14,7 +21,12 @@ services:
       - QBITTORRENT_PORT=
       - QBITTORRENT_USERNAME=
       - QBITTORRENT_PASSWORD=
+      - PLEX_URL=
+      - PLEX_TOKEN=
     volumes:
+      - uwsgi_data:/tmp/uwsgi/
       - /path/to/library:/home/library/
       - /path/to/app_data:/app/app_data/
+volumes:
+  uwsgi_data:
 
