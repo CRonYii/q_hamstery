@@ -14,7 +14,7 @@ const TopNavMenu: React.FC = () => {
         })
     useEffect(() => {
         dispatch(navActions.updateRoute({ id: selected, changes: { to: pathname } }))
-    }, [dispatch, pathname])
+    }, [dispatch, selected, pathname])
     return (
         <Menu
             theme="dark" mode="horizontal"

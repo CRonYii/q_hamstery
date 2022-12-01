@@ -65,7 +65,7 @@ export const TvDownloadInfo: React.FC<{ episode_id: string }> = ({ episode_id })
                         <b> Upspeed↑: </b>{formatBytes(extra_info.upspeed)}/s
                     </span>}
                 />
-                <CheckCircleTwoTone twoToneColor="#52c41a" />
+                {deleteButton}
             </List.Item>
         } else if (download.filename.length === 0) {
             return <List.Item>
