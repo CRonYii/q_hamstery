@@ -44,7 +44,7 @@ export const TvDownloadInfo: React.FC<{ episode_id: string }> = ({ episode_id })
     const [remove] = hamsterySlice.useRemoveTvDownloadMutation()
 
     const renderDownloadItem = (download: ITvDownload) => {
-        const deleteButton = <Popconfirm title={"The download will be cancelled!"} onConfirm={() => remove(download.hash)}>
+        const deleteButton = <Popconfirm title={"This download will be deleted!"} onConfirm={() => remove(download.hash)}>
             <DeleteTwoTone twoToneColor="#eb2f96" />
         </Popconfirm>
         if (!download.extra_info) {
@@ -60,8 +60,8 @@ export const TvDownloadInfo: React.FC<{ episode_id: string }> = ({ episode_id })
                 <List.Item.Meta
                     title={download.filename}
                     description={<span>
-                        <b>Size: </b>{formatBytes(extra_info.size)} |
-                        <b> Uploaded: </b>{formatBytes(extra_info.uploaded)} |
+                        <b>Size: </b>{formatBytes(extra_info.size)} <br />
+                        <b> Uploaded: </b>{formatBytes(extra_info.uploaded)} <br />
                         <b> Upspeed↑: </b>{formatBytes(extra_info.upspeed)}/s
                     </span>}
                 />
@@ -82,9 +82,9 @@ export const TvDownloadInfo: React.FC<{ episode_id: string }> = ({ episode_id })
                 <List.Item.Meta
                     title={download.filename}
                     description={<span>
-                        <b>Size: </b>{formatBytes(extra_info.size)} |
-                        <b> Downloaded: </b>{formatBytes(extra_info.completed)} |
-                        <b> Dlspeed↓: </b>{formatBytes(extra_info.dlspeed)}/s |
+                        <b>Size: </b>{formatBytes(extra_info.size)}  <br />
+                        <b> Downloaded: </b>{formatBytes(extra_info.completed)}  <br />
+                        <b> Dlspeed↓: </b>{formatBytes(extra_info.dlspeed)}/s  <br />
                         <b> ETA: </b>{secondsToDhms(extra_info.eta)}
                     </span>}
                 />
@@ -111,7 +111,7 @@ export const TvDownloadInfo: React.FC<{ episode_id: string }> = ({ episode_id })
 
                 if (episode.status === TvEpisodeStatus.MISSING && downloads.some((d) => d.done)) {
                     console.log(episode, downloads);
-                    
+
                     dispatch(hamsterySlice.util.invalidateTags([{ type: 'tvepisode', id: episode.id }]))
                 }
 
