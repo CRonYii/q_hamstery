@@ -5,12 +5,11 @@ import { ITvDownload, ITvEpisode, ITvSeason, ITvShow, TvEpisodeStatus } from '..
 import { useAppDispatch } from '../../../app/hook';
 import { formatBytes, secondsToDhms, toTMDBPosterURL } from '../../../app/utils';
 import { hamsterySlice } from '../../api/hamsterySlice';
-import ApiLoading from '../../general/ApiLoading';
 import { indexerActions } from '../../indexers/indexerSlice';
 
 const { Meta } = Card;
 
-const TvEpisodeCard: React.FC<{ show: ITvShow, season: ITvSeason, episode: ITvEpisode }> = ({ show, season, episode }) => {
+const TvEpisodeCard: React.FC<{ show: ITvShow, season: ITvSeason, episode: ITvEpisode, downloads: ITvDownload[] }> = ({ show, season, episode, downloads }) => {
     const dispatch = useAppDispatch()
     const poster_path = toTMDBPosterURL(episode.poster_path, "w500")
     const actions = []
@@ -35,11 +34,11 @@ const TvEpisodeCard: React.FC<{ show: ITvShow, season: ITvSeason, episode: ITvEp
     >
         <Meta title={`EP ${episode.episode_number}`} description={description} />
         <br />
-        <TvDownloadInfo episode_id={String(episode.id)} />
+        <TvDownloadInfo episode={episode} downloads={downloads} />
     </Card >
 }
 
-export const TvDownloadInfo: React.FC<{ episode_id: string }> = ({ episode_id }) => {
+export const TvDownloadInfo: React.FC<{ episode: ITvEpisode, downloads: ITvDownload[] }> = ({ episode, downloads }) => {
     const dispatch = useAppDispatch()
     const [remove] = hamsterySlice.useRemoveTvDownloadMutation()
 
@@ -96,33 +95,18 @@ export const TvDownloadInfo: React.FC<{ episode_id: string }> = ({ episode_id })
         }
     }
 
-    return <ApiLoading getters={{
-        'episode': () => hamsterySlice.useGetTvEpisodeQuery(episode_id),
-        'downloads': () => hamsterySlice.useGetTvDownloadsQuery({ episode: episode_id }, { pollingInterval: 1000 })
-    }}>
-        {
-            ({ values }) => {
-                const episode: ITvEpisode = values.episode.data
-                const downloads: ITvDownload[] = values.downloads.data
+    if (downloads.length === 0) {
+        return <div />
+    }
 
-                if (downloads.length === 0) {
-                    return <div />
-                }
-
-                if (episode.status === TvEpisodeStatus.MISSING && downloads.some((d) => d.done)) {
-                    console.log(episode, downloads);
-
-                    dispatch(hamsterySlice.util.invalidateTags([{ type: 'tvepisode', id: episode.id }]))
-                }
-
-                return <List
-                    bordered
-                    dataSource={downloads}
-                    renderItem={renderDownloadItem}
-                />
-            }
-        }
-    </ApiLoading>
+    if (episode.status === TvEpisodeStatus.MISSING && downloads.some((d) => d.done)) {
+        dispatch(hamsterySlice.util.invalidateTags([{ type: 'tvepisode', id: episode.id }]))
+    }
+    return <List
+        bordered
+        dataSource={downloads}
+        renderItem={renderDownloadItem}
+    />
 }
 
 export default TvEpisodeCard

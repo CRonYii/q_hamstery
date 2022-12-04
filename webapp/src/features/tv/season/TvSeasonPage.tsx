@@ -1,8 +1,8 @@
 import { ReloadOutlined } from '@ant-design/icons';
 import { Button, Col, Radio, Row } from 'antd';
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { ITvEpisode, ITvSeason, ITvShow } from '../../../app/entities';
+import { ITvDownload, ITvEpisode, ITvSeason, ITvShow } from '../../../app/entities';
 import { datetimeSort, isInThePast } from '../../../app/utils';
 import { hamsterySlice } from '../../api/hamsterySlice';
 import TMDB from '../../api/TMDB';
@@ -17,7 +17,7 @@ const TVSeasonPage: React.FC = () => {
     return <ApiLoading getters={{
         'show': () => hamsterySlice.useGetTvShowQuery(show_id),
         'season': () => hamsterySlice.useGetTvSeasonQuery(season_id),
-        'episodes': () => hamsterySlice.useGetTvEpisodesQuery({ season: season_id })
+        'episodes': () => hamsterySlice.useGetTvEpisodesQuery({ season: season_id }),
     }}>
         {
             ({ values }) => {
@@ -51,34 +51,56 @@ const TVSeasonItems: React.FC<{ show: ITvShow, season: ITvSeason, episodes: ITvE
     if (displayFilter === 'onair') {
         displayEpisodes = displayEpisodes.filter((episode) => isInThePast(episode.air_date))
     }
-    return <div>
-        <Row gutter={12} style={{ margin: 16 }}>
-            <Col>
-                <Button onClick={() => scan(String(season.show))} loading={isLoading}>
-                    {!isLoading ? <span><ReloadOutlined /> Scan</span> : <span>Scanning</span>}
-                </Button>
-            </Col>
-        </Row>
-        <Row gutter={24} style={{ margin: 16 }}>
-            <Col>
-                <Radio.Group
-                    defaultValue='onair'
-                    buttonStyle='solid'
-                    value={displayFilter}
-                    onChange={(e) => setDisplayFilter(e.target.value)}
-                >
-                    <Radio.Button value='all'>All</Radio.Button>
-                    <Radio.Button value='onair'>On Air</Radio.Button>
-                </Radio.Group>
-            </Col>
-        </Row>
-        <Row gutter={24} style={{ margin: 16 }} align='top'>
-            {displayEpisodes.map((episode) =>
-                <Col key={episode.id} style={{ marginBottom: 12}}>
-                    <TvEpisodeCard show={show} season={season} episode={episode} />
-                    </Col>)}
-        </Row>
-    </div>
+    return <ApiLoading getters={{
+        'downloads': () => hamsterySlice.useGetTvDownloadsQuery({
+            episode__in: episodes.map(e => e.id).join(',')
+        }, {
+            pollingInterval: 1000
+        }),
+    }}>
+        {
+            ({ values }) => {
+                const downloads: ITvDownload[] = values.downloads.data
+                const downloadsMap = new Map<number, ITvDownload[]>()
+                downloads.forEach((download) => {
+                    if (!downloadsMap.has(download.episode)) {
+                        downloadsMap.set(download.episode, [download])
+                    } else {
+                        downloadsMap.get(download.episode)?.push(download)
+                    }
+                })
+
+                return <div>
+                    <Row gutter={12} style={{ margin: 16 }}>
+                        <Col>
+                            <Button onClick={() => scan(String(season.show))} loading={isLoading}>
+                                {!isLoading ? <span><ReloadOutlined /> Scan</span> : <span>Scanning</span>}
+                            </Button>
+                        </Col>
+                    </Row>
+                    <Row gutter={24} style={{ margin: 16 }}>
+                        <Col>
+                            <Radio.Group
+                                defaultValue='onair'
+                                buttonStyle='solid'
+                                value={displayFilter}
+                                onChange={(e) => setDisplayFilter(e.target.value)}
+                            >
+                                <Radio.Button value='all'>All</Radio.Button>
+                                <Radio.Button value='onair'>On Air</Radio.Button>
+                            </Radio.Group>
+                        </Col>
+                    </Row>
+                    <Row gutter={24} style={{ margin: 16 }} align='top'>
+                        {displayEpisodes.map((episode) =>
+                            <Col key={episode.id} style={{ marginBottom: 12 }}>
+                                <TvEpisodeCard show={show} season={season} episode={episode} downloads={downloadsMap.get(episode.id) || []} />
+                            </Col>)}
+                    </Row>
+                </div>
+            }
+        }
+    </ApiLoading>
 }
 
 export default TVSeasonPage
