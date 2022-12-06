@@ -61,3 +61,13 @@ export const getDefaultLanguage = () => {
 }
 
 export const getEpNumber = (title: string) => (title.match(/Ep|EP|[ E第【[](\d{2,3})(v\d)?[ 话回集\].】]/) || [])[1] || '0'
+
+const videoRegex = new RegExp('(.mp4|.mkv|.flv|.avi|.rmvb|.m4p|.m4v)$');
+
+export const isVideoFile = (f: string) => f.match(videoRegex) != null
+
+export function b64DecodeUnicode(str: string) {
+    return decodeURIComponent(Array.prototype.map.call(atob(str), function (c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
+    }).join(''))
+}

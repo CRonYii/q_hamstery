@@ -184,6 +184,15 @@ export const hamsterySlice = createApi({
                     body: `url=${url}`
                 }),
             }),
+            importTvEpisode: builder.mutation<void, { id: string, path: string }>({
+                query: ({ id, path }) => ({
+                    method: 'POST',
+                    url: `/tvepisode/${id}/local_import/`,
+                    headers: { 'content-type': 'application/x-www-form-urlencoded' },
+                    body: `path=${path}`
+                }),
+                invalidatesTags: (result, error, arg) => [{ type: 'tvepisode', id: arg.id}]
+            }),
             // TV Download,
             getTvDownloads: tvdownload.getAll,
             removeTvDownload: tvdownload.delete,

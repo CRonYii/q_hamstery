@@ -1,13 +1,15 @@
-import { ReloadOutlined } from '@ant-design/icons';
+import { ReloadOutlined, ImportOutlined } from '@ant-design/icons';
 import { Button, Col, Radio, Row } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { ITvDownload, ITvEpisode, ITvSeason, ITvShow } from '../../../app/entities';
+import { useAppDispatch } from '../../../app/hook';
 import { datetimeSort, isInThePast } from '../../../app/utils';
 import { hamsterySlice } from '../../api/hamsterySlice';
 import TMDB from '../../api/TMDB';
 import ApiLoading from '../../general/ApiLoading';
 import TvEpisodeCard from '../episode/TvEpisodeCard';
+import { seasonActions } from './seasonSlice';
 
 const TVSeasonPage: React.FC = () => {
     const params = useParams()
@@ -33,6 +35,7 @@ const TVSeasonPage: React.FC = () => {
 const TVSeasonItems: React.FC<{ show: ITvShow, season: ITvSeason, episodes: ITvEpisode[] }> = ({
     show, season, episodes,
 }) => {
+    const dispatch = useAppDispatch()
     const [scan, { isLoading }] = hamsterySlice.useScanTvShowMutation()
     const [displayFilter, setDisplayFilter] = useState<'all' | 'onair'>('onair')
     useEffect(() => {
@@ -75,6 +78,11 @@ const TVSeasonItems: React.FC<{ show: ITvShow, season: ITvSeason, episodes: ITvE
                         <Col>
                             <Button onClick={() => scan(String(season.show))} loading={isLoading}>
                                 {!isLoading ? <span><ReloadOutlined /> Scan</span> : <span>Scanning</span>}
+                            </Button>
+                        </Col>
+                        <Col>
+                            <Button onClick={() => dispatch(seasonActions.import({ season }))}>
+                                <ImportOutlined />Import
                             </Button>
                         </Col>
                     </Row>

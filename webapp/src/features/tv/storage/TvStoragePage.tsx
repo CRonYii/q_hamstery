@@ -2,6 +2,7 @@ import { DeleteTwoTone } from '@ant-design/icons';
 import { Button, Col, List, notification, Popconfirm, Row } from 'antd';
 import React, { useState } from 'react';
 import { ITvStorage } from '../../../app/entities';
+import { b64DecodeUnicode } from '../../../app/utils';
 import { hamsterySlice } from '../../api/hamsterySlice';
 import ApiLoading from '../../general/ApiLoading';
 import PathSelector from '../../media/PathSelector';
@@ -23,7 +24,7 @@ const TvStoragePage: React.FC<{ library_id: string }> = ({ library_id }) => {
                         <Col span={4}>
                             <Button type='primary' disabled={path.length === 0 || isAddLoading}
                                 onClick={() => {
-                                    add({ lib: library_id, path: atob(path) } as any)
+                                    add({ lib: library_id, path: b64DecodeUnicode(path) } as any)
                                         .unwrap()
                                         .catch(() => notification.error({ message: 'Failed to add TV Storage' }))
                                     setPath('')
