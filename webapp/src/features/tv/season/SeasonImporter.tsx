@@ -96,7 +96,13 @@ const SeasonImporter: React.FC<{
         <div>
           {imports
             .map((item, index) => {
-              const guessEp = Number(getEpNumber(item.title));
+              const missingEps = episodes
+                .filter((e) => e.status === TvEpisodeStatus.MISSING)
+                .map(e => e.episode_number)
+              let guessEp = getEpNumber(item.title)
+              if (!missingEps.some(n => n === guessEp)) {
+                guessEp = undefined
+              }
               return <Form.Item key={item.title}>
                 <Form.Item name={[index, 'title']} initialValue={item.title} hidden>
                   <Input />
@@ -104,12 +110,11 @@ const SeasonImporter: React.FC<{
                 <Form.Item name={[index, 'path']} initialValue={item.key} hidden>
                   <Input />
                 </Form.Item>
-                <Form.Item label={item.title} name={[index, 'episode_number']} initialValue={guessEp === 0 ? undefined : guessEp}>
+                <Form.Item label={item.title} name={[index, 'episode_number']} initialValue={guessEp}>
                   <Select>
                     {
-                      episodes
-                        .filter((e) => e.status === TvEpisodeStatus.MISSING)
-                        .map((e) => <Select.Option key={e.episode_number} value={e.episode_number}>EP {e.episode_number}</Select.Option>)
+                      missingEps
+                        .map((n) => <Select.Option key={n} value={n}>EP {n}</Select.Option>)
                     }
                   </Select>
                 </Form.Item>

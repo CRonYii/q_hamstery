@@ -1,4 +1,5 @@
 import { ITvShow, ITvStorage } from "./entities";
+import Nzh from "nzh";
 
 export const datetimeSort = (a: string | undefined, b: string | undefined) => {
     const atime = a ? new Date(a).getTime() : Number.MAX_SAFE_INTEGER;
@@ -59,8 +60,26 @@ export function secondsToDhms(seconds: number) {
 export const getDefaultLanguage = () => {
     return window.navigator.language.split(/-|_/)[0]
 }
+const epNumberRegex = /Ep|EP|[ E第【[](\d{1,4}|[零一二三四五六七八九十百千]{1,6})(v\d)?[ 話话回集\].】]/
 
-export const getEpNumber = (title: string) => (title.match(/Ep|EP|[ E第【[](\d{2,3})(v\d)?[ 话回集\].】]/) || [])[1] || '0'
+export const getEpNumber = (title: string) => {
+    // If the title itself is a number, return title
+    if (!isNaN(Number(title)))
+        return Number(title)
+
+    const match = title.match(epNumberRegex)
+    if (!match || match.length < 1)
+        return undefined
+    const keyword = match[1]
+    
+    if (!isNaN(Number(keyword)))
+        return Number(keyword)
+    return Nzh.cn.decodeS(keyword)
+}
+
+const convertChineseNumber = (str: string) => {
+
+}
 
 const videoRegex = new RegExp('(.mp4|.mkv|.flv|.avi|.rmvb|.m4p|.m4v)$');
 
