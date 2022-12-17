@@ -21,7 +21,7 @@ sudo docker build ./nginx/ -t q_hamstery_nginx
 sudo docker image tag q_hamstery_nginx cronyii/q_hamstery_nginx:latest
 sudo docker image tag q_hamstery_nginx cronyii/q_hamstery_nginx:$ver
 # Push to Docker Hub
-sudo docker push cronyii/q_hamstery_nginx:latest
-sudo docker push cronyii/q_hamstery_nginx:$ver
+sudo docker push cronyii/q_hamstery_backend:latest
+sudo docker push cronyii/q_hamstery_backend:$ver
 sudo docker push cronyii/q_hamstery_nginx:latest
 sudo docker push cronyii/q_hamstery_nginx:$ver
