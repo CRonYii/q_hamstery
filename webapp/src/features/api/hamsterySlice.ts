@@ -159,7 +159,7 @@ export const hamsterySlice = createApi({
                     method: 'POST',
                     url: `/tvstorage/${id}/add-show/`,
                     headers: { 'content-type': 'application/x-www-form-urlencoded' },
-                    body: `tmdb_id=${tmdb_id}`
+                    body: `tmdb_id=${encodeURIComponent(tmdb_id)}`
                 }),
                 invalidatesTags: (result, error, arg) => [{ type: 'tvstorage', id: arg.id }]
             }),
@@ -181,7 +181,7 @@ export const hamsterySlice = createApi({
                     method: 'POST',
                     url: `/tvepisode/${id}/download/`,
                     headers: { 'content-type': 'application/x-www-form-urlencoded' },
-                    body: `url=${url}`
+                    body: `url=${encodeURIComponent(url)}`
                 }),
             }),
             importTvEpisode: builder.mutation<void, { id: string, path: string }>({
@@ -189,7 +189,7 @@ export const hamsterySlice = createApi({
                     method: 'POST',
                     url: `/tvepisode/${id}/local_import/`,
                     headers: { 'content-type': 'application/x-www-form-urlencoded' },
-                    body: `path=${path}`
+                    body: `path=${encodeURIComponent(path)}`
                 }),
                 invalidatesTags: (result, error, arg) => [{ type: 'tvepisode', id: arg.id}]
             }),
