@@ -77,10 +77,6 @@ export const getEpNumber = (title: string) => {
     return Nzh.cn.decodeS(keyword)
 }
 
-const convertChineseNumber = (str: string) => {
-
-}
-
 const videoRegex = new RegExp('(.mp4|.mkv|.flv|.avi|.rmvb|.m4p|.m4v)$');
 
 export const isVideoFile = (f: string) => f.match(videoRegex) != null
