@@ -68,11 +68,12 @@ export interface ITvDownload {
     }
 }
 
-export type IndexerType = 'torznab'
-
-export interface ITorznabIndexer {
+export interface IIndexer {
     id: number,
     name: string,
+}
+
+export interface ITorznab extends IIndexer {
     url: string,
     apikey: string,
 }

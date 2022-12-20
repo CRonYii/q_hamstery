@@ -1,32 +1,29 @@
 import { Button, Input, notification, Table } from 'antd';
 import React, { useState } from 'react';
-import { IndexerSearchResult, IndexerType } from '../../app/entities';
+import { IndexerSearchResult } from '../../app/entities';
 import { formatBytes } from '../../app/utils';
 import hamstery from '../api/hamstery';
 
 const IndexerSearcher: React.FC<{
     defaultKeyword?: string,
-    indexer: { type?: IndexerType, searchId?: string, },
+    indexerId?: string,
     onSearch?: (query: string) => void,
     onDownloadChosen?: (downlaods: IndexerSearchResult[]) => void,
-}> = ({ defaultKeyword, indexer, onSearch, onDownloadChosen }) => {
+}> = ({ defaultKeyword, indexerId, onSearch, onDownloadChosen }) => {
     const [data, setData] = useState<IndexerSearchResult[]>([])
     const [loading, setLoading] = useState<boolean>(false)
 
     const search = async (keyword: string) => {
-        if (!indexer.searchId) {
+        if (!indexerId) {
             return []
         }
-        switch (indexer.type) {
-            case 'torznab': return (await hamstery.searchTorznabIndexer(indexer.searchId, keyword)).data
-            default: return []
-        }
+        return (await hamstery.searchIndexer(indexerId, keyword)).data
     }
 
     return (<div>
         <Input.Search
             placeholder='keyword'
-            enterButton={<Button type='primary' disabled={indexer.searchId === undefined} loading={loading}>Search</Button>}
+            enterButton={<Button type='primary' disabled={indexerId === undefined} loading={loading}>Search</Button>}
             size="large"
             defaultValue={defaultKeyword}
             onSearch={async (keyword: string) => {

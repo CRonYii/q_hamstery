@@ -19,7 +19,7 @@ const GlobalIndexerSearcher: React.FC = () => {
             }}
             footer={null}
         >
-            <IndexerSearcher key={String(indexer.type) + indexer.searchId} indexer={indexer} />
+            <IndexerSearcher key={indexer.searchId} indexerId={indexer.searchId} />
         </Modal>
     </div>
 }

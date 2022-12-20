@@ -2,9 +2,9 @@ import { TagDescription } from '@reduxjs/toolkit/dist/query/endpointDefinitions'
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import Cookies from 'js-cookie';
 import flatten from 'lodash/flatten';
-import { IDjangoOptions, IParamOptions, ITorznabIndexer, ITvDownload, ITvEpisode, ITvLibrary, ITvSeason, ITvShow, ITvStorage } from '../../app/entities';
+import { IDjangoOptions, IIndexer, IParamOptions, ITorznab, ITvDownload, ITvEpisode, ITvLibrary, ITvSeason, ITvShow, ITvStorage } from '../../app/entities';
 
-type TagTypes = 'tvlib' | 'tvstorage' | 'tvshow' | 'tvseason' | 'tvepisode' | 'tvdownload' | 'torznab'
+type TagTypes = 'tvlib' | 'tvstorage' | 'tvshow' | 'tvseason' | 'tvepisode' | 'tvdownload' | 'indexer' | 'torznab'
 
 export const hamsterySlice = createApi({
     reducerPath: 'hamstery',
@@ -16,7 +16,7 @@ export const hamsterySlice = createApi({
             return headers
         }
     }),
-    tagTypes: ['tvlib', 'tvstorage', 'tvshow', 'tvseason', 'tvepisode', 'tvdownload', 'torznab'],
+    tagTypes: ['tvlib', 'tvstorage', 'tvshow', 'tvseason', 'tvepisode', 'tvdownload', 'indexer', 'torznab'],
     endpoints: builder => {
         const CRUDEntity = <T>(
             {
@@ -126,7 +126,8 @@ export const hamsterySlice = createApi({
             extraArgTags: (arg) => [{ type: 'tvepisode', id: arg.episode }],
             keepUnusedDataFor: 1,
         })
-        const torznab = CRUDEntity<ITorznabIndexer>({ name: 'torznab', url: '/torznab/' })
+        const indexer = CRUDEntity<IIndexer>({ name: 'indexer', url: '/indexer/' })
+        const torznab = CRUDEntity<ITorznab>({ name: 'torznab', url: '/torznab/' })
         return {
             // TV Library
             getTvLibraries: tvlib.getAll,
@@ -196,6 +197,9 @@ export const hamsterySlice = createApi({
             // TV Download,
             getTvDownloads: tvdownload.getAll,
             removeTvDownload: tvdownload.delete,
+            // Indexers
+            getIndexers: indexer.getAll,
+            getIndexer: indexer.get,
             // Torznab Indexers
             getTorznabIndexers: torznab.getAll,
             getTorznabIndexer: torznab.get,

@@ -1,7 +1,7 @@
 import { PlusOutlined } from '@ant-design/icons';
 import { Button, Col, Modal, notification, Row } from 'antd';
 import React from 'react';
-import { ITorznabIndexer } from '../../../app/entities';
+import { ITorznab } from '../../../app/entities';
 import { useAppDispatch, useAppSelector } from '../../../app/hook';
 import { hamsterySlice } from '../../api/hamsterySlice';
 import ApiLoading from '../../general/ApiLoading';
@@ -16,7 +16,7 @@ const TorznabIndexer: React.FC = () => {
     return <ApiLoading getters={{ 'indexers': hamsterySlice.useGetTorznabIndexersQuery }}>
         {
             ({ values }) => {
-                const indexers: ITorznabIndexer[] = values.indexers.data
+                const indexers: ITorznab[] = values.indexers.data
                 return <div>
                     <Modal
                         title={torznab.editId ? "Update Torznab Indexer" : "Add new Torznab Indexer"}

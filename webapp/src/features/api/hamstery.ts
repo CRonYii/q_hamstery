@@ -22,8 +22,8 @@ const hamstery = {
     logout() {
         return axios.get<'Ok'>('/hamstery/auth/logout');
     },
-    searchTorznabIndexer(id: string, keyword: string) {
-        return axios.get<IndexerSearchResult[]>(`/hamstery/api/torznab/${id}/search/?query=${keyword}`)
+    searchIndexer(id: string, keyword: string) {
+        return axios.get<IndexerSearchResult[]>(`/hamstery/api/indexer/${id}/search/?query=${keyword}`)
     },
     listMedia(path?: string) {
         return axios.get<IMediaResources>(path ? `/hamstery/api/media/list/${path}` : `/hamstery/api/media/list`)

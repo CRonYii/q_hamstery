@@ -1,13 +1,13 @@
 import { DeleteTwoTone, EditOutlined, SearchOutlined } from '@ant-design/icons';
 import { Card, notification, Popconfirm } from 'antd';
 import React from 'react';
-import { ITorznabIndexer } from '../../../app/entities';
+import { ITorznab } from '../../../app/entities';
 import { useAppDispatch } from '../../../app/hook';
 import { hamsterySlice } from '../../api/hamsterySlice';
 import { indexerActions } from '../indexerSlice';
 import { torznabIndexerActions } from './torznabIndexerSlice';
 
-const TorznabIndexerCard: React.FC<{ indexer: ITorznabIndexer }> = ({ indexer }) => {
+const TorznabIndexerCard: React.FC<{ indexer: ITorznab }> = ({ indexer }) => {
     const dispatch = useAppDispatch()
     const [removeTorznabIndexer, { isLoading }] = hamsterySlice.useRemoveTorznabIndexerMutation()
 
@@ -15,7 +15,7 @@ const TorznabIndexerCard: React.FC<{ indexer: ITorznabIndexer }> = ({ indexer })
         style={{ minWidth: '200px' }}
         actions={[
             <SearchOutlined key="search"
-                onClick={() => dispatch(indexerActions.search({ type: 'torznab', id: String(indexer.id) }))}
+                onClick={() => dispatch(indexerActions.search({ id: String(indexer.id) }))}
             />,
             <EditOutlined key="edit"
                 onClick={() => dispatch(torznabIndexerActions.edit(String(indexer.id)))}

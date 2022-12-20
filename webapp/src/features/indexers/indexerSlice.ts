@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { IndexerType, ITvSeason } from '../../app/entities';
+import { ITvSeason } from '../../app/entities';
 import { RootState } from '../../app/store';
 
 
@@ -7,7 +7,6 @@ interface IndexerState {
     search: 'single' | 'download' | 'closed',
     defaultQuery: string,
     season?: ITvSeason,
-    type?: IndexerType,
     searchId?: string,
 }
 
@@ -20,9 +19,8 @@ const indexerSlice = createSlice({
     name: 'indexer',
     initialState,
     reducers: {
-        search(state, action: PayloadAction<{ type: IndexerType, id: string }>) {
+        search(state, action: PayloadAction<{ id: string }>) {
             state.search = 'single'
-            state.type = action.payload.type
             state.searchId = action.payload.id
         },
         download(state, action: PayloadAction<{ season: ITvSeason, query: string }>) {

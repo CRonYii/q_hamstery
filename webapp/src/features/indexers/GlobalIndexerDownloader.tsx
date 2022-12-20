@@ -1,8 +1,7 @@
 import { Button, Col, Form, Input, Modal, notification, Row, Select, Tabs } from 'antd';
-import concat from 'lodash/concat';
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
-import { IndexerSearchResult, IndexerType, ITorznabIndexer, ITvEpisode, TvEpisodeStatus } from '../../app/entities';
+import { IIndexer, IndexerSearchResult, ITvEpisode, TvEpisodeStatus } from '../../app/entities';
 import { useAppDispatch } from '../../app/hook';
 import { getEpNumber } from '../../app/utils';
 import { hamsterySlice } from '../api/hamsterySlice';
@@ -16,13 +15,12 @@ const GlobalIndexerDownloader: React.FC = () => {
     return <div />
   return <div>
     <ApiLoading getters={{
-      'torznab': hamsterySlice.useGetTorznabIndexersQuery,
+      'indexers': hamsterySlice.useGetIndexersQuery,
       'episodes': () => hamsterySlice.useGetTvEpisodesQuery({ season: indexer.season?.id })
     }}>
       {
         ({ values }) => {
-          const torznab: ITorznabIndexer[] = values.torznab.data
-          const indexers: { type: IndexerType, id: number, name: string }[] = concat(torznab.map(({ id, name }) => ({ type: 'torznab', id, name })))
+          const indexers: IIndexer[] = values.indexers.data
           const episodes: ITvEpisode[] = values.episodes.data
           return <EpisodeDownloader key={indexer.season?.id} indexers={indexers} episodes={episodes} />
         }
@@ -32,12 +30,12 @@ const GlobalIndexerDownloader: React.FC = () => {
 }
 
 const EpisodeDownloader: React.FC<{
-  indexers: { type: IndexerType, id: number, name: string }[],
+  indexers: IIndexer[],
   episodes: ITvEpisode[],
 }> = ({ indexers, episodes }) => {
   const dispatch = useAppDispatch()
   const indexer = useSelector(indexerSelector)
-  const [searcher, setSearcher] = useState<{ type: IndexerType, searchId: string } | undefined>()
+  const [searcher, setSearcher] = useState<string | undefined>()
   const [downloads, setDownloads] = useState<IndexerSearchResult[]>([])
   const [download, { isLoading }] = hamsterySlice.useDownloadTvEpisodeMutation()
 
@@ -49,10 +47,10 @@ const EpisodeDownloader: React.FC<{
           showSearch
           style={{ width: '100%' }}
           filterOption={(input, option) => (option?.label as unknown as string).toLowerCase().includes(input)}
-          options={indexers.map(({ type, name }, idx) => ({ label: `${type} - ${name}`, value: idx }))}
+          options={indexers.map(({ name }, idx) => ({ label: `${name}`, value: idx }))}
           onChange={(idx) => {
-            const { type, id } = indexers[idx]
-            setSearcher({ type, searchId: String(id) })
+            const { id } = indexers[idx]
+            setSearcher(String(id))
             setDownloads([])
           }}
         />
@@ -64,7 +62,7 @@ const EpisodeDownloader: React.FC<{
           searcher
             ? <IndexerSearcher
               defaultKeyword={indexer.defaultQuery}
-              indexer={searcher}
+              indexerId={searcher}
               onDownloadChosen={(downloads) => {
                 setDownloads(downloads)
               }}
