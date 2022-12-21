@@ -1,5 +1,5 @@
 import { CheckCircleTwoTone, CloudDownloadOutlined, DeleteTwoTone } from '@ant-design/icons';
-import { Card, List, Popconfirm } from 'antd';
+import { Card, List, Popconfirm, Row } from 'antd';
 import React from 'react';
 import { ITvDownload, ITvEpisode, ITvSeason, ITvShow, TvEpisodeStatus } from '../../../app/entities';
 import { useAppDispatch } from '../../../app/hook';
@@ -21,7 +21,6 @@ const TvEpisodeCard: React.FC<{ show: ITvShow, season: ITvSeason, episode: ITvEp
         actions.push(<CloudDownloadOutlined onClick={() =>
             dispatch(indexerActions.download({ season, query: show.name }))}
         />)
-        // TODO: actions.push(<ImportOutlined onClick={() => { }} />)
     } else if (episode.status === TvEpisodeStatus.READY) {
         actions.push(<CheckCircleTwoTone twoToneColor="#52c41a" />)
     }
@@ -65,7 +64,8 @@ export const TvDownloadInfo: React.FC<{ episode: ITvEpisode, downloads: ITvDownl
                     description={<span>
                         <b>Size: </b>{formatBytes(extra_info.size)} <br />
                         <b> Uploaded: </b>{formatBytes(extra_info.uploaded)} <br />
-                        <b> Upspeed↑: </b>{formatBytes(extra_info.upspeed)}/s
+                        <b> Upspeed↑: </b>{formatBytes(extra_info.upspeed)}/s <br />
+                        <Row align='middle' justify='center'><CheckCircleTwoTone twoToneColor="#52c41a" /></Row>
                     </span>}
                 />
                 {deleteButton}
