@@ -174,6 +174,13 @@ export const hamsterySlice = createApi({
             // TV Season
             getTvSeasons: tvseason.getAll,
             getTvSeason: tvseason.get,
+            scanTvSeason: builder.mutation<string[], string>({
+                query: (id) => ({
+                    method: 'POST',
+                    url: `/tvseason/${id}/scan/`,
+                }),
+                invalidatesTags: (result, error, arg) => [{ type: 'tvseason', id: arg }, 'tvepisode']
+            }),
             // TV Episode
             getTvEpisodes: tvepisode.getAll,
             getTvEpisode: tvepisode.get,

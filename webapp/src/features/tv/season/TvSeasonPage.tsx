@@ -36,14 +36,14 @@ const TVSeasonItems: React.FC<{ show: ITvShow, season: ITvSeason, episodes: ITvE
     show, season, episodes,
 }) => {
     const dispatch = useAppDispatch()
-    const [scan, { isLoading }] = hamsterySlice.useScanTvShowMutation()
+    const [scan, { isLoading }] = hamsterySlice.useScanTvSeasonMutation()
     const [displayFilter, setDisplayFilter] = useState<'all' | 'onair'>('onair')
     useEffect(() => {
         // Check TMDB and see if we needs an rescan
         TMDB.getTVShowSeason(String(show.tmdb_id), season.season_number)
             .then((data) => {
                 if (data.episodes.length !== episodes.length) {
-                    scan(String(season.show))
+                    scan(String(season.id))
                 }
             })
     }, [scan, show.tmdb_id, season.season_number, season.show, episodes.length])
@@ -76,7 +76,7 @@ const TVSeasonItems: React.FC<{ show: ITvShow, season: ITvSeason, episodes: ITvE
                 return <div>
                     <Row gutter={12} style={{ margin: 16 }}>
                         <Col>
-                            <Button onClick={() => scan(String(season.show))} loading={isLoading}>
+                            <Button onClick={() => scan(String(season.id))} loading={isLoading}>
                                 {!isLoading ? <span><ReloadOutlined /> Scan</span> : <span>Scanning</span>}
                             </Button>
                         </Col>
