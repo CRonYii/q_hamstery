@@ -64,8 +64,9 @@ const epNumberRegex = /Ep|EP|[ E第【[](\d{1,4}|[零一二三四五六七八九
 
 export const getEpNumber = (title: string) => {
     // If the title itself is a number, return title
-    if (!isNaN(Number(title)))
-        return Number(title)
+    const filename = title.split('.')[0]
+    if (!isNaN(Number(filename)))
+        return Number(filename)
 
     const match = title.match(epNumberRegex)
     if (!match || match.length < 1)
