@@ -10,6 +10,9 @@ export interface IFormDisplayField {
     displayName: string,
     hidden?: boolean,
     defaultValue?: any,
+    convertValueFrom?: (raw: any) => any,
+    convertValueTo?: (raw: any) => any,
+    customRender?: (data: any) => JSX.Element,
 }
 
 export interface IDjangoRestframeworkFormProps {
@@ -38,12 +41,13 @@ const DjangoRestframeworkForm: React.FC<IDjangoRestframeworkFormProps> =
         const [loading, setLoading] = useState<boolean>(false)
         useEffect(() => {
             if (isEditing) {
-                displays.forEach(({ key }) => {
+                displays.forEach(({ key, convertValueFrom }) => {
                     const option = options[key]
                     let value = data[key]
-                    if (option.type === 'date') {
+                    if (option.type === 'date')
                         value = moment(value)
-                    }
+                    if (convertValueFrom)
+                        value = convertValueFrom(value)
                     form.setFieldValue(key, value)
                 })
             } else {
@@ -126,7 +130,7 @@ const DjangoRestframeworkForm: React.FC<IDjangoRestframeworkFormProps> =
         }
 
         const fields = displays
-            .map(({ key, displayName, hidden = false }) => {
+            .map(({ key, displayName, hidden = false, customRender, convertValueTo }) => {
                 const option = options[key]
                 if (!option) {
                     console.warn('DjangoRestframeworkForm:', key, 'does not exist.')
@@ -136,9 +140,9 @@ const DjangoRestframeworkForm: React.FC<IDjangoRestframeworkFormProps> =
                 if (option.required && option.type !== 'boolean')
                     rules.push({ required: true, message: `Please enter ${displayName}` })
                 if (option.max_length)
-                    rules.push({ max: option.max_length, message: `${displayName} maximum length is ${option.max_length}` })
+                    rules.push({ max: option.max_length, message: `${displayName} maximum length is ${option.max_length}`, transform: convertValueTo })
                 if (option.min_length)
-                    rules.push({ max: option.min_length, message: `${displayName} minimum length is ${option.min_length}` })
+                    rules.push({ max: option.min_length, message: `${displayName} minimum length is ${option.min_length}`, transform: convertValueTo })
                 if (option.type === 'email')
                     rules.push({ type: 'email' })
                 return <Form.Item
@@ -149,7 +153,7 @@ const DjangoRestframeworkForm: React.FC<IDjangoRestframeworkFormProps> =
                     rules={rules}
                     valuePropName={option.type === 'boolean' ? 'checked' : 'value'}
                 >
-                    {optionToField(key, option)}
+                    {customRender ? customRender(isEditing ? data : undefined) : optionToField(key, option)}
                 </Form.Item>
             })
 
@@ -188,13 +192,15 @@ const DjangoRestframeworkForm: React.FC<IDjangoRestframeworkFormProps> =
                     if (isMutating)
                         return
                     setLoading(true)
-                    displays.forEach(({ key }) => {
+                    displays.forEach(({ key, convertValueTo }) => {
                         if (!data[key])
                             return
                         const option = options[key]
-                        if (option.type === 'date') {
+                        if (option.type === 'date')
                             data[key] = data[key].format('YYYY-MM-DD')
-                        }
+
+                        if (convertValueTo)
+                            data[key] = convertValueTo(data[key])
                     })
 
                     const task = (async function () {

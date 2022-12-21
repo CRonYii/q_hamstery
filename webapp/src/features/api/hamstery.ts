@@ -1,5 +1,5 @@
 import axios from "axios";
-import { IndexerSearchResult } from "../../app/entities";
+import { IndexerSearchResult, TorznabCaps } from "../../app/entities";
 
 export interface IMediaResource {
     key: string,
@@ -24,6 +24,9 @@ const hamstery = {
     },
     searchIndexer(id: string, keyword: string) {
         return axios.get<IndexerSearchResult[]>(`/hamstery/api/indexer/${id}/search/?query=${keyword}`)
+    },
+    torznabCaps(id: string) {
+        return axios.get<TorznabCaps>(`/hamstery/api/torznab/${id}/caps`)
     },
     listMedia(path?: string) {
         return axios.get<IMediaResources>(path ? `/hamstery/api/media/list/${path}` : `/hamstery/api/media/list`)

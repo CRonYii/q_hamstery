@@ -76,6 +76,7 @@ export interface IIndexer {
 export interface ITorznab extends IIndexer {
     url: string,
     apikey: string,
+    cat: string,
 }
 
 export interface IndexerSearchResult {
@@ -83,6 +84,21 @@ export interface IndexerSearchResult {
     pub_date: string,
     size: string,
     link: string,
+}
+
+export interface TorznabCaps {
+    searching: Record<string, {
+        available: boolean,
+        supportedParams: string
+    }>,
+    categories: {
+        id: string,
+        name: string,
+        subcat: {
+            id: string,
+            name: string,
+        }[]
+    }[],
 }
 
 export interface IDjangoOptions {
