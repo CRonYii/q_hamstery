@@ -162,8 +162,7 @@ const EpisodeDownloader: React.FC<{
     }}
     footer={null}
   >
-    <Tabs
-      items={items} />
+    <Tabs defaultActiveKey='search' centered items={items} />
 
   </Modal>
 }

@@ -80,7 +80,7 @@ const DjangoRestframeworkForm: React.FC<IDjangoRestframeworkFormProps> =
                     {
                         const choices = option?.choices
                         if (!choices)
-                            return <div></div>
+                            return <Input disabled={disabled} />
                         return <Select
                             showSearch
                             filterOption={(input, option) => (option?.children as unknown as string).toLowerCase().includes(input)
@@ -112,7 +112,7 @@ const DjangoRestframeworkForm: React.FC<IDjangoRestframeworkFormProps> =
                     {
                         const choices = extras[key];
                         if (!choices)
-                            return <div></div>
+                            return <Input disabled={disabled} />
                         return <Select disabled={disabled}>
                             {
                                 choices.map((choice) => {

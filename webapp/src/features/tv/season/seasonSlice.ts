@@ -6,10 +6,13 @@ import { RootState } from '../../../app/store';
 interface SeasonState {
     import: boolean,
     season?: ITvSeason,
+    sub_open: boolean,
+    sub_editId?: string,
 }
 
 const initialState: SeasonState = {
-    import: false
+    import: false,
+    sub_open: false,
 }
 
 const seasonSlice = createSlice({
@@ -23,6 +26,17 @@ const seasonSlice = createSlice({
         closeImport(state, action: PayloadAction<void>) {
             state.import = false
             state.season = undefined
+        },
+        addSubscription(state, action: PayloadAction<void>) {
+            state.sub_open = true
+            state.sub_editId = undefined
+        },
+        editSubscription(state, action: PayloadAction<string>) {
+            state.sub_open = true
+            state.sub_editId = action.payload
+        },
+        closeSubscription(state, action: PayloadAction<void>) {
+            state.sub_open = false
         },
     },
 });

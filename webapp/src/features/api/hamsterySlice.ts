@@ -4,7 +4,7 @@ import Cookies from 'js-cookie';
 import flatten from 'lodash/flatten';
 import { IDjangoOptions, IIndexer, IParamOptions, ITorznab, ITvDownload, ITvEpisode, ITvLibrary, ITvSeason, ITvShow, ITvStorage } from '../../app/entities';
 
-type TagTypes = 'tvlib' | 'tvstorage' | 'tvshow' | 'tvseason' | 'tvepisode' | 'tvdownload' | 'indexer' | 'torznab'
+type TagTypes = 'tvlib' | 'tvstorage' | 'tvshow' | 'tvseason' | 'tvepisode' | 'tvdownload' | 'monitored-tvdownload' | 'indexer' | 'torznab' | 'show-subscription'
 
 export const hamsterySlice = createApi({
     reducerPath: 'hamstery',
@@ -16,7 +16,7 @@ export const hamsterySlice = createApi({
             return headers
         }
     }),
-    tagTypes: ['tvlib', 'tvstorage', 'tvshow', 'tvseason', 'tvepisode', 'tvdownload', 'indexer', 'torznab'],
+    tagTypes: ['tvlib', 'tvstorage', 'tvshow', 'tvseason', 'tvepisode', 'tvdownload', 'monitored-tvdownload', 'indexer', 'torznab', 'show-subscription'],
     endpoints: builder => {
         const CRUDEntity = <T>(
             {
@@ -126,8 +126,10 @@ export const hamsterySlice = createApi({
             extraArgTags: (arg) => [{ type: 'tvepisode', id: arg.episode }],
             keepUnusedDataFor: 1,
         })
+        const monitored_tvdownload = CRUDEntity<IIndexer>({ name: 'monitored-tvdownload', url: '/monitored-tvdownload/' })
         const indexer = CRUDEntity<IIndexer>({ name: 'indexer', url: '/indexer/' })
         const torznab = CRUDEntity<ITorznab>({ name: 'torznab', url: '/torznab/' })
+        const show_subscriptions = CRUDEntity<ITorznab>({ name: 'show-subscription', url: '/show-subscription/' })
         return {
             // TV Library
             getTvLibraries: tvlib.getAll,
@@ -204,6 +206,8 @@ export const hamsterySlice = createApi({
             // TV Download,
             getTvDownloads: tvdownload.getAll,
             removeTvDownload: tvdownload.delete,
+            // Monitored TV Download,
+            getMonitoredTvDownloads: monitored_tvdownload.getAll,
             // Indexers
             getIndexers: indexer.getAll,
             getIndexer: indexer.get,
@@ -214,6 +218,19 @@ export const hamsterySlice = createApi({
             removeTorznabIndexer: torznab.delete,
             editTorznabIndexer: torznab.update,
             getTorznabIndexerOptions: torznab.options,
+            // Show Subscriptions
+            getShowSubscriptions: show_subscriptions.getAll,
+            getShowSubscription: show_subscriptions.get,
+            addShowSubscription: show_subscriptions.create,
+            removeShowSubscription: show_subscriptions.delete,
+            editShowSubscription: show_subscriptions.update,
+            getShowSubscriptionOptions: show_subscriptions.options,
+            scanShowSubscription: builder.mutation<void, string>({
+                query: (id) => ({
+                    method: 'POST',
+                    url: `/show-subscription/${id}/monitor/`,
+                }),
+            }),
         }
     }
 })

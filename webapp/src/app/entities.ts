@@ -101,6 +101,17 @@ export interface TorznabCaps {
     }[],
 }
 
+export interface IShowSubscription {
+    id: number,
+    season: number,
+    indexer: number,
+    query: string,
+    priority: number,
+    offset: number,
+    exclude: string,
+    done: boolean,
+}
+
 export interface IDjangoOptions {
     name: string;
     description: string;
