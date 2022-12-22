@@ -58,7 +58,9 @@ export const TvShowSideNavMenu: React.FC = () => {
 
 export const TvSeasonSideNavMenu: React.FC = () => {
     const { library_id, show_id, season_id } = useParams()
+    const location = useLocation()
     const { data: seasons = [] } = hamsterySlice.useGetTvSeasonsQuery({ show: show_id })
+    const isSub = location.pathname.endsWith('subscription')
     const items = seasons
         .slice()
         .sort((a, b) => datetimeSort(a.air_date, b.air_date))
@@ -67,7 +69,9 @@ export const TvSeasonSideNavMenu: React.FC = () => {
             return {
                 key: String(season.id),
                 label: <Tooltip title={title} placement="right">
-                    <Link to={`/tvshows/${library_id}/${show_id}/${season.id}`}>
+                    <Link to={isSub
+                        ? `/tvshows/${library_id}/${show_id}/${season.id}/subscription`
+                        : `/tvshows/${library_id}/${show_id}/${season.id}`}>
                         {title}
                     </Link>
                 </Tooltip>

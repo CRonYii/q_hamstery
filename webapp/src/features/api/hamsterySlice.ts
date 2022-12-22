@@ -2,7 +2,7 @@ import { TagDescription } from '@reduxjs/toolkit/dist/query/endpointDefinitions'
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import Cookies from 'js-cookie';
 import flatten from 'lodash/flatten';
-import { IDjangoOptions, IIndexer, IParamOptions, ITorznab, ITvDownload, ITvEpisode, ITvLibrary, ITvSeason, ITvShow, ITvStorage } from '../../app/entities';
+import { IDjangoOptions, IIndexer, IParamOptions, ISeasonSearchResult, IShowSubscription, ITorznab, ITvDownload, ITvEpisode, ITvLibrary, ITvSeason, ITvShow, ITvStorage } from '../../app/entities';
 
 type TagTypes = 'tvlib' | 'tvstorage' | 'tvshow' | 'tvseason' | 'tvepisode' | 'tvdownload' | 'monitored-tvdownload' | 'indexer' | 'torznab' | 'show-subscription'
 
@@ -183,6 +183,12 @@ export const hamsterySlice = createApi({
                 }),
                 invalidatesTags: (result, error, arg) => [{ type: 'tvseason', id: arg }, 'tvepisode']
             }),
+            searchTvSeason: builder.query<ISeasonSearchResult, IShowSubscription>({
+                query: (sub) => ({
+                    method: 'GET',
+                    url: `/tvseason/${sub.season}/search/?query=${sub.query}&indexer_id=${sub.indexer}&offset=${sub.offset}&exclude=${sub.exclude}}`,
+                }),
+            }),
             // TV Episode
             getTvEpisodes: tvepisode.getAll,
             getTvEpisode: tvepisode.get,
@@ -201,7 +207,7 @@ export const hamsterySlice = createApi({
                     headers: { 'content-type': 'application/x-www-form-urlencoded' },
                     body: `path=${encodeURIComponent(path)}`
                 }),
-                invalidatesTags: (result, error, arg) => [{ type: 'tvepisode', id: arg.id}]
+                invalidatesTags: (result, error, arg) => [{ type: 'tvepisode', id: arg.id }]
             }),
             // TV Download,
             getTvDownloads: tvdownload.getAll,

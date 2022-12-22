@@ -34,6 +34,7 @@ export default BreadcrumbNav
 
 export const TvShowsBreadcrumbNav: React.FC = () => {
     const params = useParams()
+    const location = useLocation()
     const library_id = params.library_id as string
     const show_id = params.show_id as string
     const season_id = params.season_id as string
@@ -71,6 +72,12 @@ export const TvShowsBreadcrumbNav: React.FC = () => {
         items.push({
             key: `season-${season_id}`,
             label: season.name || '',
+            to: `/tvshows/${library_id}/${show_id}/${season_id}`,
+        })
+    if (location.pathname.endsWith('subscription'))
+        items.push({
+            key: `subscription`,
+            label: 'Subscriptions',
         })
     return <BreadcrumbNav items={items} />
 }

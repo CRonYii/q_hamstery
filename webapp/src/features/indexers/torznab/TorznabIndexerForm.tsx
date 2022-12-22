@@ -1,4 +1,4 @@
-import { Select } from 'antd';
+import { Form, Select } from 'antd';
 import React, { useEffect, useState } from 'react';
 import hamstery from '../../api/hamstery';
 import { hamsterySlice } from '../../api/hamsterySlice';
@@ -9,6 +9,7 @@ const TorznabIndexerForm: React.FC<{
     editId?: string,
     onFinish?: (task: Promise<void>) => void,
 }> = ({ id, editId, onFinish }) => {
+    const [form] = Form.useForm()
     const [options, setOptions] = useState<{ label: string, value: string }[]>([])
     useEffect(() => {
         if (!editId)
@@ -38,6 +39,7 @@ const TorznabIndexerForm: React.FC<{
             })
     }, [editId])
     return <DjangoRestframeworkForm
+        form={form}
         id={id} editId={editId}
         onFinish={onFinish}
         get={hamsterySlice.useGetTorznabIndexerQuery}

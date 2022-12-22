@@ -8,10 +8,10 @@ import hamstery, { IMediaResource } from '../../api/hamstery';
 import { hamsterySlice } from '../../api/hamsterySlice';
 import ApiLoading from '../../general/ApiLoading';
 import PathSelector from '../../media/PathSelector';
-import { seasonActions, seasonSelector } from './seasonSlice';
+import { seasonActions, seasonImportSelector } from './seasonSlice';
 
 const GlobalSeasonImporter: React.FC = () => {
-  const info = useSelector(seasonSelector)
+  const info = useSelector(seasonImportSelector)
   if (!info.season)
     return <div />
   return <div>
@@ -33,7 +33,7 @@ const SeasonImporter: React.FC<{
   episodes: ITvEpisode[],
 }> = ({ season, episodes }) => {
   const dispatch = useAppDispatch()
-  const info = useSelector(seasonSelector)
+  const info = useSelector(seasonImportSelector)
   const [files, setFiles] = useState<IMediaResource[]>([])
   const [imports, setImports] = useState<IMediaResource[]>([])
   const [localImport, { isLoading }] = hamsterySlice.useImportTvEpisodeMutation()

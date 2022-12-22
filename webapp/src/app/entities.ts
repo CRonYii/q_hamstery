@@ -112,6 +112,13 @@ export interface IShowSubscription {
     done: boolean,
 }
 
+export type ISeasonSearchResult = Record<string, {
+    title: string,
+    link: string,
+    size: string,
+    pub_date: string,
+}[]>
+
 export interface IDjangoOptions {
     name: string;
     description: string;

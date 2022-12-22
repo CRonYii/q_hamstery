@@ -1,18 +1,18 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { ITvSeason } from '../../../app/entities';
+import { IShowSubscription, ITvSeason } from '../../../app/entities';
 import { RootState } from '../../../app/store';
 
 
 interface SeasonState {
     import: boolean,
     season?: ITvSeason,
-    sub_open: boolean,
-    sub_editId?: string,
+    search_open: boolean,
+    search_query?: IShowSubscription,
 }
 
 const initialState: SeasonState = {
     import: false,
-    sub_open: false,
+    search_open: false,
 }
 
 const seasonSlice = createSlice({
@@ -27,22 +27,27 @@ const seasonSlice = createSlice({
             state.import = false
             state.season = undefined
         },
-        addSubscription(state, action: PayloadAction<void>) {
-            state.sub_open = true
-            state.sub_editId = undefined
+        showSearchResult(state, action: PayloadAction<IShowSubscription>) {
+            state.search_open = true
+            state.search_query = action.payload
         },
-        editSubscription(state, action: PayloadAction<string>) {
-            state.sub_open = true
-            state.sub_editId = action.payload
-        },
-        closeSubscription(state, action: PayloadAction<void>) {
-            state.sub_open = false
+        closeSearchResult(state, action: PayloadAction<void>) {
+            state.search_open = false
+            state.search_query = undefined
         },
     },
 });
 
 export const seasonActions = seasonSlice.actions;
 
-export const seasonSelector = (state: RootState) => state.episode;
+export const seasonImportSelector = (state: RootState) => ({
+    import: state.season.import,
+    season: state.season.season,
+});
+
+export const seasonSearchSelector = (state: RootState) => ({
+    search_open: state.season.search_open,
+    search_query: state.season.search_query,
+});
 
 export default seasonSlice.reducer;

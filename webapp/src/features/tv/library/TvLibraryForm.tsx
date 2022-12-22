@@ -1,3 +1,4 @@
+import { Form } from 'antd';
 import React from 'react';
 import { hamsterySlice } from '../../api/hamsterySlice';
 import DjangoRestframeworkForm from '../../general/DjangoRestframeworkForm';
@@ -7,7 +8,9 @@ const TvLibraryForm: React.FC<{
     editId?: string,
     onFinish?: (task: Promise<void>) => void,
 }> = ({ id, editId, onFinish }) => {
+    const [form] = Form.useForm()
     return <DjangoRestframeworkForm
+        form={form}
         id={id} editId={editId}
         onFinish={onFinish}
         get={hamsterySlice.useGetTvLibraryQuery}

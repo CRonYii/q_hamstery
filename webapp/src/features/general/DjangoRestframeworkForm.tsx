@@ -1,5 +1,5 @@
 import { Alert, Button, Checkbox, Col, DatePicker, Form, Input, InputNumber, Row, Select, Skeleton, Slider } from 'antd';
-import { Rule } from 'antd/lib/form';
+import { FormInstance, Rule } from 'antd/lib/form';
 import TextArea from 'antd/lib/input/TextArea';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
@@ -12,11 +12,12 @@ export interface IFormDisplayField {
     defaultValue?: any,
     convertValueFrom?: (raw: any) => any,
     convertValueTo?: (raw: any) => any,
-    customRender?: (data: any) => JSX.Element,
+    customRender?: (data: any) => React.ReactNode,
 }
 
 export interface IDjangoRestframeworkFormProps {
     onFinish?: (task: Promise<void>) => void,
+    form: FormInstance<any>,
     id: string,
     editId?: string,
     get: any,
@@ -25,11 +26,11 @@ export interface IDjangoRestframeworkFormProps {
     editMutation: any,
     displays: IFormDisplayField[],
     extras: Record<string, any[] | undefined>,
+    actions?: React.ReactNode[],
 }
 
 const DjangoRestframeworkForm: React.FC<IDjangoRestframeworkFormProps> =
-    ({ id, editId, get, getOptions, addMutation, editMutation, onFinish, displays, extras }) => {
-        const [form] = Form.useForm()
+    ({ form, id, editId, get, getOptions, addMutation, editMutation, onFinish, displays, extras, actions = [] }) => {
         const {
             data, isUninitialized, isLoading: dataIsLoading, isError: dataIsError
         } = get(editId as string, { skip: !editId })
@@ -60,7 +61,7 @@ const DjangoRestframeworkForm: React.FC<IDjangoRestframeworkFormProps> =
         if (dataIsError || optionsIsError)
             return <Alert
                 message="Error"
-                description='信息加载失败'
+                description='Failed to load data'
                 type="error"
                 showIcon
             />
@@ -222,8 +223,11 @@ const DjangoRestframeworkForm: React.FC<IDjangoRestframeworkFormProps> =
                     fields
                 }
             </Form>
-            <Row>
+            <Row gutter={8}>
                 <Col flex='auto'></Col>
+                {
+                    actions.map((action, i) => (<Col key={i}>{action}</Col>))
+                }
                 <Col>
                     <Button
                         loading={loading}
