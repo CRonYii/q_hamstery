@@ -117,7 +117,7 @@ const EpisodeDownloader: React.FC<{
                 <Form.Item name={[index, 'title']} initialValue={item.title} hidden>
                   <Input />
                 </Form.Item>
-                <Form.Item name={[index, 'link']} initialValue={item.link} hidden>
+                <Form.Item name={[index, 'link']} initialValue={item.magneturl} hidden>
                   <Input />
                 </Form.Item>
                 <Form.Item label={item.title} name={[index, 'episode_number']} initialValue={guessEp}>

@@ -84,6 +84,7 @@ export interface IndexerSearchResult {
     pub_date: string,
     size: string,
     link: string,
+    magneturl: string,
 }
 
 export interface TorznabCaps {
@@ -115,6 +116,7 @@ export interface IShowSubscription {
 export type ISeasonSearchResult = Record<string, {
     title: string,
     link: string,
+    magneturl: string,
     size: string,
     pub_date: string,
 }[]>
