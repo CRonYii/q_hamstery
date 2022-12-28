@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ITvDownload, ITvEpisode, ITvSeason, ITvShow } from '../../../app/entities';
 import { useAppDispatch } from '../../../app/hook';
-import { datetimeSort, isInThePast } from '../../../app/utils';
+import { isInThePast } from '../../../app/utils';
 import { hamsterySlice } from '../../api/hamsterySlice';
 import TMDB from '../../api/TMDB';
 import ApiLoading from '../../general/ApiLoading';
@@ -53,7 +53,7 @@ const TVSeasonItems: React.FC<{ show: ITvShow, season: ITvSeason, episodes: ITvE
 
     let displayEpisodes = episodes
         .slice()
-        .sort((a, b) => datetimeSort(a.air_date, b.air_date))
+        .sort((a, b) => (a.episode_number - b.episode_number))
     if (displayFilter === 'onair') {
         displayEpisodes = displayEpisodes.filter((episode) => isInThePast(episode.air_date))
     }

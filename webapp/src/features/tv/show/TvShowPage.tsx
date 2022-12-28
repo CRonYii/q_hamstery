@@ -3,7 +3,6 @@ import { Button, Col, Row } from 'antd';
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import { ITvSeason } from '../../../app/entities';
-import { datetimeSort } from '../../../app/utils';
 import { hamsterySlice } from '../../api/hamsterySlice';
 import ApiLoading from '../../general/ApiLoading';
 import TvSeasonCard from '../season/TvSeasonCard';
@@ -29,7 +28,7 @@ const TvShowPage: React.FC = () => {
                         {
                             seasons
                                 .slice()
-                                .sort((a, b) => datetimeSort(a.air_date, b.air_date))
+                                .sort((a, b) => (a.season_number - b.season_number))
                                 .map((season) => {
                                     return <Col key={season.id}>
                                         <TvSeasonCard season={season} />

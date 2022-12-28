@@ -1,7 +1,7 @@
 import { Affix, Layout, Menu, Tooltip } from 'antd';
 import React, { useMemo } from 'react';
-import { Link, useParams, useLocation } from 'react-router-dom';
-import { datetimeSort, getShowsOfLibrary } from '../../app/utils';
+import { Link, useLocation, useParams } from 'react-router-dom';
+import { getShowsOfLibrary } from '../../app/utils';
 import { hamsterySlice } from '../api/hamsterySlice';
 
 const { Sider } = Layout;
@@ -63,7 +63,7 @@ export const TvSeasonSideNavMenu: React.FC = () => {
     const isSub = location.pathname.endsWith('subscription')
     const items = seasons
         .slice()
-        .sort((a, b) => datetimeSort(a.air_date, b.air_date))
+        .sort((a, b) => (a.season_number - b.season_number))
         .map((season) => {
             const title = `${season.name} - ${season.number_of_episodes} episodes (${season.air_date})`
             return {
