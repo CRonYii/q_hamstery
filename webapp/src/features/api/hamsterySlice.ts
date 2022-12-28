@@ -186,7 +186,7 @@ export const hamsterySlice = createApi({
             searchTvSeason: builder.query<ISeasonSearchResult, IShowSubscription>({
                 query: (sub) => ({
                     method: 'GET',
-                    url: `/tvseason/${sub.season}/search/?query=${sub.query}&indexer_id=${sub.indexer}&offset=${sub.offset}&exclude=${sub.exclude}}`,
+                    url: `/tvseason/${sub.season}/search/?query=${sub.query}&indexer_id=${sub.indexer}&offset=${sub.offset}&exclude=${sub.exclude}`,
                 }),
             }),
             // TV Episode
