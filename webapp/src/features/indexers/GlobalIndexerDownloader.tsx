@@ -1,4 +1,5 @@
 import { Button, Col, Form, Input, Modal, notification, Row, Select, Tabs } from 'antd';
+import axios from 'axios';
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { IIndexer, IndexerSearchResult, ITvEpisode, TvEpisodeStatus } from '../../app/entities';
@@ -78,12 +79,22 @@ const EpisodeDownloader: React.FC<{
     id="downloadShows"
     name="downloadShows"
     labelCol={{ span: 24 }}
-    onFinish={async (data: { episodes: { episode_number: number, link: string }[] }) => {
+    onFinish={async (data: { episodes: { title: string, episode_number: number, link: string, magneturl: string }[] }) => {
       try {
-        for (const { episode_number, link } of data.episodes) {
+        for (const { title, episode_number, link, magneturl } of data.episodes) {
           const episode = episodes.find(ep => ep.episode_number === episode_number)
-          if (episode) {
-            await download({ id: String(episode.id), url: link }).unwrap()
+          if (!episode)
+            continue
+          if (magneturl) {
+            await download({ id: String(episode.id), data: magneturl }).unwrap()
+          } else if (link.startsWith('magnet:')) {
+            await download({ id: String(episode.id), data: link }).unwrap()
+          } else if (link.startsWith('http://') || link.startsWith('https://')) {
+            const { data } = await axios.get(link, {
+              responseType: 'blob',
+            })
+            const file = new File([data], title + '.torrent')
+            await download({ id: String(episode.id), data: file }).unwrap()
           }
         }
         setDownloads([])
@@ -117,7 +128,10 @@ const EpisodeDownloader: React.FC<{
                 <Form.Item name={[index, 'title']} initialValue={item.title} hidden>
                   <Input />
                 </Form.Item>
-                <Form.Item name={[index, 'link']} initialValue={item.magneturl} hidden>
+                <Form.Item name={[index, 'link']} initialValue={item.link} hidden>
+                  <Input />
+                </Form.Item>
+                <Form.Item name={[index, 'magneturl']} initialValue={item.magneturl} hidden>
                   <Input />
                 </Form.Item>
                 <Form.Item label={item.title} name={[index, 'episode_number']} initialValue={guessEp}>

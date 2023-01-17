@@ -9,7 +9,8 @@ type TagTypes = 'tvlib' | 'tvstorage' | 'tvshow' | 'tvseason' | 'tvepisode' | 't
 export const hamsterySlice = createApi({
     reducerPath: 'hamstery',
     baseQuery: fetchBaseQuery({
-        baseUrl: '/hamstery/api', prepareHeaders: (headers) => {
+        baseUrl: '/hamstery/api',
+        prepareHeaders: (headers) => {
             const token = Cookies.get('csrftoken')
             if (token)
                 headers.set('X-CSRFToken', token)
@@ -192,13 +193,25 @@ export const hamsterySlice = createApi({
             // TV Episode
             getTvEpisodes: tvepisode.getAll,
             getTvEpisode: tvepisode.get,
-            downloadTvEpisode: builder.mutation<void, { id: string, url: string }>({
-                query: ({ id, url }) => ({
-                    method: 'POST',
-                    url: `/tvepisode/${id}/download/`,
-                    headers: { 'content-type': 'application/x-www-form-urlencoded' },
-                    body: `url=${encodeURIComponent(url)}`
-                }),
+            downloadTvEpisode: builder.mutation<void, { id: string, data: string | File }>({
+                query: ({ id, data }) => {
+                    if (typeof data === 'string') {
+                        return ({
+                            method: 'POST',
+                            url: `/tvepisode/${id}/download/`,
+                            headers: { 'content-type': 'application/x-www-form-urlencoded' },
+                            body: `url=${encodeURIComponent(data)}`,
+                        })
+                    } else {
+                        const form = new FormData()
+                        form.append('torrent', data)
+                        return ({
+                            method: 'POST',
+                            url: `/tvepisode/${id}/download/`,
+                            body: form,
+                        })
+                    }
+                },
             }),
             importTvEpisode: builder.mutation<void, { id: string, path: string }>({
                 query: ({ id, path }) => ({
