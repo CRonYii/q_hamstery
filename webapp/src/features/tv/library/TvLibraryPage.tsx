@@ -54,14 +54,14 @@ const TvLibraryPage: React.FC = () => {
                         ]}
                     >
                         <AddShowForm library={library} onFinish={async (task) => {
+                            setAddShowLoading(true)
                             try {
-                                setAddShowLoading(true)
                                 await task
                                 setAddShowOpen(false)
-                                setAddShowLoading(false)
                             } catch (e: any) {
                                 notification.error({ message: 'Failed to add show to library' });
                             }
+                            setAddShowLoading(false)
                         }} />
                     </Modal>
                     <Row gutter={12} style={{ margin: 16 }}>
