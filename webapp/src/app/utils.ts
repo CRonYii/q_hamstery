@@ -60,7 +60,7 @@ export function secondsToDhms(seconds: number) {
 export const getDefaultLanguage = () => {
     return window.navigator.language.split(/-|_/)[0]
 }
-const epNumberRegex = /Ep|EP|[ E第【[](\d{1,4}|[零一二三四五六七八九十百千]{1,6})(v\d)?[ 話话回集\].】]/
+const epNumberRegex = /(?:[Ee][Pp]|[ E第【[])(\d{2,4}|[零一二三四五六七八九十百千]{1,6})(v\d)?[ 話话回集\].】]/
 
 export const getEpNumber = (title: string) => {
     // If the title itself is a number, return title
@@ -69,7 +69,7 @@ export const getEpNumber = (title: string) => {
         return Number(filename)
 
     const match = title.match(epNumberRegex)
-    if (!match || match.length < 1)
+    if (!match || match[1] === undefined)
         return undefined
     const keyword = match[1]
     
