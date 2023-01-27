@@ -1,5 +1,5 @@
 import { PlusOutlined, ReloadOutlined } from '@ant-design/icons';
-import { Button, Col, Empty, Modal, notification, Row } from 'antd';
+import { Button, Col, Empty, Input, Modal, notification, Row } from 'antd';
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { ITvLibrary, ITvStorage } from '../../../app/entities';
@@ -15,6 +15,7 @@ const TvLibraryPage: React.FC = () => {
     const [addShowOpen, setAddShowOpen] = useState(false)
     const [addShowLoading, setAddShowLoading] = useState(false)
     const [scan, { isLoading }] = hamsterySlice.useScanTvLibraryMutation()
+    const [showFilter, setShowFilter] = useState('')
 
     return <ApiLoading getters={{
         'library': () => hamsterySlice.useGetTvLibraryQuery(library_id),
@@ -30,6 +31,7 @@ const TvLibraryPage: React.FC = () => {
                     : <Row gutter={24} style={{ margin: 16 }} align='bottom'>
                         {
                             shows
+                                .filter(show => show.name.toLowerCase().includes(showFilter))
                                 .map(show =>
 
                                     <Col key={show.id}>
@@ -74,6 +76,9 @@ const TvLibraryPage: React.FC = () => {
                             <Button onClick={() => scan(library_id)} loading={isLoading}>
                                 {!isLoading ? <span><ReloadOutlined /> Scan</span> : <span>Scanning</span>}
                             </Button>
+                        </Col>
+                        <Col span={8}>
+                            <Input placeholder='Search Library' onChange={(evt) => setShowFilter(evt.target.value)} />
                         </Col>
                     </Row>
                     {content}
