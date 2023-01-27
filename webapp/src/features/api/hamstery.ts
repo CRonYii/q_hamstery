@@ -29,7 +29,7 @@ const hamstery = {
         return axios.get<TorznabCaps>(`/hamstery/api/torznab/${id}/caps`)
     },
     listMedia(path?: string) {
-        return axios.get<IMediaResources>(path ? `/hamstery/api/media/list/${path}` : `/hamstery/api/media/list`)
+        return axios.get<IMediaResources>(path ? `/hamstery/api/media/list?path=${encodeURIComponent(path)}` : `/hamstery/api/media/list`)
     },
 };
 
