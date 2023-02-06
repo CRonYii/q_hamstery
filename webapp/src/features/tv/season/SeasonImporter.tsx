@@ -66,13 +66,13 @@ const SeasonImporter: React.FC<{
     id="importSeason"
     name="importSeason"
     labelCol={{ span: 24 }}
-    onFinish={async (data: { episodes: { episode_number: number, path: string }[] }) => {
+    onFinish={async (data: { episodes: { episode_number: number, path: string }[], mode: string }) => {
       try {
-
+        const { mode } = data
         for (const { episode_number, path } of data.episodes) {
           const episode = episodes.find(ep => ep.episode_number === episode_number)
           if (episode) {
-            await localImport({ id: String(episode.id), path: b64DecodeUnicode(path) }).unwrap()
+            await localImport({ id: String(episode.id), path: b64DecodeUnicode(path), mode }).unwrap()
           }
         }
         setImports([])
@@ -83,6 +83,19 @@ const SeasonImporter: React.FC<{
       }
     }}
   >
+    <Form.Item label='Import Mode' name='mode' initialValue='move'>
+      <Select>
+        <Select.Option key='move' value='move'>
+          Move
+        </Select.Option>
+        <Select.Option key='link' value='link'>
+          Link
+        </Select.Option>
+        <Select.Option key='symlink' value='symlink'>
+          Symlink
+        </Select.Option>
+      </Select>
+    </Form.Item>
     <Form.List name="episodes"
       rules={[
         {

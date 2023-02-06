@@ -213,12 +213,12 @@ export const hamsterySlice = createApi({
                     }
                 },
             }),
-            importTvEpisode: builder.mutation<void, { id: string, path: string }>({
-                query: ({ id, path }) => ({
+            importTvEpisode: builder.mutation<void, { id: string, path: string, mode: string }>({
+                query: ({ id, path, mode }) => ({
                     method: 'POST',
                     url: `/tvepisode/${id}/local_import/`,
                     headers: { 'content-type': 'application/x-www-form-urlencoded' },
-                    body: `path=${encodeURIComponent(path)}`
+                    body: `path=${encodeURIComponent(path)}&mode=${mode}`
                 }),
                 invalidatesTags: (result, error, arg) => [{ type: 'tvepisode', id: arg.id }]
             }),
