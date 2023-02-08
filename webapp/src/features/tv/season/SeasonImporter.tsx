@@ -83,16 +83,18 @@ const SeasonImporter: React.FC<{
       }
     }}
   >
-    <Form.Item label='Import Mode' name='mode' initialValue='move'>
+    <Form.Item label='Import Mode' name='mode' rules={[
+      { required: true }
+    ]}>
       <Select>
-        <Select.Option key='move' value='move'>
-          Move
-        </Select.Option>
         <Select.Option key='link' value='link'>
           Link
         </Select.Option>
         <Select.Option key='symlink' value='symlink'>
           Symlink
+        </Select.Option>
+        <Select.Option key='move' value='move'>
+          Move
         </Select.Option>
       </Select>
     </Form.Item>
