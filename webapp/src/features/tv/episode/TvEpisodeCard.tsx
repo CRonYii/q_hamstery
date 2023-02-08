@@ -1,5 +1,5 @@
 import { CheckCircleTwoTone, CloudDownloadOutlined, DeleteTwoTone } from '@ant-design/icons';
-import { Card, List, Popconfirm, Row } from 'antd';
+import { Card, List, notification, Popconfirm, Row } from 'antd';
 import React from 'react';
 import { ITvDownload, ITvEpisode, ITvSeason, ITvShow, TvEpisodeStatus } from '../../../app/entities';
 import { useAppDispatch } from '../../../app/hook';
@@ -13,6 +13,8 @@ const TvEpisodeCard: React.FC<{ show: ITvShow, season: ITvSeason, episode: ITvEp
     const dispatch = useAppDispatch()
     const poster_path = toTMDBPosterURL(episode.poster_path, "w500")
     const actions = []
+    const [removeTvEpisode] = hamsterySlice.useRemoveTvEpisodeMutation()
+
     let description = <div>{episode.name}</div>
     if (episode.air_date) {
         description = <div>{description}{episode.air_date}</div>
@@ -23,6 +25,16 @@ const TvEpisodeCard: React.FC<{ show: ITvShow, season: ITvSeason, episode: ITvEp
         />)
     } else if (episode.status === TvEpisodeStatus.READY) {
         actions.push(<CheckCircleTwoTone twoToneColor="#52c41a" />)
+        actions.push(<Popconfirm title='Are you sure you want to delete this episode from the file system?'
+            onConfirm={async () => {
+                try {
+                    await removeTvEpisode(String(episode.id)).unwrap()
+                } catch {
+                    notification.error({ message: 'Failed to delete TV Episode' })
+                }
+            }}>
+            <DeleteTwoTone key="delete" twoToneColor="#eb2f96" />
+        </Popconfirm>)
     }
 
     return <Card
@@ -54,6 +66,7 @@ export const TvDownloadInfo: React.FC<{ episode: ITvEpisode, downloads: ITvDownl
                 <List.Item.Meta
                     title='Info not found...'
                 />
+                {deleteButton}
             </List.Item>
         }
         const { extra_info } = download

@@ -193,6 +193,13 @@ export const hamsterySlice = createApi({
             // TV Episode
             getTvEpisodes: tvepisode.getAll,
             getTvEpisode: tvepisode.get,
+            removeTvEpisode: builder.mutation<void, string>({
+                query: (id) => ({
+                    method: 'DELETE',
+                    url: `/tvepisode/${id}/remove/`,
+                }),
+                invalidatesTags: (result, error, id) => [{ type: 'tvepisode', id }]
+            }),
             downloadTvEpisode: builder.mutation<void, { id: string, data: string | File }>({
                 query: ({ id, data }) => {
                     if (typeof data === 'string') {
