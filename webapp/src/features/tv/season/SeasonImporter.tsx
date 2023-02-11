@@ -3,11 +3,11 @@ import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { ITvEpisode, ITvSeason, TvEpisodeStatus } from '../../../app/entities';
 import { useAppDispatch } from '../../../app/hook';
-import { getEpNumber, isVideoFile, b64DecodeUnicode } from '../../../app/utils';
+import { b64DecodeUnicode, getEpNumber, isVideoFile } from '../../../app/utils';
 import hamstery, { IMediaResource } from '../../api/hamstery';
 import { hamsterySlice } from '../../api/hamsterySlice';
 import ApiLoading from '../../general/ApiLoading';
-import PathSelector from '../../media/PathSelector';
+import { PathSelectorV2Modal } from '../../media/PathSelectorV2';
 import { seasonActions, seasonImportSelector } from './seasonSlice';
 
 const GlobalSeasonImporter: React.FC = () => {
@@ -39,8 +39,8 @@ const SeasonImporter: React.FC<{
   const [localImport, { isLoading }] = hamsterySlice.useImportTvEpisodeMutation()
 
   const chooseTab = <div>
-    <PathSelector type='path' onChange={async (path) => {
-      const { data } = await hamstery.listMedia(path)
+    <PathSelectorV2Modal type='path' onChange={async (opt) => {
+      const { data } = await hamstery.listMedia(opt.key)
       setFiles(data.file.filter((f) => isVideoFile(f.title)));
       setImports([])
     }} />
@@ -159,6 +159,7 @@ const SeasonImporter: React.FC<{
   }
 
   return <Modal
+    maskClosable={false}
     title={`Import to ${season.name}`}
     style={{ minWidth: '60vw' }}
     open={info.import}
