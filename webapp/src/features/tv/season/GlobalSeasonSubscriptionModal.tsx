@@ -10,6 +10,7 @@ const GlobalSeasonSubscriptionModal: React.FC = () => {
     return <Modal
         title={sub.editId ? "Update subscription" : "Add a new subscription"}
         style={{ minWidth: '60vw' }}
+        maskClosable={false}
         open={sub.open}
         onCancel={() => dispatch(subscriptionActions.closeSubscription())}
         footer={null}

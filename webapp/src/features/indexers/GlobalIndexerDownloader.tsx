@@ -170,6 +170,7 @@ const EpisodeDownloader: React.FC<{
   return <Modal
     title={`Download to ${indexer.defaultQuery} - ${indexer.season?.name}`}
     style={{ minWidth: '60vw' }}
+    maskClosable={false}
     open={indexer.search === 'download'}
     onCancel={() => {
       dispatch(indexerActions.closeSearch())
