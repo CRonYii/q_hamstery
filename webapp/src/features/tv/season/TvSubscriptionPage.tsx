@@ -1,5 +1,5 @@
 import { DeleteTwoTone, EditOutlined, PlusOutlined, ReloadOutlined } from '@ant-design/icons';
-import { Alert, Button, Col, Collapse, List, Modal, notification, Popconfirm, Row, Skeleton, Typography } from 'antd';
+import { Alert, Button, Col, Collapse, List, Modal, notification, Popconfirm, Row, Skeleton, Switch, Typography } from 'antd';
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import { IIndexer, IShowSubscription, ITvDownload } from '../../../app/entities';
@@ -59,6 +59,7 @@ const TVSeasonSubscriptionListItem: React.FC<{ sub: IShowSubscription }> = ({ su
     const dispatch = useAppDispatch()
     const [scanShowSubscription, { isLoading: scanIsLoading }] = hamsterySlice.useScanShowSubscriptionMutation()
     const [removeShowSubscription, { isLoading: isRemoveLoading }] = hamsterySlice.useRemoveShowSubscriptionMutation()
+    const [editShowSubscription, { isLoading: isEditLoading }] = hamsterySlice.useEditShowSubscriptionMutation()
 
     return <ApiLoading getters={{
         'indexer': () => hamsterySlice.useGetIndexerQuery(String(sub.indexer)),
@@ -69,6 +70,21 @@ const TVSeasonSubscriptionListItem: React.FC<{ sub: IShowSubscription }> = ({ su
             const downloads: ITvDownload[] = values.downloads.data
             return <List.Item
                 actions={[
+                    <Switch loading={isEditLoading} checked={sub.done} onClick={async () => {
+                        if (!isEditLoading) {
+                            try {
+                                await editShowSubscription({
+                                    id: String(sub.id),
+                                    body: {
+                                        ...sub,
+                                        done: !sub.done,
+                                    },
+                                }).unwrap()
+                            } catch {
+                                notification.error({ message: 'Failed to change status of Show Subscription' })
+                            }
+                        }
+                    }} />,
                     <Button
                         key='scan' icon={<ReloadOutlined />}
                         onClick={() => scanShowSubscription(String(sub.id))}

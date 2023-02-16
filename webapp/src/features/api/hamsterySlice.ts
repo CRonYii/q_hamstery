@@ -130,7 +130,7 @@ export const hamsterySlice = createApi({
         const monitored_tvdownload = CRUDEntity<IIndexer>({ name: 'monitored-tvdownload', url: '/monitored-tvdownload/' })
         const indexer = CRUDEntity<IIndexer>({ name: 'indexer', url: '/indexer/' })
         const torznab = CRUDEntity<ITorznab>({ name: 'torznab', url: '/torznab/' })
-        const show_subscriptions = CRUDEntity<ITorznab>({ name: 'show-subscription', url: '/show-subscription/' })
+        const show_subscriptions = CRUDEntity<IShowSubscription>({ name: 'show-subscription', url: '/show-subscription/' })
         return {
             // TV Library
             getTvLibraries: tvlib.getAll,
