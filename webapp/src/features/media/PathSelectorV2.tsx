@@ -9,6 +9,7 @@ interface IMediaResourceOption {
     label: string,
     is_directory: boolean,
     is_back: boolean,
+    disabled: boolean,
 }
 
 const listToPathOptions = (list: IMediaResources): IMediaResourceOption[] => list.path.map((p) => {
@@ -17,33 +18,28 @@ const listToPathOptions = (list: IMediaResources): IMediaResourceOption[] => lis
         label: p.title,
         is_directory: true,
         is_back: false,
+        disabled: false,
     }
 })
 
-const listToFileOptions = (list: IMediaResources): IMediaResourceOption[] => list.file.map((p) => {
+const listToFileOptions = (list: IMediaResources, disabled = false): IMediaResourceOption[] => list.file.map((p) => {
     return {
         key: p.key,
         label: p.title,
         is_directory: false,
         is_back: false,
+        disabled,
     }
 })
 
-const listToAllOptions = (list: any) => [...listToPathOptions(list), ...listToFileOptions(list)];
-
-const listToOptions = (type: 'path' | 'file', list: IMediaResources) => {
-    switch (type) {
-        case 'file': return listToAllOptions(list)
-        case 'path': return listToPathOptions(list)
-    }
-}
+const listToOptions = (type: 'path' | 'file', list: IMediaResources) => [...listToPathOptions(list), ...listToFileOptions(list, type !== 'file')];
 
 const PathSelectorBase: React.FC<{
     type: 'path' | 'file',
     onChange?: (opt: IMediaResourceOption) => void,
 }> = ({ type, onChange }) => {
     const [loading, setLoading] = useState<boolean>(false)
-    const [target, setTarget] = useState<IMediaResourceOption>({ key: '', label: '/', is_back: false, is_directory: true, })
+    const [target, setTarget] = useState<IMediaResourceOption>({ key: '', label: '/', is_back: false, is_directory: true, disabled: false, })
     const [keyword, setKeyword] = useState<string>('')
     const [options, setOptions] = useState<IMediaResourceOption[]>([])
     const [history, setHistory] = useState<{ key: string, label: string }[]>([{ key: '', label: '/' }])
@@ -52,12 +48,12 @@ const PathSelectorBase: React.FC<{
             const { data: list } = await hamstery.listMedia()
             setOptions(listToOptions(type, list));
         })()
-    }, []);
+    }, [type]);
 
     const loadData = async (opt: MenuInfo) => {
         const current_directory = options.find(({ key }) => opt.key === key)
 
-        if (!current_directory)
+        if (!current_directory || current_directory.disabled)
             return
         setTarget(current_directory)
         if (onChange) {
@@ -93,6 +89,7 @@ const PathSelectorBase: React.FC<{
                     label: last.label,
                     is_directory: true,
                     is_back: true,
+                    disabled: false,
                 }, ...list])
             }
             setKeyword('')
@@ -123,11 +120,12 @@ const PathSelectorBase: React.FC<{
                             .filter(({ label, is_back }) => {
                                 return is_back || keyword === '' || label.toLowerCase().includes(keyword)
                             })
-                            .map(({ key, label, is_directory, is_back }) => {
+                            .map(({ key, label, is_directory, is_back, disabled }) => {
                                 return {
                                     key,
                                     label: is_back ? '.. [Back]' : label,
                                     icon: is_back ? <RollbackOutlined /> : is_directory ? <FolderOpenFilled /> : <FileFilled />,
+                                    disabled,
                                 }
                             })}
                         defaultChecked={false}
