@@ -1,5 +1,5 @@
-import { ITvShow, ITvStorage } from "./entities";
 import Nzh from "nzh";
+import { ITvShow, ITvStorage } from "./entities";
 
 export const datetimeSort = (a: string | undefined, b: string | undefined) => {
     const atime = a ? new Date(a).getTime() : Number.MAX_SAFE_INTEGER;
@@ -60,7 +60,8 @@ export function secondsToDhms(seconds: number) {
 export const getDefaultLanguage = () => {
     return window.navigator.language.split(/-|_/)[0]
 }
-const epNumberRegex = /(?:[Ee][Pp]|[ E第【[])(\d{2,4}|[零一二三四五六七八九十百千]{1,6})(v\d)?[ 話话回集\].】]/
+
+const epNumberRegex = /(?:[Ee][Pp]|[ E第【[])(\d{2,4}|[零一二三四五六七八九十百千]{1,6})(v\d)?[ 話话回集\].-】]/
 
 export const getEpNumber = (title: string) => {
     // If the title itself is a number, return title
@@ -72,7 +73,7 @@ export const getEpNumber = (title: string) => {
     if (!match || match[1] === undefined)
         return undefined
     const keyword = match[1]
-    
+
     if (!isNaN(Number(keyword)))
         return Number(keyword)
     return Nzh.cn.decodeS(keyword)
