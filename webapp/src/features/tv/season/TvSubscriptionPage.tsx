@@ -70,7 +70,7 @@ const TVSeasonSubscriptionListItem: React.FC<{ sub: IShowSubscription }> = ({ su
             const downloads: ITvDownload[] = values.downloads.data
             return <List.Item
                 actions={[
-                    <Switch loading={isEditLoading} checked={sub.done} onClick={async () => {
+                    <Switch loading={isEditLoading} checked={!sub.done} onClick={async () => {
                         if (!isEditLoading) {
                             try {
                                 await editShowSubscription({
