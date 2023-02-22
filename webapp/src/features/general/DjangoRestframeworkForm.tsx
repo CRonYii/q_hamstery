@@ -41,7 +41,7 @@ const DjangoRestframeworkForm: React.FC<IDjangoRestframeworkFormProps> =
         const isEditing = !!(editId && !isUninitialized && data)
         const [loading, setLoading] = useState<boolean>(false)
         useEffect(() => {
-            if (isEditing) {
+            if (isEditing && options) {
                 displays.forEach(({ key, convertValueFrom }) => {
                     const option = options[key]
                     let value = data[key]
