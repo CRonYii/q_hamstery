@@ -14,6 +14,7 @@ const navAdapter = createEntityAdapter<INavTab>({
 const initialState = navAdapter.setAll(navAdapter.getInitialState(), [
     { key: 'tvshows', to: '/tvshows', label: 'TV Shows', },
     { key: 'indexers', to: '/indexers', label: 'Indexers', },
+    { key: 'settings', to: '/settings', label: 'Settings', },
 ])
 
 const navSlice = createSlice({
