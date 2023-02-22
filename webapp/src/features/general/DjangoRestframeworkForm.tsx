@@ -10,6 +10,8 @@ export interface IFormDisplayField {
     displayName: string,
     hidden?: boolean,
     defaultValue?: any,
+    tooltip?: string,
+    help?: string,
     convertValueFrom?: (raw: any) => any,
     convertValueTo?: (raw: any) => any,
     customRender?: (data: any) => React.ReactNode,
@@ -131,7 +133,7 @@ const DjangoRestframeworkForm: React.FC<IDjangoRestframeworkFormProps> =
         }
 
         const fields = displays
-            .map(({ key, displayName, hidden = false, customRender, convertValueTo }) => {
+            .map(({ key, displayName, hidden = false, customRender, convertValueTo, tooltip, help, }) => {
                 const option = options[key]
                 if (!option) {
                     console.warn('DjangoRestframeworkForm:', key, 'does not exist.')
@@ -152,6 +154,8 @@ const DjangoRestframeworkForm: React.FC<IDjangoRestframeworkFormProps> =
                     name={key}
                     hidden={hidden}
                     rules={rules}
+                    tooltip={tooltip}
+                    help={help}
                     valuePropName={option.type === 'boolean' ? 'checked' : 'value'}
                 >
                     {customRender ? customRender(isEditing ? data : undefined) : optionToField(key, option)}

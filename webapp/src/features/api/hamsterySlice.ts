@@ -2,9 +2,9 @@ import { TagDescription } from '@reduxjs/toolkit/dist/query/endpointDefinitions'
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import Cookies from 'js-cookie';
 import flatten from 'lodash/flatten';
-import { IDjangoOptions, IIndexer, IParamOptions, ISeasonSearchResult, IShowSubscription, ITorznab, ITvDownload, ITvEpisode, ITvLibrary, ITvSeason, ITvShow, ITvStorage } from '../../app/entities';
+import { IDjangoOptions, IHamsterySettings, IIndexer, IParamOptions, ISeasonSearchResult, IShowSubscription, ITorznab, ITvDownload, ITvEpisode, ITvLibrary, ITvSeason, ITvShow, ITvStorage } from '../../app/entities';
 
-type TagTypes = 'tvlib' | 'tvstorage' | 'tvshow' | 'tvseason' | 'tvepisode' | 'tvdownload' | 'monitored-tvdownload' | 'indexer' | 'torznab' | 'show-subscription'
+type TagTypes = 'settings' | 'tvlib' | 'tvstorage' | 'tvshow' | 'tvseason' | 'tvepisode' | 'tvdownload' | 'monitored-tvdownload' | 'indexer' | 'torznab' | 'show-subscription'
 
 export const hamsterySlice = createApi({
     reducerPath: 'hamstery',
@@ -17,18 +17,21 @@ export const hamsterySlice = createApi({
             return headers
         }
     }),
-    tagTypes: ['tvlib', 'tvstorage', 'tvshow', 'tvseason', 'tvepisode', 'tvdownload', 'monitored-tvdownload', 'indexer', 'torznab', 'show-subscription'],
+    tagTypes: ['settings', 'tvlib', 'tvstorage', 'tvshow', 'tvseason', 'tvepisode', 'tvdownload', 'monitored-tvdownload', 'indexer', 'torznab', 'show-subscription'],
     endpoints: builder => {
         const CRUDEntity = <T>(
             {
                 name,
                 url,
+                singleton = false,
                 idSelector = (item: any) => item.id,
                 extraArgTags,
                 extraItemTags,
                 keepUnusedDataFor,
+
             }: {
                 name: TagTypes, url: string,
+                singleton?: boolean,
                 idSelector?: (item: T) => string,
                 extraArgTags?: (arg: any) => TagDescription<TagTypes>[],
                 extraItemTags?: (item: T) => TagDescription<TagTypes>[],
@@ -102,17 +105,18 @@ export const hamsterySlice = createApi({
                 options: builder.query<IParamOptions | undefined, void>({
                     query: () => ({
                         method: 'OPTIONS',
-                        url: url,
+                        url: singleton ? `${url}/${1}/` : url,
                         headers: {
                             'Accept': 'application/json'
                         }
                     }),
                     transformResponse: (response: IDjangoOptions) => {
-                        return response.actions.POST
+                        return singleton ? response.actions.PUT : response.actions.POST
                     }
                 }),
             }
         }
+        const settings = CRUDEntity<IHamsterySettings>({ name: 'settings', url: '/settings/', singleton: true, })
         const tvlib = CRUDEntity<ITvLibrary>({ name: 'tvlib', url: '/tvlib/' })
         const tvstorage = CRUDEntity<ITvStorage>({ name: 'tvstorage', url: '/tvstorage/' })
         const tvshow = CRUDEntity<ITvShow>({ name: 'tvshow', url: '/tvshow/', })
@@ -132,6 +136,11 @@ export const hamsterySlice = createApi({
         const torznab = CRUDEntity<ITorznab>({ name: 'torznab', url: '/torznab/' })
         const show_subscriptions = CRUDEntity<IShowSubscription>({ name: 'show-subscription', url: '/show-subscription/' })
         return {
+            // Hamstery Settings
+            getSettings: settings.get,
+            addSettings: settings.create, // dummy export, will not be used
+            editSettings: settings.update,
+            getSettingsOptions: settings.options,
             // TV Library
             getTvLibraries: tvlib.getAll,
             getTvLibrary: tvlib.get,

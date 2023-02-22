@@ -1,3 +1,11 @@
+export interface IHamsterySettings {
+    id: number,
+    qbittorrent_host: string,
+    qbittorrent_port: string,
+    qbittorrent_username: string,
+    qbittorrent_password: string,
+}
+
 export interface ITvLibrary {
     id: number,
     name: string,
@@ -132,6 +140,7 @@ export interface IDjangoOptions {
 export type IParamOptions = Record<string, IParamOption>
 
 interface Actions {
+    PUT?: IParamOptions;
     POST?: IParamOptions;
 }
 
