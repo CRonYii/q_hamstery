@@ -51,7 +51,7 @@ const QbittorrentSettingsForm: React.FC<{
         ]}
         displays={[
             { key: 'id', displayName: 'ID', hidden: true },
-            { key: 'qbittorrent_host', displayName: 'Host', },
+            { key: 'qbittorrent_host', displayName: 'URL', },
             { key: 'qbittorrent_port', displayName: 'Port', },
             {
                 key: 'qbittorrent_username', displayName: ' Username',
