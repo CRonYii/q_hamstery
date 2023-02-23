@@ -54,7 +54,7 @@ const QbittorrentSettingsForm: React.FC<{
             { key: 'qbittorrent_host', displayName: 'URL', },
             { key: 'qbittorrent_port', displayName: 'Port', },
             {
-                key: 'qbittorrent_username', displayName: ' Username',
+                key: 'qbittorrent_username', displayName: 'Username',
                 help: 'You can leave username and password empty if you have whitelisted Hamstery in qBittorrent',
             },
             {
