@@ -1,5 +1,6 @@
 import { Col, Divider, Row, Typography } from 'antd'
 import React from 'react'
+import PlexSettingsForm from './PlexSettingsForm'
 import QbittorrentSettingsForm from './QbittorrentSettingsForm'
 
 const SettingsPage: React.FC = () => {
@@ -12,6 +13,15 @@ const SettingsPage: React.FC = () => {
             </Col>
         </Row>
         <QbittorrentSettingsForm id='qbt_settings' />
+        <Divider />
+        <Row>
+            <Col span={4}>
+            </Col>
+            <Col>
+                <Typography.Title level={4}>Plex Integration Settings</Typography.Title>
+            </Col>
+        </Row>
+        <PlexSettingsForm id='plex_settings' />
         <Divider />
     </>
 }

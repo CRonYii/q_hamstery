@@ -38,7 +38,10 @@ const hamstery = {
     },
     testQbtConnection() {
         return axios.get<IQbtTestResult>('/hamstery/api/settings/1/qbt_test_connection/')
-    }
+    },
+    testPlexConnection() {
+        return axios.get<IQbtTestResult>('/hamstery/api/settings/1/plex_test_connection/')
+    },
 };
 
 export default hamstery;
