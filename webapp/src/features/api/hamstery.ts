@@ -12,6 +12,11 @@ export interface IMediaResources {
     file: IMediaResource[],
 }
 
+export interface IQbtTestResult {
+    status: boolean,
+    message: string,
+}
+
 const hamstery = {
     test() {
         return axios.get<{ id: number, username: string }>('/hamstery/auth/test');
@@ -31,6 +36,9 @@ const hamstery = {
     listMedia(path?: string) {
         return axios.get<IMediaResources>(path ? `/hamstery/api/media/list?path=${encodeURIComponent(path)}` : `/hamstery/api/media/list`)
     },
+    testQbtConnection() {
+        return axios.get<IQbtTestResult>('/hamstery/api/settings/1/qbt_test_connection/')
+    }
 };
 
 export default hamstery;
