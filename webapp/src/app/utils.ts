@@ -61,7 +61,7 @@ export const getDefaultLanguage = () => {
     return window.navigator.language.split(/-|_/)[0]
 }
 
-const epNumberRegex = /(?:[Ee][Pp]|[ E第【[])(\d{2,3}|[零一二三四五六七八九十百千]{1,6})(v\d)?[ 話话回集\].】-]/
+const epNumberRegex = /(?:[Ee][Pp]|[ E第【[])(\d{2,3}|[零一二三四五六七八九十百千]{1,6})([vV]\d)?[ 話话回集\].】-]/
 
 export const getEpNumber = (title: string) => {
     // If the title itself is a number, return title
