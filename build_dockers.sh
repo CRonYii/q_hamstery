@@ -5,9 +5,11 @@ echo "Building v$ver"
 
 # Update git submodule to latest
 cd backend/app
+git checkout main
 git pull
 cd ../..
 cd nginx/webapp
+git checkout main
 git pull
 cd ../
 # Build frontend webap artifacts
