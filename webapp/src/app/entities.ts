@@ -162,3 +162,8 @@ export interface Choice {
     value: string;
     display_name: string;
 }
+
+export interface INumberOfEpisodes {
+    ready: number,
+    missing: number,
+}
