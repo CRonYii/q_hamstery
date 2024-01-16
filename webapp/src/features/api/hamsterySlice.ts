@@ -2,7 +2,7 @@ import { TagDescription } from '@reduxjs/toolkit/dist/query/endpointDefinitions'
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import Cookies from 'js-cookie';
 import flatten from 'lodash/flatten';
-import { IDjangoOptions, IHamsterySettings, IIndexer, INumberOfEpisodes, IParamOptions, ISeasonSearchResult, IShowSubscription, ITorznab, ITvDownload, ITvEpisode, ITvLibrary, ITvSeason, ITvShow, ITvStorage } from '../../app/entities';
+import { IDjangoOptions, IHamsterySettings, IIndexer, IParamOptions, ISeasonSearchResult, IShowSubscription, ITorznab, ITvDownload, ITvEpisode, ITvLibrary, ITvSeason, ITvShow, ITvStorage } from '../../app/entities';
 
 type TagTypes = 'settings' | 'tvlib' | 'tvstorage' | 'tvshow' | 'tvseason' | 'tvepisode' | 'tvdownload' | 'monitored-tvdownload' | 'indexer' | 'torznab' | 'show-subscription'
 
@@ -167,6 +167,7 @@ export const hamsterySlice = createApi({
             getTvStorageOptions: tvstorage.options,
             // TV Show
             getTvShow: tvshow.get,
+            getTvShows: tvshow.getAll,
             addTvShowToStorage: builder.mutation<void, { id: string, tmdb_id: string, }>({
                 query: ({ id, tmdb_id }) => ({
                     method: 'POST',
@@ -183,12 +184,6 @@ export const hamsterySlice = createApi({
                 }),
                 invalidatesTags: (result, error, arg) => [{ type: 'tvshow', id: arg }, 'tvseason', 'tvepisode']
             }),
-            getTvShowNumberOfEpisodes: builder.query<INumberOfEpisodes, number>({
-                query: (id) => ({
-                    method: 'GET',
-                    url: `/tvshow/${id}/number_of_episodes/`,
-                })
-            }),
             // TV Season
             getTvSeasons: tvseason.getAll,
             getTvSeason: tvseason.get,
@@ -198,12 +193,6 @@ export const hamsterySlice = createApi({
                     url: `/tvseason/${id}/scan/`,
                 }),
                 invalidatesTags: (result, error, arg) => [{ type: 'tvseason', id: arg }, 'tvepisode']
-            }),
-            getTvSeasaonNumberOfEpisodes: builder.query<INumberOfEpisodes, number>({
-                query: (id) => ({
-                    method: 'GET',
-                    url: `/tvseason/${id}/number_of_episodes/`,
-                })
             }),
             searchTvSeason: builder.query<ISeasonSearchResult, IShowSubscription>({
                 query: (sub) => ({

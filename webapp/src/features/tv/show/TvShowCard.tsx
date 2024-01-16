@@ -4,7 +4,6 @@ import { Card } from 'antd';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ITvShow } from '../../../app/entities';
 import { toTMDBPosterURL } from '../../../app/utils';
-import { hamsterySlice } from '../../api/hamsterySlice';
 import EpisodeNumberBadge from '../EpisodeNumberBadge';
 
 const { Meta } = Card;
@@ -13,7 +12,6 @@ const TVShowCard: React.FC<{ show: ITvShow }> = ({ show }) => {
     const navigate = useNavigate();
     const params = useParams()
     const library_id = params.library_id as string
-    const { data: episode_number_stats } = hamsterySlice.useGetTvShowNumberOfEpisodesQuery(show.id)
 
     let description = <span>{
         show.number_of_seasons === 1 ?
@@ -24,7 +22,7 @@ const TVShowCard: React.FC<{ show: ITvShow }> = ({ show }) => {
         description = <div>{description}<br />{show.air_date}</div>
     }
     const poster_path = toTMDBPosterURL(show.poster_path)
-    return <EpisodeNumberBadge episode_stats={episode_number_stats}>
+    return <EpisodeNumberBadge episode_stats={show.number_of_ready_episodes}>
         <Card
             hoverable
             onClick={() => navigate(`/tvshows/${library_id}/${show.id}`)}

@@ -10,6 +10,7 @@ export interface ITvLibrary {
     id: number,
     name: string,
     lang: string,
+    storages: ITvStorage[],
 }
 
 export interface ITvStorage {
@@ -25,6 +26,7 @@ export interface ITvShow {
     tmdb_id: number,
     name: string,
     number_of_episodes: number,
+    number_of_ready_episodes: INumberOfEpisodes,
     number_of_seasons: number,
     poster_path?: string,
     air_date?: string,
@@ -37,6 +39,7 @@ export interface ITvSeason {
     name: string,
     season_number: number,
     number_of_episodes: number,
+    number_of_ready_episodes: INumberOfEpisodes,
     poster_path?: string,
     air_date?: string,
 }
