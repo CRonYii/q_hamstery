@@ -32,7 +32,7 @@ const TvSeasonCard: React.FC<{ season: ITvSeason }> = ({ season }) => {
             <Meta title={title} description={`${season.number_of_episodes} Episode${season.number_of_episodes !== 1 ? 's' : ''}`} />
             {
                 season.warn_removed ?
-                    <Badge status="error" text="Season is removed from TMDB" />
+                    <Badge status="error" text="Season/Episode is removed from TMDB" />
                     : null
             }
         </Card >
