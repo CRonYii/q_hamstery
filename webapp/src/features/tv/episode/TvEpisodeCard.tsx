@@ -1,5 +1,5 @@
 import { CheckCircleTwoTone, CloudDownloadOutlined, DeleteTwoTone } from '@ant-design/icons';
-import { Card, List, notification, Popconfirm, Row } from 'antd';
+import { Badge, Card, List, notification, Popconfirm, Row } from 'antd';
 import React from 'react';
 import { ITvDownload, ITvEpisode, ITvSeason, ITvShow, TvEpisodeStatus } from '../../../app/entities';
 import { useAppDispatch } from '../../../app/hook';
@@ -44,6 +44,11 @@ const TvEpisodeCard: React.FC<{ show: ITvShow, season: ITvSeason, episode: ITvEp
         actions={actions}
     >
         <Meta title={`EP ${episode.episode_number}`} description={description} />
+        {
+            episode.warn_removed ?
+                <Badge status="error" text="Episode is removed from TMDB" />
+                : null
+        }
         <br />
         <TvDownloadInfo episode={episode} downloads={downloads} />
     </Card >

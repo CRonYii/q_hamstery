@@ -30,6 +30,7 @@ export interface ITvShow {
     number_of_seasons: number,
     poster_path?: string,
     air_date?: string,
+    warn_removed: boolean,
 }
 
 export interface ITvSeason {
@@ -42,6 +43,7 @@ export interface ITvSeason {
     number_of_ready_episodes: INumberOfEpisodes,
     poster_path?: string,
     air_date?: string,
+    warn_removed: boolean,
 }
 
 export enum TvEpisodeStatus {
@@ -59,6 +61,7 @@ export interface ITvEpisode {
     episode_number: number,
     poster_path?: string,
     air_date?: string,
+    warn_removed: boolean,
 }
 
 export interface ITvDownload {

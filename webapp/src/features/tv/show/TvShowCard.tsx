@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Card } from 'antd';
+import { Badge, Card } from 'antd';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ITvShow } from '../../../app/entities';
 import { toTMDBPosterURL } from '../../../app/utils';
@@ -30,6 +30,11 @@ const TVShowCard: React.FC<{ show: ITvShow }> = ({ show }) => {
             cover={<img alt="Poster" src={poster_path} />}
         >
             <Meta title={show.name} description={description} />
+            {
+                show.warn_removed ?
+                    <Badge status="error" text="Season/Episode is removed from TMDB" />
+                    : null
+            }
         </Card >
     </EpisodeNumberBadge>
 }

@@ -1,4 +1,4 @@
-import { Card, Skeleton } from 'antd';
+import { Badge, Card, Skeleton } from 'antd';
 import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ITvSeason } from '../../../app/entities';
@@ -30,6 +30,11 @@ const TvSeasonCard: React.FC<{ season: ITvSeason }> = ({ season }) => {
             cover={<img alt="Poster" src={poster_path} />}
         >
             <Meta title={title} description={`${season.number_of_episodes} Episode${season.number_of_episodes !== 1 ? 's' : ''}`} />
+            {
+                season.warn_removed ?
+                    <Badge status="error" text="Season is removed from TMDB" />
+                    : null
+            }
         </Card >
     </EpisodeNumberBadge>
 }
