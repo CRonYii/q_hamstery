@@ -10,13 +10,13 @@ const EpisodeNumberBadge: React.FC<{ episode_stats?: INumberOfEpisodes, children
         return <Badge>
             {children}
         </Badge>
-    } else if (episode_stats.missing == 0) {
+    } else if (episode_stats.missing === 0) {
         return <Badge count={<CheckCircleTwoTone twoToneColor="#52c41a" />}>
             {children}
         </Badge>
     } else {
         return <Badge count={episode_stats.missing}>
-            {children}
+                {children}
         </Badge>
     }
 
