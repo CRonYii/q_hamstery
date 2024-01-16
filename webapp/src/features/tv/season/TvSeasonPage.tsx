@@ -1,12 +1,12 @@
-import { HeartTwoTone, ImportOutlined, ReloadOutlined } from '@ant-design/icons';
+import { HeartTwoTone, ImportOutlined, LinkOutlined, ReloadOutlined } from '@ant-design/icons';
 import { Button, Col, Radio, Row } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ITvDownload, ITvEpisode, ITvSeason, ITvShow } from '../../../app/entities';
 import { useAppDispatch } from '../../../app/hook';
 import { isInThePast } from '../../../app/utils';
-import { hamsterySlice } from '../../api/hamsterySlice';
 import TMDB from '../../api/TMDB';
+import { hamsterySlice } from '../../api/hamsterySlice';
 import ApiLoading from '../../general/ApiLoading';
 import TvEpisodeCard from '../episode/TvEpisodeCard';
 import { seasonActions } from './seasonSlice';
@@ -92,6 +92,13 @@ const TVSeasonItems: React.FC<{ show: ITvShow, season: ITvSeason, episodes: ITvE
                             <Button onClick={() => navigate('./subscription')}>
                                 <HeartTwoTone twoToneColor="#eb2f96" />Subscribe
                             </Button>
+                        </Col>
+                        <Col>
+                            <Button disabled={season.warn_removed}><a
+                                href={'https://www.themoviedb.org/tv/' + show.tmdb_id + '/season/' + season.season_number}
+                                target='_blank'
+                                rel='noreferrer'
+                            ><LinkOutlined />View on TMDB</a></Button>
                         </Col>
                     </Row>
                     <Row gutter={24} style={{ margin: 16 }}>
