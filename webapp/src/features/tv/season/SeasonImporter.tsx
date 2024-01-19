@@ -1,5 +1,5 @@
 import { Button, Form, Input, Modal, notification, Select, Table, Tabs } from 'antd';
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { ITvEpisode, ITvSeason, TvEpisodeStatus } from '../../../app/entities';
 import { useAppDispatch } from '../../../app/hook';
@@ -36,7 +36,33 @@ const SeasonImporter: React.FC<{
   const info = useSelector(seasonImportSelector)
   const [files, setFiles] = useState<IMediaResource[]>([])
   const [imports, setImports] = useState<IMediaResource[]>([])
+  const [episode_numbers, setEpisoedNumbers] = useState<Record<string, number>>({})
+  const [loading_episode_numbers, setLoadingEpisodeNumbers] = useState<boolean>(false)
   const [localImport, { isLoading }] = hamsterySlice.useImportTvEpisodeMutation()
+
+  const missingEps = useMemo(() => new Set(episodes
+    .filter((e) => e.status === TvEpisodeStatus.MISSING)
+    .map(e => e.episode_number)), [episodes])
+
+  useEffect(() => {
+    setLoadingEpisodeNumbers(true)
+    Promise.all(imports.map(async (item) => {
+      const episode_number = await getEpNumber(item.title)
+      return { title: item.title, episode_number }
+    })).then(episode_numbers => {
+      const import_episode_numbers: Record<string, number> = {}
+      episode_numbers.forEach(episode => {
+        if (!missingEps.has(episode.episode_number)) {
+          return
+        }
+        import_episode_numbers[episode.title] = episode.episode_number
+      })
+      setEpisoedNumbers(import_episode_numbers)
+    })
+      .finally(() => {
+        setLoadingEpisodeNumbers(false)
+      })
+  }, [missingEps, imports])
 
   const chooseTab = <div>
     <PathSelectorV2Modal type='path' onChange={async (opt) => {
@@ -111,13 +137,6 @@ const SeasonImporter: React.FC<{
         <div>
           {imports
             .map((item, index) => {
-              const missingEps = episodes
-                .filter((e) => e.status === TvEpisodeStatus.MISSING)
-                .map(e => e.episode_number)
-              let guessEp = getEpNumber(item.title)
-              if (!missingEps.some(n => n === guessEp)) {
-                guessEp = undefined
-              }
               return <Form.Item key={item.title}>
                 <Form.Item name={[index, 'title']} initialValue={item.title} hidden>
                   <Input />
@@ -125,10 +144,10 @@ const SeasonImporter: React.FC<{
                 <Form.Item name={[index, 'path']} initialValue={item.key} hidden>
                   <Input />
                 </Form.Item>
-                <Form.Item label={item.title} name={[index, 'episode_number']} initialValue={guessEp}>
+                <Form.Item label={item.title} name={[index, 'episode_number']} initialValue={episode_numbers[item.title]}>
                   <Select>
                     {
-                      missingEps
+                      [...missingEps]
                         .map((n) => <Select.Option key={n} value={n}>EP {n}</Select.Option>)
                     }
                   </Select>
@@ -150,7 +169,7 @@ const SeasonImporter: React.FC<{
       children: chooseTab
     },
   ]
-  if (imports.length !== 0) {
+  if (!loading_episode_numbers && imports.length !== 0) {
     items.push({
       label: 'Finish import',
       key: 'import',

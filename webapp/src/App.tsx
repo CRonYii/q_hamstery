@@ -17,6 +17,7 @@ import TvShowPage from './features/tv/show/TvShowPage';
 import Login from './features/user/Login';
 import LogoutButton from './features/user/LogutButton';
 import { userSelector } from './features/user/userSlice';
+import StatsPage from './features/stats/StatsPage';
 
 const { Header, Content, Footer } = Layout;
 
@@ -30,6 +31,7 @@ const AppContent = () => {
     <Route path='/indexers' element={<Empty description={<span>Please select an Indexer Category</span>} />} />
     <Route path='/indexers/torznab' element={<TorznabIndexer />} />
     <Route path='/settings' element={<SettingsPage />} />
+    <Route path='/stats' element={<StatsPage />} />
     <Route path='*' element={<Navigate to={'/tvshows'} replace />} />
   </Routes>)
 }

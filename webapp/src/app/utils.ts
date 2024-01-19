@@ -1,4 +1,4 @@
-import Nzh from "nzh";
+import hamstery from "../features/api/hamstery";
 import { hamsterySlice } from "../features/api/hamsterySlice";
 import { ITvLibrary, ITvShow, ITvStorage } from "./entities";
 
@@ -78,22 +78,13 @@ export const getFilenameWithoutExtension = (name: string) => {
     return filename
 }
 
-const epNumberRegex = /(?:[Ee][Pp]|[ E第【[])(\d{2,3}|[零一二三四五六七八九十百千]{1,6})([vV]\d)?[ 話话回集\].】-]/
-
-export const getEpNumber = (title: string) => {
-    // If the title itself is a number, return title
-    const filename = getFilenameWithoutExtension(title)
-    if (!isNaN(Number(filename)))
-        return Number(filename)
-
-    const match = title.match(epNumberRegex)
-    if (!match || match[1] === undefined)
-        return undefined
-    const keyword = match[1]
-
-    if (!isNaN(Number(keyword)))
-        return Number(keyword)
-    return Nzh.cn.decodeS(keyword)
+export const getEpNumber = async (title: string) => {
+    try {
+        const { data } = await hamstery.getEpisodeNumber(title)
+        return data.episode_number
+    } catch {
+        return 0
+    }
 }
 
 const videoRegex = new RegExp('(.mp4|.mkv|.flv|.avi|.rmvb|.m4p|.m4v)$');

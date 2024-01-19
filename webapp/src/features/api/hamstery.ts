@@ -1,5 +1,6 @@
 import axios from "axios";
 import { IndexerSearchResult, TorznabCaps } from "../../app/entities";
+import Cookies from "js-cookie";
 
 export interface IMediaResource {
     key: string,
@@ -17,6 +18,16 @@ export interface IQbtTestResult {
     message: string,
 }
 
+export interface IEpisodeNumber {
+    episode_number: number,
+}
+
+export interface IOpenAIModel {
+    id: string,
+    created: number,
+    owned_by: string,
+}
+
 const hamstery = {
     test() {
         return axios.get<{ id: number, username: string }>('/hamstery/auth/test');
@@ -28,7 +39,7 @@ const hamstery = {
         return axios.get<'Ok'>('/hamstery/auth/logout');
     },
     searchIndexer(id: string, keyword: string) {
-        return axios.get<IndexerSearchResult[]>(`/hamstery/api/indexer/${id}/search/?query=${keyword}`)
+        return axios.get<IndexerSearchResult[]>(`/hamstery/api/indexer/${id}/search/?query=${encodeURIComponent(keyword)}`)
     },
     torznabCaps(id: string) {
         return axios.get<TorznabCaps>(`/hamstery/api/torznab/${id}/caps`)
@@ -41,6 +52,19 @@ const hamstery = {
     },
     testPlexConnection() {
         return axios.get<IQbtTestResult>('/hamstery/api/settings/1/plex_test_connection/')
+    },
+    getEpisodeNumber(title: string) {
+        return axios.get<IEpisodeNumber>(`/hamstery/api/media/episode_number?title=${encodeURIComponent(title)}`)
+    },
+    getOpenAIModels() {
+        return axios.get<{ models: IOpenAIModel[] }>('/hamstery/api/settings/1/openai_get_models/')
+    },
+    resetTitleParserStats() {
+        return axios.post<string>('/hamstery/api/stats/1/reset_title_parser_stats/', undefined, {
+            headers: {
+                'X-CSRFToken': Cookies.get('csrftoken') || '',
+            }
+        })
     },
 };
 

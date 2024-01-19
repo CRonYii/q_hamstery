@@ -6,6 +6,14 @@ export interface IHamsterySettings {
     qbittorrent_password: string,
 }
 
+export interface IHamsteryStats {
+    openai_title_parser_calls: number,
+    openai_title_parser_failures: number,
+    openai_title_parser_prompt_tokens_used: number,
+    openai_title_parser_completion_tokens_used: number,
+    openai_title_parser_total_tokens_used: number,
+}
+
 export interface ITvLibrary {
     id: number,
     name: string,

@@ -2,9 +2,9 @@ import { TagDescription } from '@reduxjs/toolkit/dist/query/endpointDefinitions'
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import Cookies from 'js-cookie';
 import flatten from 'lodash/flatten';
-import { IDjangoOptions, IHamsterySettings, IIndexer, IParamOptions, ISeasonSearchResult, IShowSubscription, ITorznab, ITvDownload, ITvEpisode, ITvLibrary, ITvSeason, ITvShow, ITvStorage } from '../../app/entities';
+import { IDjangoOptions, IHamsterySettings, IHamsteryStats, IIndexer, IParamOptions, ISeasonSearchResult, IShowSubscription, ITorznab, ITvDownload, ITvEpisode, ITvLibrary, ITvSeason, ITvShow, ITvStorage } from '../../app/entities';
 
-type TagTypes = 'settings' | 'tvlib' | 'tvstorage' | 'tvshow' | 'tvseason' | 'tvepisode' | 'tvdownload' | 'monitored-tvdownload' | 'indexer' | 'torznab' | 'show-subscription'
+type TagTypes = 'stats' | 'settings' | 'tvlib' | 'tvstorage' | 'tvshow' | 'tvseason' | 'tvepisode' | 'tvdownload' | 'monitored-tvdownload' | 'indexer' | 'torznab' | 'show-subscription'
 
 export const hamsterySlice = createApi({
     reducerPath: 'hamstery',
@@ -17,7 +17,7 @@ export const hamsterySlice = createApi({
             return headers
         }
     }),
-    tagTypes: ['settings', 'tvlib', 'tvstorage', 'tvshow', 'tvseason', 'tvepisode', 'tvdownload', 'monitored-tvdownload', 'indexer', 'torznab', 'show-subscription'],
+    tagTypes: ['stats', 'settings', 'tvlib', 'tvstorage', 'tvshow', 'tvseason', 'tvepisode', 'tvdownload', 'monitored-tvdownload', 'indexer', 'torznab', 'show-subscription'],
     endpoints: builder => {
         const CRUDEntity = <T>(
             {
@@ -117,6 +117,7 @@ export const hamsterySlice = createApi({
             }
         }
         const settings = CRUDEntity<IHamsterySettings>({ name: 'settings', url: '/settings/', singleton: true, })
+        const stats = CRUDEntity<IHamsteryStats>({ name: 'stats', url: '/stats/', singleton: true, })
         const tvlib = CRUDEntity<ITvLibrary>({ name: 'tvlib', url: '/tvlib/' })
         const tvstorage = CRUDEntity<ITvStorage>({ name: 'tvstorage', url: '/tvstorage/' })
         const tvshow = CRUDEntity<ITvShow>({ name: 'tvshow', url: '/tvshow/', })
@@ -141,6 +142,8 @@ export const hamsterySlice = createApi({
             addSettings: settings.create, // dummy export, will not be used
             editSettings: settings.update,
             getSettingsOptions: settings.options,
+            // Hamstery Stats
+            getStats: stats.get,
             // TV Library
             getTvLibraries: tvlib.getAll,
             getTvLibrary: tvlib.get,

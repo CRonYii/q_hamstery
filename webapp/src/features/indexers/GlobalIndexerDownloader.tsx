@@ -1,6 +1,6 @@
 import { Button, Col, Form, Input, Modal, notification, Row, Select, Tabs } from 'antd';
 import axios from 'axios';
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { IIndexer, IndexerSearchResult, ITvEpisode, TvEpisodeStatus } from '../../app/entities';
 import { useAppDispatch } from '../../app/hook';
@@ -39,6 +39,27 @@ const EpisodeDownloader: React.FC<{
   const [searcher, setSearcher] = useState<string | undefined>()
   const [downloads, setDownloads] = useState<IndexerSearchResult[]>([])
   const [download, { isLoading }] = hamsterySlice.useDownloadTvEpisodeMutation()
+  const [episode_numbers, setEpisoedNumbers] = useState<Record<string, number>>({})
+
+  const missingEps = useMemo(() => new Set(episodes
+    .filter((e) => e.status === TvEpisodeStatus.MISSING)
+    .map(e => e.episode_number)), [episodes])
+
+  useEffect(() => {
+    Promise.all(downloads.map(async (item) => {
+      const episode_number = await getEpNumber(item.title)
+      return { title: item.title, episode_number }
+    })).then(episode_numbers => {
+      const import_episode_numbers: Record<string, number> = {}
+      episode_numbers.forEach(episode => {
+        if (!missingEps.has(episode.episode_number)) {
+          return
+        }
+        import_episode_numbers[episode.title] = episode.episode_number
+      })
+      setEpisoedNumbers(import_episode_numbers)
+    })
+  }, [missingEps, downloads])
 
   const searchTab = <div>
     <Row gutter={8} align='middle'>
@@ -117,13 +138,6 @@ const EpisodeDownloader: React.FC<{
         <div>
           {downloads
             .map((item, index) => {
-              const missingEps = episodes
-                .filter((e) => e.status === TvEpisodeStatus.MISSING)
-                .map(e => e.episode_number)
-              let guessEp = getEpNumber(item.title)
-              if (!missingEps.some(n => n === guessEp)) {
-                guessEp = undefined
-              }
               return <Form.Item key={item.title}>
                 <Form.Item name={[index, 'title']} initialValue={item.title} hidden>
                   <Input />
@@ -134,10 +148,10 @@ const EpisodeDownloader: React.FC<{
                 <Form.Item name={[index, 'magneturl']} initialValue={item.magneturl} hidden>
                   <Input />
                 </Form.Item>
-                <Form.Item label={item.title} name={[index, 'episode_number']} initialValue={guessEp}>
+                <Form.Item label={item.title} name={[index, 'episode_number']} initialValue={episode_numbers[item.title]}>
                   <Select>
                     {
-                      missingEps
+                      [...missingEps]
                         .map((n) => <Select.Option key={n} value={n}>EP {n}</Select.Option>)
                     }
                   </Select>
