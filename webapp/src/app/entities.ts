@@ -18,14 +18,12 @@ export interface ITvLibrary {
     id: number,
     name: string,
     lang: string,
-    storages: ITvStorage[],
 }
 
 export interface ITvStorage {
     id: number,
     lib: number,
     path: string,
-    shows: ITvShow[]
 }
 
 export interface ITvShow {
