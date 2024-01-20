@@ -60,7 +60,7 @@ export const TvShowsBreadcrumbNav: React.FC = () => {
         items.push({
             key: `library-${library_id}`,
             label: library.name,
-            to: '/tvshows/' + library_id,
+            to: '/tvshows/' + library_id + '?page=1',
         })
     if (show && !showIsUninitialized)
         items.push({

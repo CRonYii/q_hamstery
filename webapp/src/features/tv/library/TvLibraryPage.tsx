@@ -1,29 +1,39 @@
 import { PlusOutlined, ReloadOutlined } from '@ant-design/icons';
-import { Button, Col, Empty, Input, Modal, Row, notification } from 'antd';
+import { Button, Col, Empty, Input, Modal, Pagination, Row, notification } from 'antd';
 import React, { useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useSearchParams } from 'react-router-dom';
 import { ITvLibrary, ITvShow } from '../../../app/entities';
-import { hamsterySlice } from '../../api/hamsterySlice';
+import { IPageNumberResult, hamsterySlice } from '../../api/hamsterySlice';
 import ApiLoading from '../../general/ApiLoading';
 import TVShowCard from '../show/TvShowCard';
 import AddShowForm from './AddShowForm';
 
 const TvLibraryPage: React.FC = () => {
     const params = useParams()
+    const [searchParams, setSearchParams] = useSearchParams()
     const library_id = params.library_id as string
     const [addShowOpen, setAddShowOpen] = useState(false)
     const [addShowLoading, setAddShowLoading] = useState(false)
     const [scan, { isLoading }] = hamsterySlice.useScanTvLibraryMutation()
     const [showFilter, setShowFilter] = useState('')
 
+    const goToPage = (page: number) => {
+        const new_params = new URLSearchParams(searchParams)
+        new_params.set('page', String(page))
+        setSearchParams(new_params)
+    }
+
+    const currentPage = searchParams.get('page')
+
     return <ApiLoading getters={{
         'library': () => hamsterySlice.useGetTvLibraryQuery(library_id),
-        'shows': () => hamsterySlice.useGetTvShowsQuery({ lib: library_id, ordering: '-air_date' })
+        'shows': () => hamsterySlice.useGetTvShowsQuery({ lib: library_id, ordering: '-air_date', page: currentPage })
     }}>
         {
             ({ values }) => {
                 const library: ITvLibrary = values.library.data
-                const shows: ITvShow[] = values.shows.data
+                const shows_page: IPageNumberResult<ITvShow> = values.shows.data
+                const shows: ITvShow[] = shows_page.results
                 const content = shows.length === 0
                     ? <Empty description={"The library is empty. Try to add a show!"} />
                     : <Row gutter={24} style={{ margin: 16 }} align='bottom'>
@@ -78,6 +88,14 @@ const TvLibraryPage: React.FC = () => {
                         <Col span={8}>
                             <Input placeholder='Search Library' onChange={(evt) => setShowFilter(evt.target.value)} />
                         </Col>
+                    </Row>
+                    <Row>
+                        <Pagination
+                            current={shows_page.page} pageSize={shows_page.page_size} total={shows_page.count}
+                            onChange={(page) => {
+                                goToPage(page)
+                            }}
+                        />
                     </Row>
                     {content}
                 </div>

@@ -6,6 +6,13 @@ import { IDjangoOptions, IHamsterySettings, IHamsteryStats, IIndexer, IParamOpti
 
 type TagTypes = 'stats' | 'settings' | 'tvlib' | 'tvstorage' | 'tvshow' | 'tvseason' | 'tvepisode' | 'tvdownload' | 'monitored-tvdownload' | 'indexer' | 'torznab' | 'show-subscription'
 
+export interface IPageNumberResult<T> {
+    count: number
+    page_size: number,
+    page: number,
+    results: T[]
+}
+
 export const hamsterySlice = createApi({
     reducerPath: 'hamstery',
     baseQuery: fetchBaseQuery({
@@ -54,6 +61,31 @@ export const hamsterySlice = createApi({
                                 : []),
                             ...(extraItemTags
                                 ? flatten(result.map((item) => extraItemTags(item)))
+                                : []),
+                        ]
+
+                        return tags
+                    },
+                    keepUnusedDataFor,
+                }),
+                getPage: builder.query<IPageNumberResult<T>, any>({
+                    query: (params) => ({
+                        method: 'GET',
+                        url,
+                        params
+                    }),
+                    providesTags: (result, error, arg) => {
+                        if (!result)
+                            return []
+                        const { results } = result
+                        const tags = [
+                            name,
+                            ...results.map((item): TagDescription<TagTypes> => ({ type: name, id: idSelector(item) })),
+                            ...(extraArgTags
+                                ? flatten(extraArgTags(arg))
+                                : []),
+                            ...(extraItemTags
+                                ? flatten(results.map((item) => extraItemTags(item)))
                                 : []),
                         ]
 
@@ -170,7 +202,7 @@ export const hamsterySlice = createApi({
             getTvStorageOptions: tvstorage.options,
             // TV Show
             getTvShow: tvshow.get,
-            getTvShows: tvshow.getAll,
+            getTvShows: tvshow.getPage,
             addTvShowToStorage: builder.mutation<void, { id: string, tmdb_id: string, }>({
                 query: ({ id, tmdb_id }) => ({
                     method: 'POST',
