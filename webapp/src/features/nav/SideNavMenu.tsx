@@ -1,6 +1,6 @@
 import { Affix, Layout, Menu, Tooltip } from 'antd';
 import React from 'react';
-import { Link, useLocation, useParams, useSearchParams } from 'react-router-dom';
+import { Link, useLocation, useParams } from 'react-router-dom';
 import { hamsterySlice } from '../api/hamsterySlice';
 
 const { Sider } = Layout;

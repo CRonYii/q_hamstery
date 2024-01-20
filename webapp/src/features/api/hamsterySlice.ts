@@ -238,6 +238,7 @@ export const hamsterySlice = createApi({
             }),
             // TV Episode
             getTvEpisodes: tvepisode.getAll,
+            getTvEpisodesPage: tvepisode.getPage,
             getTvEpisode: tvepisode.get,
             removeTvEpisode: builder.mutation<void, string>({
                 query: (id) => ({

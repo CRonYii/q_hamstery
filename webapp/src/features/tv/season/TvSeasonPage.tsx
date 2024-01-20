@@ -1,15 +1,15 @@
 import { HeartTwoTone, ImportOutlined, LinkOutlined, ReloadOutlined } from '@ant-design/icons';
-import { Button, Col, Radio, Row } from 'antd';
+import { Button, Col, Pagination, Radio, Row } from 'antd';
 import React, { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { ITvDownload, ITvEpisode, ITvSeason, ITvShow } from '../../../app/entities';
 import { useAppDispatch } from '../../../app/hook';
-import { isInThePast } from '../../../app/utils';
 import TMDB from '../../api/TMDB';
-import { hamsterySlice } from '../../api/hamsterySlice';
+import { IPageNumberResult, hamsterySlice } from '../../api/hamsterySlice';
 import ApiLoading from '../../general/ApiLoading';
 import TvEpisodeCard from '../episode/TvEpisodeCard';
 import { seasonActions } from './seasonSlice';
+import { getOnAirDate } from '../../../app/utils';
 
 const TVSeasonPage: React.FC = () => {
     const params = useParams()
@@ -19,14 +19,15 @@ const TVSeasonPage: React.FC = () => {
     return <ApiLoading getters={{
         'show': () => hamsterySlice.useGetTvShowQuery(show_id),
         'season': () => hamsterySlice.useGetTvSeasonQuery(season_id),
-        'episodes': () => hamsterySlice.useGetTvEpisodesQuery({ season: season_id }),
     }}>
         {
             ({ values }) => {
                 const show: ITvShow = values.show.data
                 const season: ITvSeason = values.season.data
-                const episodes: ITvEpisode[] = values.episodes.data
-                return <TVSeasonItems show={show} season={season} episodes={episodes} />
+
+                return <>
+                    <TVSeasonComponent show={show} season={season} />
+                </>
             }
         }
     </ApiLoading>
@@ -34,49 +35,64 @@ const TVSeasonPage: React.FC = () => {
 
 export default TVSeasonPage
 
-const TVSeasonItems: React.FC<{ show: ITvShow, season: ITvSeason, episodes: ITvEpisode[] }> = ({
-    show, season, episodes,
+const TVSeasonComponent: React.FC<{ show: ITvShow, season: ITvSeason }> = ({
+    show, season,
 }) => {
+    const [searchParams, setSearchParams] = useSearchParams()
+    const [pageSize, setPageSize] = useState(25)
     const dispatch = useAppDispatch()
     const navigate = useNavigate()
     const [scan, { isLoading }] = hamsterySlice.useScanTvSeasonMutation()
     const [displayFilter, setDisplayFilter] = useState<'all' | 'onair'>('onair')
-    useEffect(() => {
-        // Check TMDB and see if we needs an rescan
-        TMDB.getTVShowSeason(String(show.tmdb_id), season.season_number)
-            .then((data) => {
-                if (data.episodes.length !== episodes.length) {
-                    scan(String(season.id))
-                }
-            })
-    }, [scan, show.tmdb_id, season.season_number, season.id, episodes.length])
 
-    let displayEpisodes = episodes
-        .slice()
-        .sort((a, b) => (a.episode_number - b.episode_number))
-    if (displayFilter === 'onair') {
-        displayEpisodes = displayEpisodes.filter((episode) => isInThePast(episode.air_date))
+    const goToPage = (page: number) => {
+        const new_params = new URLSearchParams(searchParams)
+        new_params.set('page', String(page))
+        setSearchParams(new_params)
     }
+
+    const currentPage = searchParams.get('page') || '1';
+    const onAir = displayFilter === 'onair' ? getOnAirDate() : undefined;
+
+    // useEffect(() => {
+    //     // Check TMDB and see if we needs an rescan
+    //     TMDB.getTVShowSeason(String(show.tmdb_id), season.season_number)
+    //         .then((data) => {
+    //             if (data.episodes.length !== episodes.length) {
+    //                 scan(String(season.id))
+    //             }
+    //         })
+    // }, [scan, show.tmdb_id, season.season_number, season.id, episodes.length])
     return <ApiLoading getters={{
-        'downloads': () => hamsterySlice.useGetTvDownloadsQuery({
-            episode__in: episodes.map(e => e.id).join(',')
-        }, {
-            pollingInterval: 1000
+        'episodes': () => hamsterySlice.useGetTvEpisodesPageQuery({
+            season: season.id, ordering: 'episode_number',
+            page: currentPage, page_size: pageSize,
+            on_air: onAir,
         }),
     }}>
         {
             ({ values }) => {
-                const downloads: ITvDownload[] = values.downloads.data
-                const downloadsMap = new Map<number, ITvDownload[]>()
-                downloads.forEach((download) => {
-                    if (!downloadsMap.has(download.episode)) {
-                        downloadsMap.set(download.episode, [download])
-                    } else {
-                        downloadsMap.get(download.episode)?.push(download)
-                    }
-                })
+                const episodes_page: IPageNumberResult<ITvEpisode> = values.episodes.data
+                const episodes: ITvEpisode[] = episodes_page.results
+                const paginator = <Row>
+                    <Pagination
+                        responsive
+                        showQuickJumper
+                        showSizeChanger
+                        current={episodes_page.page} total={episodes_page.count}
+                        onChange={(page) => {
+                            goToPage(page)
+                            window.scrollTo(0, 0)
+                        }}
+                        pageSize={pageSize}
+                        pageSizeOptions={['10', '25', '50', '100']}
+                        onShowSizeChange={(current, size) => {
+                            setPageSize(size)
+                        }}
+                    />
+                </Row>
 
-                return <div>
+                return <>
                     <Row gutter={12} style={{ margin: 16 }}>
                         <Col>
                             <Button onClick={() => scan(String(season.id))} loading={isLoading}>
@@ -107,20 +123,55 @@ const TVSeasonItems: React.FC<{ show: ITvShow, season: ITvSeason, episodes: ITvE
                                 defaultValue='onair'
                                 buttonStyle='solid'
                                 value={displayFilter}
-                                onChange={(e) => setDisplayFilter(e.target.value)}
+                                onChange={(e) => {
+                                    goToPage(1)
+                                    setDisplayFilter(e.target.value)
+                                }}
                             >
                                 <Radio.Button value='all'>All</Radio.Button>
                                 <Radio.Button value='onair'>On Air</Radio.Button>
                             </Radio.Group>
                         </Col>
                     </Row>
+                    {paginator}
+                    <TVSeasonItems show={show} season={season} episodes={episodes} />
+                    {paginator}
+                </>
+            }
+        }
+    </ApiLoading>
+}
+
+const TVSeasonItems: React.FC<{ show: ITvShow, season: ITvSeason, episodes: ITvEpisode[] }> = ({
+    show, season, episodes,
+}) => {
+    return <ApiLoading getters={{
+        'downloads': () => hamsterySlice.useGetTvDownloadsQuery({
+            episode__in: episodes.map(e => e.id).join(',')
+        }, {
+            pollingInterval: 1000
+        }),
+    }}>
+        {
+            ({ values }) => {
+                const downloads: ITvDownload[] = values.downloads.data
+                const downloadsMap = new Map<number, ITvDownload[]>()
+                downloads.forEach((download) => {
+                    if (!downloadsMap.has(download.episode)) {
+                        downloadsMap.set(download.episode, [download])
+                    } else {
+                        downloadsMap.get(download.episode)?.push(download)
+                    }
+                })
+
+                return <>
                     <Row gutter={24} style={{ margin: 16 }} align='top'>
-                        {displayEpisodes.map((episode) =>
+                        {episodes.map((episode) =>
                             <Col key={episode.id} style={{ marginBottom: 12 }}>
                                 <TvEpisodeCard show={show} season={season} episode={episode} downloads={downloadsMap.get(episode.id) || []} />
                             </Col>)}
                     </Row>
-                </div>
+                </>
             }
         }
     </ApiLoading>
