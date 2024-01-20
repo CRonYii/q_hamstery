@@ -1,6 +1,4 @@
 import hamstery from "../features/api/hamstery";
-import { hamsterySlice } from "../features/api/hamsterySlice";
-import { ITvLibrary, ITvShow, ITvStorage } from "./entities";
 
 export const datetimeSort = (a: string | undefined, b: string | undefined) => {
     const atime = a ? new Date(a).getTime() : Number.MAX_SAFE_INTEGER;
@@ -16,24 +14,6 @@ export const isInThePast = (date?: string) => {
 
 export const toTMDBPosterURL = (relativeURL?: string, size: 'w500' | 'w185' = 'w500') => {
     return relativeURL ? `https://image.tmdb.org/t/p/${size}/${relativeURL}` : ''
-}
-
-export const getShowsOfLibrary = (storages?: ITvStorage[]) => {
-    if (!storages)
-        return []
-    return storages
-        .reduce<ITvShow[]>((shows, storage) => [...shows, ...storage.shows], [])
-        .sort((a, b) => datetimeSort(b.air_date, a.air_date))
-}
-
-export const makeGettersForShowsOfLibrary = (getters: Record<string, any>, library: ITvLibrary) => {
-    library.storages.forEach(storage => getters[String(storage.id)] = () => hamsterySlice.useGetTvShowsQuery({ storage: storage.id }))
-}
-
-export const getShowsFromLibrary = (values: Record<string, any>, library: ITvLibrary) => {
-    return library.storages
-        .reduce<ITvShow[]>((shows, storage) => [...shows, ...values[String(storage.id)].data], [])
-        .sort((a, b) => datetimeSort(b.air_date, a.air_date))
 }
 
 export const capitalizeFirstLetter = (str: string) => {

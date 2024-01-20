@@ -1,7 +1,6 @@
 import { Affix, Layout, Menu, Tooltip } from 'antd';
-import React, { useMemo } from 'react';
+import React from 'react';
 import { Link, useLocation, useParams } from 'react-router-dom';
-import { getShowsOfLibrary } from '../../app/utils';
 import { hamsterySlice } from '../api/hamsterySlice';
 
 const { Sider } = Layout;
@@ -39,9 +38,8 @@ export const TvLibrarySideNavMenu: React.FC = () => {
 
 export const TvShowSideNavMenu: React.FC = () => {
     const { library_id, show_id } = useParams()
-    const { data: storages } = hamsterySlice.useGetTvStoragesQuery({ lib: library_id })
-    const shows = useMemo(() => getShowsOfLibrary(storages), [storages])
-    const items = shows.map((show) => {
+    const { data: shows } = hamsterySlice.useGetTvShowsQuery({ lib: library_id, ordering: '-air_date' })
+    const items = shows?.map((show) => {
         const title = `${show.name} (${show.air_date})`
         return {
             key: String(show.id),
@@ -51,7 +49,7 @@ export const TvShowSideNavMenu: React.FC = () => {
                 </Link>
             </Tooltip>
         }
-    })
+    }) || []
 
     return (<SideNavMenuBase items={items} id={show_id as string} />)
 }
