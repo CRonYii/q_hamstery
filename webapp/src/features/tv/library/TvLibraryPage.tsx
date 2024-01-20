@@ -50,13 +50,21 @@ const TvLibraryPage: React.FC = () => {
                         {
                             shows
                                 .map(show =>
-
                                     <Col key={show.id}>
                                         <TVShowCard show={show} />
                                     </Col>
                                 )
                         }
                     </Row>
+                const paginator = <Row>
+                    <Pagination
+                        current={shows_page.page} pageSize={shows_page.page_size} total={shows_page.count}
+                        onChange={(page) => {
+                            goToPage(page)
+                            window.scrollTo(0, 0)
+                        }}
+                    />
+                </Row>
                 return <div>
                     <Modal
                         style={{ minWidth: '60vw' }}
@@ -98,15 +106,9 @@ const TvLibraryPage: React.FC = () => {
                             <Input placeholder='Search Library' onChange={(evt) => searchLibrary(evt.target.value)} />
                         </Col>
                     </Row>
-                    <Row>
-                        <Pagination
-                            current={shows_page.page} pageSize={shows_page.page_size} total={shows_page.count}
-                            onChange={(page) => {
-                                goToPage(page)
-                            }}
-                        />
-                    </Row>
+                    {paginator}
                     {content}
+                    {paginator}
                 </div>
             }}</ApiLoading>
 }
