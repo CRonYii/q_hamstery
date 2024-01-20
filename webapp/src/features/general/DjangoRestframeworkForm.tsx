@@ -68,7 +68,6 @@ const DjangoRestframeworkForm: React.FC<IDjangoRestframeworkFormProps> =
                 showIcon
             />
 
-
         const optionToField = (key: string, option: IParamOption) => {
             const disabled = option.read_only
             switch (option.type) {
@@ -214,7 +213,6 @@ const DjangoRestframeworkForm: React.FC<IDjangoRestframeworkFormProps> =
                         } else {
                             await add(data).unwrap()
                         }
-                        form.resetFields()
                     })()
                     if (onFinish)
                         onFinish(task)
