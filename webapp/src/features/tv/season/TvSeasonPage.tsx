@@ -4,12 +4,12 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { ITvDownload, ITvEpisode, ITvSeason, ITvShow } from '../../../app/entities';
 import { useAppDispatch } from '../../../app/hook';
+import { getOnAirDate } from '../../../app/utils';
 import TMDB from '../../api/TMDB';
 import { IPageNumberResult, hamsterySlice } from '../../api/hamsterySlice';
 import ApiLoading from '../../general/ApiLoading';
 import TvEpisodeCard from '../episode/TvEpisodeCard';
 import { seasonActions } from './seasonSlice';
-import { getOnAirDate } from '../../../app/utils';
 
 const TVSeasonPage: React.FC = () => {
     const params = useParams()
@@ -54,15 +54,15 @@ const TVSeasonComponent: React.FC<{ show: ITvShow, season: ITvSeason }> = ({
     const currentPage = searchParams.get('page') || '1';
     const onAir = displayFilter === 'onair' ? getOnAirDate() : undefined;
 
-    // useEffect(() => {
-    //     // Check TMDB and see if we needs an rescan
-    //     TMDB.getTVShowSeason(String(show.tmdb_id), season.season_number)
-    //         .then((data) => {
-    //             if (data.episodes.length !== episodes.length) {
-    //                 scan(String(season.id))
-    //             }
-    //         })
-    // }, [scan, show.tmdb_id, season.season_number, season.id, episodes.length])
+    useEffect(() => {
+        // Check TMDB and see if we needs an rescan
+        TMDB.getTVShowSeason(String(show.tmdb_id), season.season_number)
+            .then((data) => {
+                if (data.episodes.length !== season.number_of_episodes) {
+                    scan(String(season.id))
+                }
+            })
+    }, [scan, show.tmdb_id, season])
     return <ApiLoading getters={{
         'episodes': () => hamsterySlice.useGetTvEpisodesPageQuery({
             season: season.id, ordering: 'episode_number',
