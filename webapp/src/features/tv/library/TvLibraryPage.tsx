@@ -15,7 +15,6 @@ const TvLibraryPage: React.FC = () => {
     const [addShowOpen, setAddShowOpen] = useState(false)
     const [addShowLoading, setAddShowLoading] = useState(false)
     const [scan, { isLoading }] = hamsterySlice.useScanTvLibraryMutation()
-    const [showFilter, setShowFilter] = useState('')
 
     const goToPage = (page: number) => {
         const new_params = new URLSearchParams(searchParams)
@@ -23,11 +22,22 @@ const TvLibraryPage: React.FC = () => {
         setSearchParams(new_params)
     }
 
-    const currentPage = searchParams.get('page')
+    const searchLibrary = (keyword: string) => {
+        const new_params = new URLSearchParams(searchParams)
+        new_params.set('search', keyword)
+        new_params.set('search_page', String(1))
+        setSearchParams(new_params)
+    }
+
+    const searchKeyword = searchParams.get('search') || ''
+    const currentPage = searchKeyword ? searchParams.get('serch_page') || '1' : searchParams.get('page') || '1';
 
     return <ApiLoading getters={{
         'library': () => hamsterySlice.useGetTvLibraryQuery(library_id),
-        'shows': () => hamsterySlice.useGetTvShowsQuery({ lib: library_id, ordering: '-air_date', page: currentPage })
+        'shows': () => hamsterySlice.useGetTvShowsQuery({
+            lib: library_id, ordering: '-air_date',
+            search: searchKeyword, page: currentPage
+        })
     }}>
         {
             ({ values }) => {
@@ -39,7 +49,6 @@ const TvLibraryPage: React.FC = () => {
                     : <Row gutter={24} style={{ margin: 16 }} align='bottom'>
                         {
                             shows
-                                .filter(show => show.name.toLowerCase().includes(showFilter))
                                 .map(show =>
 
                                     <Col key={show.id}>
@@ -86,7 +95,7 @@ const TvLibraryPage: React.FC = () => {
                             </Button>
                         </Col>
                         <Col span={8}>
-                            <Input placeholder='Search Library' onChange={(evt) => setShowFilter(evt.target.value)} />
+                            <Input placeholder='Search Library' onChange={(evt) => searchLibrary(evt.target.value)} />
                         </Col>
                     </Row>
                     <Row>
