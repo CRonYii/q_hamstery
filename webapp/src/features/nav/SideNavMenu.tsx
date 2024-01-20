@@ -38,7 +38,7 @@ export const TvLibrarySideNavMenu: React.FC = () => {
 
 export const TvShowSideNavMenu: React.FC = () => {
     const { library_id, show_id } = useParams()
-    const { data: shows_page } = hamsterySlice.useGetTvShowsQuery({ lib: library_id, ordering: '-air_date' })
+    const { data: shows_page } = hamsterySlice.useGetTvShowsPageQuery({ lib: library_id, ordering: '-air_date' })
     const shows = shows_page?.results
     const items = shows?.map((show) => {
         const title = `${show.name} (${show.air_date})`

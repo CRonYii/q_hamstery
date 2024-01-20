@@ -14,6 +14,7 @@ const TvLibraryPage: React.FC = () => {
     const library_id = params.library_id as string
     const [addShowOpen, setAddShowOpen] = useState(false)
     const [addShowLoading, setAddShowLoading] = useState(false)
+    const [pageSize, setPageSize] = useState(25)
     const [scan, { isLoading }] = hamsterySlice.useScanTvLibraryMutation()
 
     const goToPage = (page: number) => {
@@ -34,9 +35,9 @@ const TvLibraryPage: React.FC = () => {
 
     return <ApiLoading getters={{
         'library': () => hamsterySlice.useGetTvLibraryQuery(library_id),
-        'shows': () => hamsterySlice.useGetTvShowsQuery({
+        'shows': () => hamsterySlice.useGetTvShowsPageQuery({
             lib: library_id, ordering: '-air_date',
-            search: searchKeyword, page: currentPage
+            search: searchKeyword, page: currentPage, page_size: pageSize,
         })
     }}>
         {
@@ -58,12 +59,20 @@ const TvLibraryPage: React.FC = () => {
                     </Row>
                 const paginator = <Row>
                     <Pagination
-                        current={shows_page.page} pageSize={shows_page.page_size} total={shows_page.count}
+                        responsive
+                        showQuickJumper
+                        showSizeChanger
+                        current={shows_page.page} total={shows_page.count}
                         onChange={(page) => {
                             goToPage(page)
                             window.scrollTo(0, 0)
                         }}
-                    />
+                        pageSize={pageSize}
+                        pageSizeOptions={['10', '25', '50', '100']}
+                        onShowSizeChange={(current, size) => {
+                            setPageSize(size)
+                        }}
+                        />
                 </Row>
                 return <div>
                     <Modal

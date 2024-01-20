@@ -202,7 +202,8 @@ export const hamsterySlice = createApi({
             getTvStorageOptions: tvstorage.options,
             // TV Show
             getTvShow: tvshow.get,
-            getTvShows: tvshow.getPage,
+            getTvShows: tvshow.getAll,
+            getTvShowsPage: tvshow.getPage,
             addTvShowToStorage: builder.mutation<void, { id: string, tmdb_id: string, }>({
                 query: ({ id, tmdb_id }) => ({
                     method: 'POST',
