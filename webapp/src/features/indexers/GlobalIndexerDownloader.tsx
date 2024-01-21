@@ -151,7 +151,7 @@ const EpisodeDownloader: React.FC<{
                 <Form.Item label={item.title} name={[index, 'episode_number']} initialValue={episode_numbers[item.title]}>
                   <Select>
                     {
-                      [...missingEps]
+                      [...missingEps.values()]
                         .map((n) => <Select.Option key={n} value={n}>EP {n}</Select.Option>)
                     }
                   </Select>
