@@ -4,11 +4,13 @@ import { useSelector } from 'react-redux';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import './App.css';
 import GlobalModal from './features/general/GlobalModal';
+import { useResponsiveUpdater } from './features/general/responsiveSlice';
 import TorznabIndexer from './features/indexers/torznab/TorznabIndexer';
 import { IndexerBreadcrumbNav, TvShowsBreadcrumbNav } from './features/nav/BreadcrumbNav';
 import { IndexerSideNavMenu, TvLibrarySideNavMenu, TvSeasonSideNavMenu, TvShowSideNavMenu } from './features/nav/SideNavMenu';
 import TopNavMenu from './features/nav/TopNavMenu';
 import SettingsPage from './features/settings/SettingsPage';
+import StatsPage from './features/stats/StatsPage';
 import TvLibraryHome from './features/tv/library/TvLibraryHome';
 import TvLibraryPage from './features/tv/library/TvLibraryPage';
 import TVSeasonPage from './features/tv/season/TvSeasonPage';
@@ -17,7 +19,6 @@ import TvShowPage from './features/tv/show/TvShowPage';
 import Login from './features/user/Login';
 import LogoutButton from './features/user/LogutButton';
 import { userSelector } from './features/user/userSlice';
-import StatsPage from './features/stats/StatsPage';
 
 const { Header, Content, Footer } = Layout;
 
@@ -62,6 +63,7 @@ const AppBreadcrumbNav = () => {
 
 const App: React.FC = () => {
   const user = useSelector(userSelector)
+  useResponsiveUpdater()
 
   if (!user.logged_in) {
     return <Login />;

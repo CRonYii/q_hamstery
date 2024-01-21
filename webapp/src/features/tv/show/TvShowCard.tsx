@@ -26,7 +26,7 @@ const TVShowCard: React.FC<{ show: ITvShow }> = ({ show }) => {
         <Card
             hoverable
             onClick={() => navigate(`/tvshows/${library_id}/${show.id}`)}
-            style={{ width: 185 }}
+            style={{ width: 180 }}
             cover={<img alt="Poster" src={poster_path} />}
         >
             <Meta title={show.name} description={description} />

@@ -7,6 +7,7 @@ import seasonSlice from "../features/tv/season/seasonSlice";
 import tvlibrarySlice from "../features/tv/library/tvlibrarySlice";
 import userSlice from "../features/user/userSlice";
 import subscriptionSlice from "../features/tv/season/subscriptionSlice";
+import responsiveSlice from "../features/general/responsiveSlice";
 
 const store = configureStore({
     reducer: {
@@ -18,6 +19,7 @@ const store = configureStore({
         torznab: torznabIndexerSlice,
         season: seasonSlice,
         subscription: subscriptionSlice,
+        responsive: responsiveSlice,
     },
     middleware: getDefaultMiddleware =>
         getDefaultMiddleware().concat(hamsterySlice.middleware)

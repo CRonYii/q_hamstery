@@ -39,7 +39,7 @@ const TvEpisodeCard: React.FC<{ show: ITvShow, season: ITvSeason, episode: ITvEp
 
     return <Card
         hoverable
-        style={{ width: 400 }}
+        style={{ width: 180 }}
         cover={<img alt="Poster" src={poster_path} />}
         actions={actions}
     >

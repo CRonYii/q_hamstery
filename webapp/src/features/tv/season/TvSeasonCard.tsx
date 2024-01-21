@@ -26,7 +26,7 @@ const TvSeasonCard: React.FC<{ season: ITvSeason }> = ({ season }) => {
         <Card
             hoverable
             onClick={() => navigate(`/tvshows/${library_id}/${show_id}/${season.id}`)}
-            style={{ width: 300 }}
+            style={{ width: 180 }}
             cover={<img alt="Poster" src={poster_path} />}
         >
             <Meta title={title} description={`${season.number_of_episodes} Episode${season.number_of_episodes !== 1 ? 's' : ''}`} />

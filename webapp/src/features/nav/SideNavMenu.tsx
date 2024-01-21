@@ -2,12 +2,25 @@ import { Affix, Layout, Menu, Tooltip } from 'antd';
 import React from 'react';
 import { Link, useLocation, useParams } from 'react-router-dom';
 import { hamsterySlice } from '../api/hamsterySlice';
+import { useAppSelector } from '../../app/hook';
+import { responsiveModeSelector } from '../general/responsiveSlice';
 
 const { Sider } = Layout;
 
 const SideNavMenuBase: React.FC<{ id?: string, items: any[] }> = ({ id, items }) => {
+    const mode = useAppSelector(responsiveModeSelector)
+    const props: any = {}
+    if (mode === 'mobile') {
+        props['collapsible'] = true
+        props['collapsedWidth'] = 0
+        props['defaultCollapsed'] = true
+    }
+
     return (<Affix>
-        <Sider className="site-layout-background" width={200}>
+        <Sider
+            {...props}
+            className="site-layout-background"
+            width={200}>
             <Menu
                 mode="inline"
                 style={{
