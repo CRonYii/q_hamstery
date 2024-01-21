@@ -2,17 +2,21 @@ import { DeleteTwoTone, EditOutlined, SearchOutlined } from '@ant-design/icons';
 import { Card, notification, Popconfirm } from 'antd';
 import React from 'react';
 import { ITorznab } from '../../../app/entities';
-import { useAppDispatch } from '../../../app/hook';
+import { useAppDispatch, useAppSelector } from '../../../app/hook';
 import { hamsterySlice } from '../../api/hamsterySlice';
 import { indexerActions } from '../indexerSlice';
 import { torznabIndexerActions } from './torznabIndexerSlice';
+import { responsiveComputeSelector, useResponsiveCardSize } from '../../general/responsiveSlice';
 
 const TorznabIndexerCard: React.FC<{ indexer: ITorznab }> = ({ indexer }) => {
     const dispatch = useAppDispatch()
+    const modeCompute = useAppSelector(responsiveComputeSelector)
+
     const [removeTorznabIndexer, { isLoading }] = hamsterySlice.useRemoveTorznabIndexerMutation()
+    const width = useResponsiveCardSize(modeCompute)
 
     return <Card
-        style={{ minWidth: '200px' }}
+        style={{ width }}
         actions={[
             <SearchOutlined key="search"
                 onClick={() => dispatch(indexerActions.search({ id: String(indexer.id) }))}

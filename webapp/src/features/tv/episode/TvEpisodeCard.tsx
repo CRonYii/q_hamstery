@@ -1,19 +1,39 @@
 import { CheckCircleTwoTone, CloudDownloadOutlined, DeleteTwoTone } from '@ant-design/icons';
-import { Badge, Card, List, notification, Popconfirm, Row } from 'antd';
+import { Badge, Card, List, Popconfirm, Row, Tooltip, notification } from 'antd';
 import React from 'react';
 import { ITvDownload, ITvEpisode, ITvSeason, ITvShow, TvEpisodeStatus } from '../../../app/entities';
-import { useAppDispatch } from '../../../app/hook';
-import { formatBytes, secondsToDhms, toTMDBPosterURL } from '../../../app/utils';
+import { useAppDispatch, useAppSelector } from '../../../app/hook';
+import { TMDBPosterSize, formatBytes, secondsToDhms, toTMDBPosterURL } from '../../../app/utils';
 import { hamsterySlice } from '../../api/hamsterySlice';
+import { responsiveComputeSelector, useResponsiveCardSize } from '../../general/responsiveSlice';
 import { indexerActions } from '../../indexers/indexerSlice';
 
 const { Meta } = Card;
 
+const DownloadName: React.FC<{
+    title: string,
+    length: number
+}> = ({ title, length }) => {
+    let showTitle
+    if (length !== 0 && title.length > length)
+        showTitle = title.substring(0, length) + '...'
+    else
+        showTitle = title
+    return <Tooltip title={title}>{showTitle}</Tooltip>
+}
+
 const TvEpisodeCard: React.FC<{ show: ITvShow, season: ITvSeason, episode: ITvEpisode, downloads: ITvDownload[] }> = ({ show, season, episode, downloads }) => {
     const dispatch = useAppDispatch()
-    const poster_path = toTMDBPosterURL(episode.poster_path, "w500")
+    const modeCompute = useAppSelector(responsiveComputeSelector)
     const actions = []
     const [removeTvEpisode] = hamsterySlice.useRemoveTvEpisodeMutation()
+
+    const poster_path = toTMDBPosterURL(episode.poster_path, modeCompute<TMDBPosterSize>({
+        'mobile': 'w185',
+        'tablet': 'w185',
+        'desktop': 'w500',
+    }))
+    const width = useResponsiveCardSize(modeCompute)
 
     let description = <div>{episode.name}</div>
     if (episode.air_date) {
@@ -39,7 +59,7 @@ const TvEpisodeCard: React.FC<{ show: ITvShow, season: ITvSeason, episode: ITvEp
 
     return <Card
         hoverable
-        style={{ width: 180 }}
+        style={{ width }}
         cover={<img alt="Poster" src={poster_path} />}
         actions={actions}
     >
@@ -56,7 +76,13 @@ const TvEpisodeCard: React.FC<{ show: ITvShow, season: ITvSeason, episode: ITvEp
 
 export const TvDownloadInfo: React.FC<{ episode: ITvEpisode, downloads: ITvDownload[] }> = ({ episode, downloads }) => {
     const dispatch = useAppDispatch()
+    const modeCompute = useAppSelector(responsiveComputeSelector)
     const [remove] = hamsterySlice.useRemoveTvDownloadMutation()
+    const downloadNameLength = modeCompute<number>({
+        'mobile': 10,
+        'tablet': 20,
+        'desktop': 80,
+    }) || 0
 
     const renderDownloadItem = (download: ITvDownload) => {
         const deleteButton = <Popconfirm title={"This download will be deleted!"}
@@ -78,7 +104,7 @@ export const TvDownloadInfo: React.FC<{ episode: ITvEpisode, downloads: ITvDownl
         if (download.done) {
             return <List.Item>
                 <List.Item.Meta
-                    title={download.filename}
+                    title={<DownloadName title={download.filename} length={downloadNameLength} />}
                     description={<span>
                         <b>Size: </b>{formatBytes(extra_info.size)} <br />
                         <b> Uploaded: </b>{formatBytes(extra_info.uploaded)} <br />
@@ -101,7 +127,7 @@ export const TvDownloadInfo: React.FC<{ episode: ITvEpisode, downloads: ITvDownl
         } else {
             return <List.Item>
                 <List.Item.Meta
-                    title={download.filename}
+                    title={<DownloadName title={download.filename} length={downloadNameLength} />}
                     description={<span>
                         <b>Size: </b>{formatBytes(extra_info.size)}  <br />
                         <b> Downloaded: </b>{formatBytes(extra_info.completed)}  <br />

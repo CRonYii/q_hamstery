@@ -1,26 +1,37 @@
-import { Affix, Layout, Menu, Tooltip } from 'antd';
-import React from 'react';
+import { Affix, Layout, Menu, SiderProps, Tooltip } from 'antd';
+import React, { useState } from 'react';
 import { Link, useLocation, useParams } from 'react-router-dom';
-import { hamsterySlice } from '../api/hamsterySlice';
 import { useAppSelector } from '../../app/hook';
-import { responsiveModeSelector } from '../general/responsiveSlice';
+import { hamsterySlice } from '../api/hamsterySlice';
+import { responsiveComputeSelector } from '../general/responsiveSlice';
 
 const { Sider } = Layout;
 
 const SideNavMenuBase: React.FC<{ id?: string, items: any[] }> = ({ id, items }) => {
-    const mode = useAppSelector(responsiveModeSelector)
-    const props: any = {}
-    if (mode === 'mobile') {
-        props['collapsible'] = true
-        props['collapsedWidth'] = 0
-        props['defaultCollapsed'] = true
-    }
+    const modeCompute = useAppSelector(responsiveComputeSelector)
+    const props = modeCompute<SiderProps>({
+        'mobile': {
+            collapsible: true,
+            collapsedWidth: 0,
+            width: 100,
+        },
+        'tablet': {
+            width: 120,
+        },
+        'desktop': {
+            width: 200,
+        },
+    })
+    const [collapsed, setCollapsed] = useState(props?.collapsible || false)
 
     return (<Affix>
         <Sider
             {...props}
-            className="site-layout-background"
-            width={200}>
+            onCollapse={(collapsed) => {
+                setCollapsed(collapsed)
+            }}
+            collapsed={props?.collapsible ? collapsed : false}
+            className="site-layout-background">
             <Menu
                 mode="inline"
                 style={{
@@ -31,6 +42,11 @@ const SideNavMenuBase: React.FC<{ id?: string, items: any[] }> = ({ id, items })
                 }}
                 items={items}
                 selectedKeys={id ? [id] : []}
+                onClick={() => {
+                    if (props?.collapsible) {
+                        setCollapsed(true)
+                    }
+                }}
             />
         </Sider>
     </Affix>)

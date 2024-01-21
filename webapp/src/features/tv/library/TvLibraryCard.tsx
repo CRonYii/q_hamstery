@@ -1,17 +1,21 @@
 import { DeleteTwoTone, EditOutlined, FolderAddOutlined } from '@ant-design/icons';
-import { Card, notification, Popconfirm } from 'antd';
+import { Card, Popconfirm, notification } from 'antd';
 import React from 'react';
 import { ITvLibrary } from '../../../app/entities';
-import { useAppDispatch } from '../../../app/hook';
+import { useAppDispatch, useAppSelector } from '../../../app/hook';
 import { hamsterySlice } from '../../api/hamsterySlice';
+import { responsiveComputeSelector, useResponsiveCardSize } from '../../general/responsiveSlice';
 import { tvLibraryActions } from './tvlibrarySlice';
 
 const TvLibraryCard: React.FC<{ library: ITvLibrary }> = ({ library }) => {
     const dispatch = useAppDispatch()
+    const modeCompute = useAppSelector(responsiveComputeSelector)
     const [remove, { isLoading }] = hamsterySlice.useRemoveTvLibraryMutation()
 
+    const width = useResponsiveCardSize(modeCompute)
+
     return <Card
-        style={{ minWidth: '200px' }}
+        style={{ width }}
         actions={[
             <EditOutlined key="edit"
                 onClick={() => dispatch(tvLibraryActions.edit(String(library.id)))}

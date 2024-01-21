@@ -1,10 +1,10 @@
 import { Col, Empty, Layout, Row } from 'antd';
 import React from 'react';
-import { useSelector } from 'react-redux';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import './App.css';
+import { useAppSelector } from './app/hook';
 import GlobalModal from './features/general/GlobalModal';
-import { useResponsiveUpdater } from './features/general/responsiveSlice';
+import { responsiveComputeSelector, useResponsiveUpdater } from './features/general/responsiveSlice';
 import TorznabIndexer from './features/indexers/torznab/TorznabIndexer';
 import { IndexerBreadcrumbNav, TvShowsBreadcrumbNav } from './features/nav/BreadcrumbNav';
 import { IndexerSideNavMenu, TvLibrarySideNavMenu, TvSeasonSideNavMenu, TvShowSideNavMenu } from './features/nav/SideNavMenu';
@@ -62,15 +62,20 @@ const AppBreadcrumbNav = () => {
 }
 
 const App: React.FC = () => {
-  const user = useSelector(userSelector)
   useResponsiveUpdater()
+  const user = useAppSelector(userSelector)
+  const modeCompute = useAppSelector(responsiveComputeSelector)
+  const logo = modeCompute<any>({
+    'tablet': null,
+    'desktop': <div className="logo" />,
+  })
 
   if (!user.logged_in) {
     return <Login />;
   } else {
     return (<Layout>
       <Header className="header">
-        <div className="logo" />
+        {logo}
         <TopNavMenu />
       </Header>
       <Content style={{ padding: '0 50px' }}>

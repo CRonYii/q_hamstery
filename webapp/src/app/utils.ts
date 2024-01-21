@@ -12,7 +12,9 @@ export const getOnAirDate = () => {
     return `${onAir.getFullYear()}-${onAir.getMonth() + 1}-${onAir.getDate()}`
 }
 
-export const toTMDBPosterURL = (relativeURL?: string, size: 'w500' | 'w185' = 'w500') => {
+export type TMDBPosterSize = 'w500' | 'w185'
+
+export const toTMDBPosterURL = (relativeURL?: string, size: TMDBPosterSize = 'w500') => {
     return relativeURL ? `https://image.tmdb.org/t/p/${size}/${relativeURL}` : ''
 }
 

@@ -72,7 +72,7 @@ const TvLibraryPage: React.FC = () => {
                         onShowSizeChange={(current, size) => {
                             setPageSize(size)
                         }}
-                        />
+                    />
                 </Row>
                 return <div>
                     <Modal
@@ -111,8 +111,14 @@ const TvLibraryPage: React.FC = () => {
                                 {!isLoading ? <span><ReloadOutlined /> Scan</span> : <span>Scanning</span>}
                             </Button>
                         </Col>
-                        <Col span={8}>
-                            <Input placeholder='Search Library' onChange={(evt) => searchLibrary(evt.target.value)} />
+                    </Row>
+                    <Row gutter={12} style={{ margin: 16 }}>
+                        <Col span={24}>
+                            <Input
+                                placeholder='Search Library'
+                                defaultValue={searchKeyword}
+                                onChange={(evt) => searchLibrary(evt.target.value)}
+                            />
                         </Col>
                     </Row>
                     {paginator}
