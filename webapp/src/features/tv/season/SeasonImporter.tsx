@@ -84,6 +84,7 @@ const SeasonImporter: React.FC<{
         type: 'checkbox',
         onChange: (selectedRowKeys, selectedRows) => setImports(selectedRows)
       }}
+      pagination={{ defaultPageSize: 26, pageSizeOptions: ['13', '26', '52'] }}
     />
   </div>
 

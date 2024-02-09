@@ -39,7 +39,7 @@ const TVSeasonComponent: React.FC<{ show: ITvShow, season: ITvSeason }> = ({
     show, season,
 }) => {
     const [searchParams, setSearchParams] = useSearchParams()
-    const [pageSize, setPageSize] = useState(25)
+    const [pageSize, setPageSize] = useState(52)
     const dispatch = useAppDispatch()
     const navigate = useNavigate()
     const [scan, { isLoading }] = hamsterySlice.useScanTvSeasonMutation()
@@ -85,7 +85,7 @@ const TVSeasonComponent: React.FC<{ show: ITvShow, season: ITvSeason }> = ({
                             window.scrollTo(0, 0)
                         }}
                         pageSize={pageSize}
-                        pageSizeOptions={['10', '25', '50', '100']}
+                        pageSizeOptions={['13', '26', '52']}
                         onShowSizeChange={(current, size) => {
                             setPageSize(size)
                         }}
