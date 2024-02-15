@@ -5,6 +5,7 @@ import { RootState } from '../../../app/store';
 
 interface SeasonState {
     import: boolean,
+    import_supplemental: boolean,
     season?: ITvSeason,
     search_open: boolean,
     search_query?: IShowSubscription,
@@ -12,6 +13,7 @@ interface SeasonState {
 
 const initialState: SeasonState = {
     import: false,
+    import_supplemental: false,
     search_open: false,
 }
 
@@ -23,8 +25,13 @@ const seasonSlice = createSlice({
             state.import = true
             state.season = action.payload.season
         },
+        import_supplemental(state, action: PayloadAction<{ season: ITvSeason }>) {
+            state.import_supplemental = true
+            state.season = action.payload.season
+        },
         closeImport(state, action: PayloadAction<void>) {
             state.import = false
+            state.import_supplemental = false
             state.season = undefined
         },
         showSearchResult(state, action: PayloadAction<IShowSubscription>) {
@@ -42,6 +49,11 @@ export const seasonActions = seasonSlice.actions;
 
 export const seasonImportSelector = (state: RootState) => ({
     import: state.season.import,
+    season: state.season.season,
+});
+
+export const seasonSupplementalImportSelector = (state: RootState) => ({
+    import: state.season.import_supplemental,
     season: state.season.season,
 });
 

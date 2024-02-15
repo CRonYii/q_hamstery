@@ -105,6 +105,11 @@ const TVSeasonComponent: React.FC<{ show: ITvShow, season: ITvSeason }> = ({
                             </Button>
                         </Col>
                         <Col>
+                            <Button onClick={() => dispatch(seasonActions.import_supplemental({ season }))}>
+                                <ImportOutlined />Import Supplemental
+                            </Button>
+                        </Col>
+                        <Col>
                             <Button onClick={() => navigate('./subscription')}>
                                 <HeartTwoTone twoToneColor="#eb2f96" />Subscribe
                             </Button>

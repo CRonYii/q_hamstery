@@ -69,9 +69,13 @@ export const getEpNumber = async (title: string) => {
     }
 }
 
-const videoRegex = new RegExp('(.mp4|.mkv|.flv|.avi|.rmvb|.m4p|.m4v)$');
+const videoRegex = new RegExp('.*?.(mp4|mkv|flv|avi|rmvb|m4p|m4v|m2ts|ts)$');
 
 export const isVideoFile = (f: string) => f.match(videoRegex) != null
+
+const supplementalRegex = new RegExp('.*?.(ass|ssa|srt|idx|sub|mka|flac)$');
+
+export const isSupplementalFile = (f: string) => f.match(supplementalRegex) != null
 
 export function b64DecodeUnicode(str: string) {
     return decodeURIComponent(Array.prototype.map.call(atob(str), function (c) {

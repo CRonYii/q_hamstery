@@ -3,6 +3,7 @@ import GlobalIndexerDownloader from '../indexers/GlobalIndexerDownloader';
 import GlobalIndexerSearcher from '../indexers/GlobalIndexerSearcher';
 import GlobalSeasonSubscriptionModal from '../tv/season/GlobalSeasonSubscriptionModal';
 import GlobalSeasonImporter from '../tv/season/SeasonImporter';
+import GlobalSeasonSupplementalImporter from '../tv/season/SeasonSupplementalImporter';
 import { TVSeasonSearchResult } from '../tv/season/TvSubscriptionPage';
 
 const GlobalModal: React.FC = () => {
@@ -10,6 +11,7 @@ const GlobalModal: React.FC = () => {
         <GlobalIndexerSearcher />
         <GlobalIndexerDownloader />
         <GlobalSeasonImporter />
+        <GlobalSeasonSupplementalImporter />
         <GlobalSeasonSubscriptionModal />
         <TVSeasonSearchResult />
     </div>
