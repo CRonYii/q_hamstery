@@ -1,6 +1,0 @@
-[submodule "backend/app"]
-	path = backend/app
-	url = git@github.com:CRonYii/q_hamstery_backend.git
-[submodule "nginx/webapp"]
-	path = nginx/webapp
-	url = git@github.com:CRonYii/q-hamstery-webapp.git
