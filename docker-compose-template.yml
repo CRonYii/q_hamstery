@@ -1,0 +1,20 @@
+version: '3'
+services:
+  q_hamstery:
+    hostname: q_hamstery
+    container_name: q_hamstery
+    image: q_hamstery:latest
+    ports:
+      - "8000:80"
+    environment:
+      - TZ=
+      - SECRET_KEY=
+      - HOST_NAME=
+      - HOST=
+    volumes:
+      - uwsgi_data:/tmp/uwsgi/
+      - /path/to/library:/home/library/
+      - /path/to/app_data:/app/app_data/
+    restart: unless-stopped
+volumes:
+  uwsgi_data:
