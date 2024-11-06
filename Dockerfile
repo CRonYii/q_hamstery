@@ -31,15 +31,7 @@ RUN apk add --no-cache \
 		linux-headers \
 		&& rm -rf /var/cache/apk/*
 
-# Install Nginx configurations
-WORKDIR /run/nginx
-
-COPY nginx.conf /etc/nginx/nginx.conf
-COPY hamstery.conf /etc/nginx/conf.d/hamstery.conf
-
-# Prepare webapp for serving in static
-COPY --from=build /app/webapp/build /var/www/html/webapp
-
+# Setup Backend
 WORKDIR /app/backend
 
 RUN mkdir /tmp/uwsgi
@@ -50,14 +42,23 @@ COPY q_hamstery_backend.uwsgi.ini /app/backend/q_hamstery_backend.uwsgi.ini
 RUN pip3 install uwsgi
 RUN pip3 install --ignore-installed -r requirements.txt --no-cache-dir
 
-# Run Django setup
 RUN python3 ./manage.py collectstatic --no-input
 RUN python3 ./manage.py migrate
 
+# Setup Frontend
+WORKDIR /run/nginx
+
+COPY nginx.conf /etc/nginx/nginx.conf
+
+COPY --from=build /app/webapp/build /var/www/html/webapp
+
+# Remove unnecessary files from runtime
 RUN apk del gcc \
 			libc-dev \
 			linux-headers
 
+# Prepare container entrypoint
+WORKDIR /app/backend
 COPY start.sh start.sh
 RUN chmod 777 start.sh
 
