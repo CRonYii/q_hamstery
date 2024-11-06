@@ -34,13 +34,14 @@ RUN apk add --no-cache \
 # Setup Backend
 WORKDIR /app/backend
 
-RUN mkdir /tmp/uwsgi
-COPY backend ./
-COPY q_hamstery_backend.uwsgi.ini /app/backend/q_hamstery_backend.uwsgi.ini
-
 # Install backend dependency
-RUN pip3 install uwsgi
+COPY backend ./
 RUN pip3 install --ignore-installed -r requirements.txt --no-cache-dir
+
+# Setup uwsgi
+RUN mkdir /tmp/uwsgi
+COPY q_hamstery_backend.uwsgi.ini /app/backend/q_hamstery_backend.uwsgi.ini
+RUN pip3 install uwsgi
 
 RUN python3 ./manage.py collectstatic --no-input
 RUN python3 ./manage.py migrate
