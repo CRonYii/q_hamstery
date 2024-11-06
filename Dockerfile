@@ -11,9 +11,6 @@ RUN PUBLIC_URL=/webapp npm run build
 ### Ngnix and Django
 FROM alpine:3.13 AS base
 
-ARG FIRST_RUN=True
-ARG BUILDING=True
-
 # Install alpine dependecy
 RUN apk add --no-cache \
 		# Runtime
@@ -43,8 +40,16 @@ RUN mkdir /tmp/uwsgi
 COPY q_hamstery_backend.uwsgi.ini /app/backend/q_hamstery_backend.uwsgi.ini
 RUN pip3 install uwsgi
 
+# Set Django args
+ARG FIRST_RUN=True
+ARG BUILDING=True
+ARG DJANGO_SUPERUSER_EMAIL=admin@hamstery.com
+ARG DJANGO_SUPERUSER_USERNAME=hamstery
+ARG DJANGO_SUPERUSER_PASSWORD=hamstery
+
 RUN python3 ./manage.py collectstatic --no-input
 RUN python3 ./manage.py migrate
+RUN python3 ./manage.py createsuperuser --noinput
 
 # Setup Frontend
 WORKDIR /run/nginx
