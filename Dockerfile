@@ -26,6 +26,9 @@ RUN apk add --no-cache \
 		gcc \
 		libc-dev \
 		linux-headers \
+		shadow \
+		sudo \ 
+		su-exec \
 		&& rm -rf /var/cache/apk/*
 
 # Setup Backend
@@ -68,6 +71,10 @@ RUN apk del gcc \
 
 # Prepare container entrypoint
 WORKDIR /app/backend
+
+RUN addgroup -g 1000 -S hamstery && \
+	adduser -S -G hamstery -u 1000 -h /app/ -s /bin/ash -D hamstery
+
 COPY start.sh start.sh
 RUN chmod 777 start.sh
 
