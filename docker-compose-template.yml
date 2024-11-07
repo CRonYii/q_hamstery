@@ -14,7 +14,7 @@ services:
     volumes:
       - uwsgi_data:/tmp/uwsgi/
       - /path/to/library:/home/library/
-      - /path/to/app_data:/app/app_data/
+      - /path/to/app_data:/app/backend/app_data/
     restart: unless-stopped
 volumes:
   uwsgi_data:

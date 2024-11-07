@@ -32,7 +32,7 @@ RUN apk add --no-cache \
 WORKDIR /app/backend
 
 # Install backend dependency
-COPY backend ./
+COPY backend/requirements.txt ./requirements.txt
 RUN pip3 install --ignore-installed -r requirements.txt --no-cache-dir
 
 # Setup uwsgi
@@ -47,9 +47,12 @@ ARG DJANGO_SUPERUSER_EMAIL=admin@hamstery.com
 ARG DJANGO_SUPERUSER_USERNAME=hamstery
 ARG DJANGO_SUPERUSER_PASSWORD=hamstery
 
+COPY backend/ ./
 RUN python3 ./manage.py collectstatic --no-input
+# Initialize sqlite database for first run
 RUN python3 ./manage.py migrate
 RUN python3 ./manage.py createsuperuser --noinput
+RUN mv app_data/db.sqlite3 ./default.sqlite3
 
 # Setup Frontend
 WORKDIR /run/nginx
