@@ -7,6 +7,8 @@ services:
     ports:
       - "8000:80"
     environment:
+      - PUID=
+      - PGID=
       - TZ=
       - SECRET_KEY=
       - HOST_NAME=
