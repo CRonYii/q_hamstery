@@ -15,6 +15,7 @@ import environ
 
 # Initialise environment variables
 env = environ.Env(
+    FIRST_RUN=(bool, False),
     BUILDING=(bool, False),
     HOST_NAME=(str, 'local'),
     HOST=(str, '.localhost'),
@@ -156,6 +157,7 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'hamstery.views.general.HamsteryPaginator'
 }
 
+FIRST_RUN = env('FIRST_RUN')
 BUILDING = env('BUILDING')
 
 LOGGING = {

@@ -1,7 +1,7 @@
 import logging
 
 from django.apps import AppConfig
-
+from django.conf import settings
 from hamstery import upgrade, utils
 
 logger = logging.getLogger(__name__)
@@ -12,7 +12,8 @@ class HamsteryConfig(AppConfig):
     name = 'hamstery'
 
     def ready(self) -> None:
-        upgrade.register_upgrade_hook(self)
+        if settings.FIRST_RUN is False:
+            upgrade.register_upgrade_hook(self)
         logger.info('Timezone: %s' % (utils.tz))
         logger.info('Starup Time: %s' % (utils.now().strftime('%Y-%m-%d %H:%M:%S')))
         from hamstery.hamstery_settings import settings_manager
