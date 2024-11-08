@@ -1,6 +1,7 @@
 .env
+.secrets
+.act
 app_data
 *.swp
 
-nginx/build
 docker-compose.yml
