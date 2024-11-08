@@ -39,13 +39,13 @@ class TvShowSerializer(serializers.ModelSerializer):
 class TvStorageSerializer(serializers.ModelSerializer):
     class Meta:
         model = TvStorage
-        fields = ('id', 'lib', 'path', 'shows')
+        fields = ('id', 'lib', 'path')
 
 
 class TvLibrarySerializer(serializers.ModelSerializer):
     class Meta:
         model = TvLibrary
-        fields = ('id', 'name', 'lang', 'storages')
+        fields = ('id', 'name', 'lang')
 
 
 class TvDownloadSerializer(serializers.ModelSerializer):
