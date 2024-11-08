@@ -75,7 +75,8 @@ RUN addgroup -g 1000 -S hamstery && \
 	adduser -S -G hamstery -u 1000 -h /app/ -s /bin/ash -D hamstery
 
 COPY start.sh start.sh
-RUN chmod 777 start.sh
+RUN chmod 777 start.sh && \
+	chown -R hamstery:hamstery ./
 
 EXPOSE 80/tcp 443/tcp
 
