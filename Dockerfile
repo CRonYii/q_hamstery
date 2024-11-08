@@ -5,8 +5,8 @@ WORKDIR /app/webapp
 
 COPY webapp ./
 
-RUN npm ci
-RUN PUBLIC_URL=/webapp npm run build
+RUN npm ci && \
+	PUBLIC_URL=/webapp npm run build
 
 ### Ngnix and Django
 FROM alpine:3.13 AS base
@@ -27,7 +27,6 @@ RUN apk add --no-cache \
 		libc-dev \
 		linux-headers \
 		shadow \
-		sudo \ 
 		su-exec \
 		&& rm -rf /var/cache/apk/*
 
@@ -51,11 +50,11 @@ ARG DJANGO_SUPERUSER_USERNAME=hamstery
 ARG DJANGO_SUPERUSER_PASSWORD=hamstery
 
 COPY backend/ ./
-RUN python3 ./manage.py collectstatic --no-input
 # Initialize sqlite database for first run
-RUN python3 ./manage.py migrate
-RUN python3 ./manage.py createsuperuser --noinput
-RUN mv app_data/db.sqlite3 ./default.sqlite3
+RUN python3 ./manage.py collectstatic --no-input && \
+	python3 ./manage.py migrate && \
+	python3 ./manage.py createsuperuser --noinput && \
+	mv app_data/db.sqlite3 ./default.sqlite3
 
 # Setup Frontend
 WORKDIR /run/nginx
