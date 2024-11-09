@@ -1,0 +1,16 @@
+aiohttp==3.9.1
+asgiref==3.7.2
+cn2an==0.5.22
+Django==4.2.9
+djangorestframework==3.14.0
+django-environ==0.10.0
+django-filter==23.5
+lxml==4.9.2
+qbittorrent-api==2023.11.57
+requests==2.31.0
+tzlocal==4.2
+whitenoise==6.2.0
+apscheduler==3.10.4
+openai==1.8.0
+psutil==5.9.2
+packaging==23.2
