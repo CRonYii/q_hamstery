@@ -88,7 +88,10 @@ if [[ $cur_ver =~ $semver_regex ]]; then
     fi
     echo "Done tagging new release to $new_ver"
     git show HEAD
-    echo "Release preparation is done, please double check and push with \"git push origin $new_ver\""
+    echo "
+Release preparation is done, please double check and push with
+
+    git push --atomic origin main $new_ver"
 else
     echo "ERROR: invalid version number read from .version: $cur_ver"
     exit 1
