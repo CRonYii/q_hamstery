@@ -19,6 +19,8 @@ if [ ! -e $db_path ]; then
     cp default.sqlite3 $db_path
 fi
 
+envsubst '${HOST}' < /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf
 nginx
+
 BUILDING=True python3 manage.py run_migration
 exec su-exec hamstery uwsgi --ini q_hamstery_backend.uwsgi.ini

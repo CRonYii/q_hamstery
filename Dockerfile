@@ -26,6 +26,7 @@ RUN apk add --no-cache \
 		gcc \
 		libc-dev \
 		linux-headers \
+		gettext \
 		shadow \
 		su-exec \
 		&& rm -rf /var/cache/apk/*
@@ -59,7 +60,7 @@ RUN python3 ./manage.py collectstatic --no-input && \
 # Setup Frontend
 WORKDIR /run/nginx
 
-COPY nginx.conf /etc/nginx/nginx.conf
+COPY nginx.conf /etc/nginx/nginx.conf.template
 
 COPY --from=build /app/webapp/build /var/www/html/webapp
 
