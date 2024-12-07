@@ -16,20 +16,22 @@ logger = logging.getLogger(__name__)
 # Will only support specific models (Need JSON Mode)
 # Do not add model pointers like 'gpt-3.5-turbo' since those are subject to change
 supported_models = [
-    'gpt-4-0125-preview', # 2024-01-25
-    'gpt-4-1106-preview', # 2023-11-06
-    'gpt-3.5-turbo-0125', # 2024-01-25
-    'gpt-3.5-turbo-1106', # 2023-11-06
+    'gpt-4-0125-preview',  # 2024-01-25
+    'gpt-4-1106-preview',  # 2023-11-06
+    'gpt-3.5-turbo-0125',  # 2024-01-25
+    'gpt-3.5-turbo-1106',  # 2023-11-06
     'gpt-4o-2024-08-06',
     'gpt-4o-2024-05-13',
     'gpt-4o-mini-2024-07-18',
 ]
 
+
 def is_supported_model(model: Model):
     for id in supported_models:
-        if model.id.startswith(id): # to support fine-tuned models
+        if model.id.startswith(id):  # to support fine-tuned models
             return True
     return False
+
 
 class OpenAIManager:
 
@@ -47,73 +49,74 @@ class OpenAIManager:
     def load_client(self, instance: HamsterySettings):
         self.client = OpenAI(api_key=instance.openai_api_key)
         self.enable_openai = instance.openai_api_key != ''
-        self.enable_handle_title = self.enable_openai and (instance.openai_title_parser_mode != HamsterySettings.TitleParserMode.DISABLED) and (instance.openai_title_parser_model != '')
+        self.enable_handle_title = self.enable_openai and (
+            instance.openai_title_parser_mode != HamsterySettings.TitleParserMode.DISABLED) and (instance.openai_title_parser_model != '')
 
     def on_openai_config_update(self, instance: HamsterySettings):
         logger.info(
             'Detected OpenAI configuration changes, loading new OpenAI client...')
         self.load_client(instance)
-    
+
     def list_models(self):
         if not self.enable_openai:
             return []
         openai_models = self.client.models.list()
         models = (filter(is_supported_model,  openai_models))
-        return [{ 'id': model.id, 'created': model.created, 'owned_by': model.owned_by } for model in models]
+        return [{'id': model.id, 'created': model.created, 'owned_by': model.owned_by} for model in models]
 
     @lru_cache(maxsize=128)
-    def get_episode_number_from_title(self, model: str, title: str) -> int:
+    def get_episode_number_from_title(self, model: str, prompt: str, title: str) -> int:
         if self.enable_handle_title is False:
             return None
         stats = HamsteryStats.singleton()
         try:
-            logger.info("Querying OpenAI ChatCompletion API Model '%s' to extract episode number from '%s'" % (model, title))
+            logger.info(
+                "Querying OpenAI ChatCompletion API Model '%s' to extract episode number from '%s'" % (model, title))
             stats.update_title_parser_stats(calls=1)
             response = self.client.chat.completions.create(
                 model=model,
                 messages=[
                     {
-                        "role": "system", 
-                        "content":
-    '''You are an API that receives user input in JSON format and processes it to extract episode numbers from video file titles, responding only in JSON format.
-Input: A JSON object containing the title of a video file, for example: { "title": "([POPGO][Ghost_in_the_Shell][S.A.C._2nd_GIG][08][AVC_FLACx2+AC3][BDrip][1080p][072D2CD7]).mkv" }.
-Goal: Identify the episode number from the title. The video name may follow various naming conventions and may contain indicators of episode numbers in different languages (e.g., English, Chinese, Japanese, etc.). Episode numbers may be embedded in different formats, such as "EP01" or other natural language patterns.
-Response: A JSON object with the extracted episode number. For example: { "episode": 8 }.
-Error Handling: If the input format is incorrect or if an episode number cannot be determined, respond with { "error": "<an error message>", "episode": null }.
-Important: Always respond in JSON format without any additional text.'''},
+                        "role": "system",
+                        "content": prompt
+                    },
                     {
-                        "role": "user", 
+                        "role": "user",
                         "content": '{ "title": "%s" }' % (title)
                     },
                 ],
-                response_format={ "type": "json_object" },
+                response_format={"type": "json_object"},
             )
         except Exception:
             stats.update_title_parser_stats(fails=1)
             logger.error(traceback.format_exc())
             return None
         if response.usage:
-            stats.update_title_parser_stats(prompt_tokens=response.usage.prompt_tokens, 
-                                            completion_tokens=response.usage.completion_tokens, 
+            stats.update_title_parser_stats(prompt_tokens=response.usage.prompt_tokens,
+                                            completion_tokens=response.usage.completion_tokens,
                                             total_tokens=response.usage.total_tokens)
         choice = response.choices[0]
         # We are not handling finish_reason=length since it's not very likely to happen for a single episode name parsing
         if choice.finish_reason != "stop":
             stats.update_title_parser_stats(fails=1)
-            logger.error("OpenAI API failed with: %s" % (choice['finish_reason']))
+            logger.error("OpenAI API failed with: %s" %
+                         (choice['finish_reason']))
             return None
         try:
             content = json.loads(choice.message.content)
         except:
             stats.update_title_parser_stats(fails=1)
-            logger.error("Faile to decode ChatGPT JSON response: %s" % (choice.message.content))
+            logger.error("Faile to decode ChatGPT JSON response: %s" %
+                         (choice.message.content))
             return None
         if 'error' in content:
             stats.update_title_parser_stats(fails=1)
-            logger.error("OpenAI ChatGPT failed to extract episode number: %s" % (content['error']))
+            logger.error(
+                "OpenAI ChatGPT failed to extract episode number: %s" % (content['error']))
             return None
         episode_number = content['episode']
-        logger.info("OpenAI ChatCompletion extracted '%s' from '%s'" % (episode_number, title))
+        logger.info("OpenAI ChatCompletion extracted '%s' from '%s'" %
+                    (episode_number, title))
         return episode_number
 
 

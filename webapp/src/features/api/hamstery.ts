@@ -18,6 +18,12 @@ export interface IQbtTestResult {
     message: string,
 }
 
+export interface ITitleParserResult {
+    title: string,
+    episode: number,
+    success: boolean,
+}
+
 export interface IEpisodeNumber {
     episode_number: number,
 }
@@ -58,6 +64,9 @@ const hamstery = {
     },
     getOpenAIModels() {
         return axios.get<{ models: IOpenAIModel[] }>('/hamstery/api/settings/1/openai_get_models/')
+    },
+    testOpenAITitleParser() {
+        return axios.get<ITitleParserResult>('/hamstery/api/settings/1/openai_test_title_parser/')
     },
     resetTitleParserStats() {
         return axios.post<string>('/hamstery/api/stats/1/reset_title_parser_stats/', undefined, {

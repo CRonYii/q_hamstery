@@ -4,6 +4,14 @@ from django.db import models
 from hamstery.models.singleton import SingletonModel
 
 
+OPENAI_TITLE_PARSER_DEFAULT_PROMPT = '''You are an API that receives user input in JSON format and processes it to extract episode numbers from video file titles, responding only in JSON format.
+Input: A JSON object containing the title of a video file, for example: { "title": "([POPGO][Ghost_in_the_Shell][S.A.C._2nd_GIG][08][AVC_FLACx2+AC3][BDrip][1080p][072D2CD7]).mkv" }.
+Goal: Identify the episode number from the title. The video name may follow various naming conventions and may contain indicators of episode numbers in different languages (e.g., English, Chinese, Japanese, etc.). Episode numbers may be embedded in different formats, such as "EP01" or other natural language patterns.
+Response: A JSON object with the extracted episode number. For example: { "episode": 8 }.
+Error Handling: If the input format is incorrect or if an episode number cannot be determined, respond with { "error": "<an error message>", "episode": null }.
+Important: Always respond in JSON format without any additional text.'''
+
+
 class HamsterySettings(SingletonModel):
     qbittorrent_host = models.CharField(
         max_length=2048, blank=True, default='')
@@ -22,13 +30,17 @@ class HamsterySettings(SingletonModel):
 
     openai_api_key = models.CharField(
         max_length=2048, blank=True, default='')
+
     class TitleParserMode(models.IntegerChoices):
         DISABLED = 1
         PRIMARY = 2
         STANDBY = 3
-    openai_title_parser_mode = models.IntegerField(choices=TitleParserMode.choices, default=TitleParserMode.DISABLED)
+    openai_title_parser_mode = models.IntegerField(
+        choices=TitleParserMode.choices, default=TitleParserMode.DISABLED)
     openai_title_parser_model = models.CharField(
         max_length=255, blank=True, default='')
+    openai_title_parser_prompt = models.CharField(
+        max_length=2048, default=OPENAI_TITLE_PARSER_DEFAULT_PROMPT)
 
     def __str__(self) -> str:
         return 'Hamstery Settings'

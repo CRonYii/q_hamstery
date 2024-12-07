@@ -1,4 +1,4 @@
-import { Form, Input, Select } from 'antd';
+import { Button, Form, Input, notification, Select } from 'antd';
 import React, { useEffect, useState } from 'react';
 import hamstery from '../api/hamstery';
 import { hamsterySlice } from '../api/hamsterySlice';
@@ -10,6 +10,7 @@ const OpenAISettingsForm: React.FC<{
 }> = ({ id, onFinish }) => {
     const [form] = Form.useForm()
     const [models, setModels] = useState<{ label: string, value: string }[]>([])
+    const [testing, setTesting] = useState<boolean>(false)
     useEffect(() => {
         hamstery.getOpenAIModels()
             .then(({ data }) => {
@@ -31,7 +32,35 @@ const OpenAISettingsForm: React.FC<{
         editMutation={hamsterySlice.useEditSettingsMutation}
         getOptions={hamsterySlice.useGetSettingsOptionsQuery}
         extras={{}}
-        actions={[]}
+        actions={[
+            <Button
+                loading={testing}
+                onClick={async () => {
+                    try {
+                        setTesting(true)
+                        const { data } = await hamstery.testOpenAITitleParser()
+                        if (data.success) {
+                            notification.success({
+                                message: "Title Parser extracted episode number successfully",
+                            })
+                        } else {
+                            notification.error({
+                                message: `Title Parser failed to extract episode: Got${data.episode} from ${data.title}`,
+                                duration: 0,
+                            })
+                        }
+                    } catch {
+                        notification.error({
+                            message: 'Server error',
+                            duration: 0,
+                        })
+                    } finally {
+                        setTesting(false)
+                    }
+
+                }}
+            >Test Connection (Update before testing)</Button>
+        ]}
         displays={[
             { key: 'id', displayName: 'ID', hidden: true },
             {
@@ -54,6 +83,10 @@ const OpenAISettingsForm: React.FC<{
                         options={models}
                     />
                 }
+            },
+            {
+                key: 'openai_title_parser_prompt', displayName: 'ChatGPT Title Parsing Prompt',
+                help: 'The prompt for title parser',
             }
         ]} />
 }
