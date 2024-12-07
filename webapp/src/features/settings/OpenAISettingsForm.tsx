@@ -1,4 +1,4 @@
-import { Form, Select } from 'antd';
+import { Form, Input, Select } from 'antd';
 import React, { useEffect, useState } from 'react';
 import hamstery from '../api/hamstery';
 import { hamsterySlice } from '../api/hamsterySlice';
@@ -36,7 +36,10 @@ const OpenAISettingsForm: React.FC<{
             { key: 'id', displayName: 'ID', hidden: true },
             {
                 key: 'openai_api_key', displayName: 'OpenAI API Key',
-                help: 'Please keep in mind that using OpenAI API has a cost.'
+                help: 'Please keep in mind that using OpenAI API has a cost.',
+                customRender: (data) => {
+                    return <Input.Password value={data} autoComplete='openai-api-key' />
+                },
             },
             {
                 key: 'openai_title_parser_mode', displayName: 'ChatGPT Title Parsing Mode',

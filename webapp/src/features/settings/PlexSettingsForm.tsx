@@ -1,4 +1,4 @@
-import { Button, Form, notification } from 'antd';
+import { Button, Form, Input, notification } from 'antd';
 import React, { useState } from 'react';
 import hamstery from '../api/hamstery';
 import { hamsterySlice } from '../api/hamsterySlice';
@@ -56,6 +56,9 @@ const PlexSettingsForm: React.FC<{
             {
                 key: 'plex_token', displayName: 'X-Plex-Token',
                 help: 'https://support.plex.tv/articles/204059436-finding-an-authentication-token-x-plex-token/',
+                customRender: (data) => {
+                    return <Input.Password value={data} autoComplete='plex-token' />
+                },
             },
         ]} />
 }
