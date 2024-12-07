@@ -20,11 +20,14 @@ supported_models = [
     'gpt-4-1106-preview', # 2023-11-06
     'gpt-3.5-turbo-0125', # 2024-01-25
     'gpt-3.5-turbo-1106', # 2023-11-06
+    'gpt-4o-2024-08-06',
+    'gpt-4o-2024-05-13',
+    'gpt-4o-mini-2024-07-18',
 ]
 
 def is_supported_model(model: Model):
     for id in supported_models:
-        if id in model.id: # to support fine-tuned models
+        if model.id.startswith(id): # to support fine-tuned models
             return True
     return False
 
@@ -54,32 +57,30 @@ class OpenAIManager:
     def list_models(self):
         if not self.enable_openai:
             return []
-        models = (filter(is_supported_model,  self.client.models.list()))
+        openai_models = self.client.models.list()
+        models = (filter(is_supported_model,  openai_models))
         return [{ 'id': model.id, 'created': model.created, 'owned_by': model.owned_by } for model in models]
 
     @lru_cache(maxsize=128)
-    def get_episode_number_from_title(self, title: str) -> int:
+    def get_episode_number_from_title(self, model: str, title: str) -> int:
         if self.enable_handle_title is False:
             return None
-        settings = settings_manager.settings
         stats = HamsteryStats.singleton()
         try:
-            logger.info("Querying OpenAI ChatCompletion API Model '%s' to extract episode number from '%s'" % (settings.openai_title_parser_model, title))
+            logger.info("Querying OpenAI ChatCompletion API Model '%s' to extract episode number from '%s'" % (model, title))
             stats.update_title_parser_stats(calls=1)
             response = self.client.chat.completions.create(
-                model=settings.openai_title_parser_model,
+                model=model,
                 messages=[
                     {
                         "role": "system", 
                         "content":
-    '''I need you to act as a single API that reads user input in JSON format as a request, processes the request, and responds in JSON format.
-    - User input will a JSON object containing a title of a video file. For example: { "title": "([POPGO][Ghost_in_the_Shell][S.A.C._2nd_GIG][08][AVC_FLACx2+AC3][BDrip][1080p][072D2CD7]).mkv" }
-    - The string represents a video name of an episode of a show, the task is to guess the episode number out of the video name
-    - You should expect any naming convention of the video file. It does not always come in a well-formatted name like EP01. You should expect any natural human language that may indicate the episode number of the file.
-    - The file name can be languages, includes but not limit to English, Chinese, Japanese etc.
-    - You should respond in a JSON response format containing the episode number the video name. In this example, You should respond with: { "episode": 8 }.
-    - If the input format is incorrect, you respond with : { "error": "<an error message>", "episode": null }. 
-    Note: You must respond with only the JSON response, you must not respond with any extra text.'''},
+    '''You are an API that receives user input in JSON format and processes it to extract episode numbers from video file titles, responding only in JSON format.
+Input: A JSON object containing the title of a video file, for example: { "title": "([POPGO][Ghost_in_the_Shell][S.A.C._2nd_GIG][08][AVC_FLACx2+AC3][BDrip][1080p][072D2CD7]).mkv" }.
+Goal: Identify the episode number from the title. The video name may follow various naming conventions and may contain indicators of episode numbers in different languages (e.g., English, Chinese, Japanese, etc.). Episode numbers may be embedded in different formats, such as "EP01" or other natural language patterns.
+Response: A JSON object with the extracted episode number. For example: { "episode": 8 }.
+Error Handling: If the input format is incorrect or if an episode number cannot be determined, respond with { "error": "<an error message>", "episode": null }.
+Important: Always respond in JSON format without any additional text.'''},
                     {
                         "role": "user", 
                         "content": '{ "title": "%s" }' % (title)

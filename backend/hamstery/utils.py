@@ -265,7 +265,7 @@ def get_episode_number_from_title(title: str, force_local=False) -> int:
     from hamstery.openai import openai_manager
     settings = settings_manager.settings
     if not force_local and settings.openai_title_parser_mode == HamsterySettings.TitleParserMode.PRIMARY:
-        ep = openai_manager.get_episode_number_from_title(title)
+        ep = openai_manager.get_episode_number_from_title(settings.openai_title_parser_model, title)
         if ep:
             return ep
     try:
@@ -281,7 +281,7 @@ def get_episode_number_from_title(title: str, force_local=False) -> int:
     
     if not match:
         if not force_local and settings.openai_title_parser_mode == HamsterySettings.TitleParserMode.STANDBY:
-            return openai_manager.get_episode_number_from_title(title)
+            return openai_manager.get_episode_number_from_title(settings.openai_title_parser_model, title)
         return None
 
     ep = match.group(1)
