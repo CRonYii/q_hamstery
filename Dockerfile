@@ -36,7 +36,8 @@ WORKDIR /app/backend
 
 # Install backend dependency
 COPY backend/requirements.txt ./requirements.txt
-RUN pip3 install --ignore-installed -r requirements.txt --no-cache-dir
+RUN pip3 install --upgrade pip && \
+	pip3 install --ignore-installed -r requirements.txt --no-cache-dir
 
 # Setup uwsgi
 RUN mkdir /tmp/uwsgi
