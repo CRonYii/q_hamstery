@@ -47,12 +47,13 @@ class Qbittorrent:
             'Detected qbittorrent configuration changes, loading new qbittorrent client...')
         self.load_client(instance)
 
-    def test_connection(self):
+    def test_connection(self, verbose=False):
         [self.known_status, msg] = self.__test_connection()
-        logger.info('Testing qBittorrent connection...')
-        if self.known_status:
-            logger.info(msg)
-        else:
+        if verbose:
+            logger.info('Testing qBittorrent connection...')
+            if self.known_status:
+                logger.info(msg)
+        if not self.known_status:
             logger.error(msg)
         return [self.known_status, msg]
 

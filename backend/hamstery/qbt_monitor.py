@@ -45,6 +45,7 @@ def qbittorrent_monitor_step():
     # django signals does not work outside of application.
     # so, we need to do polling update for settings...
     settings_manager.manual_update()
+    qbt.test_connection()
     if qbt.known_status is True:
         qbittorrent_handle_tv_downloads()
 

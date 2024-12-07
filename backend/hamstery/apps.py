@@ -20,6 +20,8 @@ class HamsteryConfig(AppConfig):
         from hamstery.openai import openai_manager
         from hamstery.plex import plex_manager
         from hamstery.qbittorrent import qbt
+        if settings.BUILDING is False:
+            qbt.test_connection()
         try:
             import uwsgi
 

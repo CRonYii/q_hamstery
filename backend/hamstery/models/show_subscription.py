@@ -97,6 +97,7 @@ class ShowSubscription(models.Model):
 
 def show_subscription_monitor_step():
     settings_manager.manual_update()
+    qbt.test_connection()
     if qbt.known_status is False:
         return
     logger.info('Show subscriptions monitor triggered')
