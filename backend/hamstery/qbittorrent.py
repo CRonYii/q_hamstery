@@ -33,12 +33,14 @@ class Qbittorrent:
         ], self.on_qbt_config_update))
 
     def load_client(self, instance: HamsterySettings):
-        self.client = qbittorrentapi.Client(
-            host=instance.qbittorrent_host,
-            port=instance.qbittorrent_port,
-            username=instance.qbittorrent_username,
-            password=instance.qbittorrent_password,
-        )
+        self.client = None
+        if instance.qbittorrent_host != '' and instance.qbittorrent_port != '':
+            self.client = qbittorrentapi.Client(
+                host=instance.qbittorrent_host,
+                port=instance.qbittorrent_port,
+                username=instance.qbittorrent_username,
+                password=instance.qbittorrent_password,
+            )
         if self.auto_test:
             self.test_connection()
 
@@ -54,11 +56,15 @@ class Qbittorrent:
             if self.known_status:
                 logger.info(msg)
         if not self.known_status:
-            logger.error(msg)
+            # Skip certain errors
+            if msg != "User did not setup qbittorrent connection in hamstery setting":
+                logger.error(msg)
         return [self.known_status, msg]
 
     def __test_connection(self):
         try:
+            if not self.client:
+                return [False, "User did not setup qbittorrent connection in hamstery setting"]
             qbt.client.auth_log_in()
             qbt_version = version.parse(qbt.client.app.web_api_version)
             # check if version requirement is satisfied
