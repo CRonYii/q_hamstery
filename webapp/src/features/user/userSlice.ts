@@ -6,7 +6,15 @@ import hamstery from '../api/hamstery';
 
 export const testAuthHamstery = createAsyncThunk('user/test_auth', async () => {
     const response = await hamstery.test();
-    return response.data;
+    const { data } = response;
+    if (data.hamstery_version !== process.env.REACT_APP_VERSION) {
+        notification.warn({
+            message: `Detected webapp and bakcend are running different hamstery version`,
+            description: `backend: ${data.hamstery_version} webapp: ${process.env.REACT_APP_VERSION}`,
+            duration: 0,
+        })
+    }
+    return data;
 })
 
 export const loginHamstery = createAsyncThunk('user/login', async (arg: { username: string, password: string }) => {

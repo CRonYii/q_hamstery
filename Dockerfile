@@ -1,15 +1,20 @@
 ### Build frontend web app
 FROM node:22-alpine3.20 AS build
 
-WORKDIR /app/webapp
+ARG HAMSTERY_VERSION
+ENV REACT_APP_VERSION=$HAMSTERY_VERSION
 
+WORKDIR /app/webapp
 COPY webapp ./
 
 RUN npm ci && \
-	PUBLIC_URL=/webapp npm run build
+PUBLIC_URL=/webapp npm run build
 
 ### Ngnix and Django
 FROM alpine:3.13 AS base
+
+ARG HAMSTERY_VERSION
+ENV HAMSTERY_VERSION=$HAMSTERY_VERSION
 
 # Install alpine dependecy
 RUN apk add --no-cache \

@@ -19,6 +19,11 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
+    - name: Set ENV from file
+      run: |
+        HAMSTERY_VERSION=$(cat .version)
+        echo "HAMSTERY_VERSION=$HAMSTERY_VERSION" >> $GITHUB_ENV
+
     - name: Login to docker registry
       uses: docker/login-action@v3
       with:
@@ -41,3 +46,4 @@ jobs:
         push: true
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
+        build-args: HAMSTERY_VERSION=${{ env.HAMSTERY_VERSION }}

@@ -2,6 +2,8 @@ import axios from "axios";
 import { IndexerSearchResult, TorznabCaps } from "../../app/entities";
 import Cookies from "js-cookie";
 
+export interface ITestAuth { id: number, username: string, hamstery_version: string }
+
 export interface IMediaResource {
     key: string,
     path: string,
@@ -36,7 +38,7 @@ export interface IOpenAIModel {
 
 const hamstery = {
     test() {
-        return axios.get<{ id: number, username: string }>('/hamstery/auth/test');
+        return axios.get<ITestAuth>('/hamstery/auth/test');
     },
     login(username: string, password: string) {
         return axios.post<'Ok' | 'Invalid credentials'>('/hamstery/auth/login', { username, password });

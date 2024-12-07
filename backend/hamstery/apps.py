@@ -14,6 +14,7 @@ class HamsteryConfig(AppConfig):
     def ready(self) -> None:
         if settings.FIRST_RUN is False:
             upgrade.register_upgrade_hook(self)
+        logger.info('q-hamstery version: %s' % (settings.HAMSTERY_VERSION))
         logger.info('Timezone: %s' % (utils.tz))
         logger.info('Starup Time: %s' % (utils.now().strftime('%Y-%m-%d %H:%M:%S')))
         from hamstery.hamstery_settings import settings_manager

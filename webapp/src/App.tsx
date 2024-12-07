@@ -96,7 +96,9 @@ const App: React.FC = () => {
           </Content>
         </Layout>
       </Content>
-      <Footer style={{ textAlign: 'center' }}>Hamstery - Tech otakus save the world</Footer>
+      <Footer style={{ textAlign: 'center' }}>
+        Hamstery {process.env.REACT_APP_VERSION ? process.env.REACT_APP_VERSION :'<unknown>'} - Tech otakus save the world
+      </Footer>
     </Layout>);
   }
 }

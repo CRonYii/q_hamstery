@@ -2,6 +2,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from hamstery.utils import JSON, POST, need_authentication, validate_params
+from django.conf import settings
 
 from ..forms import LoginForm
 
@@ -28,4 +29,4 @@ def logout_view(request):
 
 @need_authentication
 def test_auth_view(request):
-    return JsonResponse({'id': request.user.id, 'username': request.user.username})
+    return JsonResponse({'id': request.user.id, 'username': request.user.username, 'hamstery_version': settings.HAMSTERY_VERSION})

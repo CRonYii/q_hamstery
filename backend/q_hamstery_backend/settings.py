@@ -24,9 +24,11 @@ env = environ.Env(
     SECRET_KEY=(
         str, 'django-insecure-+h-p!u=n2o-z2ap_ekvwt)$@3*t!hf*uvfx=(!a^de-&ums15b'),
     CSRF_TRUSTED_ORIGINS=(str, None),
+    HAMSTERY_VERSION=(str, '<unknown>'),
 )
 environ.Env.read_env('.env')
 
+HAMSTERY_VERSION = env('HAMSTERY_VERSION')
 HOST_NAME = env('HOST_NAME')
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
