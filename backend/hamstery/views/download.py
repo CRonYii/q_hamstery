@@ -36,12 +36,15 @@ class TvDownloadView(viewsets.GenericViewSet):
 
     def append_extra_info(self, download):
         hash = '|'.join(map(lambda d: d['hash'], download))
-        info = qbt.client.torrents_info(torrent_hashes=hash)
+        info = []
+        if qbt.known_status:
+            info = qbt.client.torrents_info(torrent_hashes=hash)
         for d in download:
             i = next((x for x in info if x['hash'] == d['hash']), None)
             if i is None:
                 continue
             extra = {}
+            extra['state'] = i['state']
             extra['progress'] = i['progress']
             extra['dlspeed'] = i['dlspeed']
             extra['completed'] = i['completed']

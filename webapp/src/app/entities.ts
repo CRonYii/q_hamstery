@@ -76,6 +76,7 @@ export interface ITvDownload {
     episode: number,
     filename: string,
     extra_info: {
+        state: string,
         progress: number,
         dlspeed: number,
         completed: number,

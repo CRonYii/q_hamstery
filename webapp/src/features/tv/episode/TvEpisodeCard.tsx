@@ -129,6 +129,7 @@ export const TvDownloadInfo: React.FC<{ episode: ITvEpisode, downloads: ITvDownl
                 <List.Item.Meta
                     title={<DownloadName title={download.filename} length={downloadNameLength} />}
                     description={<span>
+                        <b>State: </b>{extra_info.state}  <br />
                         <b>Size: </b>{formatBytes(extra_info.size)}  <br />
                         <b> Downloaded: </b>{formatBytes(extra_info.completed)}  <br />
                         <b> Dlspeed↓: </b>{formatBytes(extra_info.dlspeed)}/s  <br />
