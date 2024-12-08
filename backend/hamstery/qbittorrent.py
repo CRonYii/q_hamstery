@@ -19,6 +19,7 @@ class Qbittorrent:
     client = None
     known_status = False
     auto_test = False
+    login_failed = False
 
     def __init__(self):
         if settings.BUILDING is True:
@@ -34,6 +35,7 @@ class Qbittorrent:
 
     def load_client(self, instance: HamsterySettings):
         self.client = None
+        self.login_failed = False
         if instance.qbittorrent_host != '' and instance.qbittorrent_port != '':
             self.client = qbittorrentapi.Client(
                 host=instance.qbittorrent_host,
@@ -50,21 +52,23 @@ class Qbittorrent:
         self.load_client(instance)
 
     def test_connection(self, verbose=False):
-        [self.known_status, msg] = self.__test_connection()
-        if verbose:
-            logger.info('Testing qBittorrent connection...')
-            if self.known_status:
-                logger.info(msg)
-        if not self.known_status:
-            # Skip certain errors
-            if msg != "User did not setup qbittorrent connection in hamstery setting":
+        self.known_status = False
+        if not self.client:
+            msg = "qbittorrent connection info is not provided in settings"
+        elif self.login_failed:
+            msg = "qbittorrent connection credentials are invalid. Login failed previously. Please update and try again."
+        else:
+            [self.known_status, msg] = self.__test_connection()
+            if verbose:
+                logger.info('Testing qBittorrent connection...')
+                if self.known_status:
+                    logger.info(msg)
+            if not self.known_status:
                 logger.error(msg)
         return [self.known_status, msg]
 
     def __test_connection(self):
         try:
-            if not self.client:
-                return [False, "User did not setup qbittorrent connection in hamstery setting"]
             qbt.client.auth_log_in()
             qbt_version = version.parse(qbt.client.app.web_api_version)
             # check if version requirement is satisfied
@@ -78,6 +82,11 @@ Your qBittorrent Web API Version is: {qbt.client.app.web_api_version}''']
                     f'''Connected to qBittorrent@{qbt.client.host}:{qbt.client.port} successfully
 qBittorrent Version: {qbt.client.app.version}
 qBittorrent Web API Version: {qbt.client.app.web_api_version}''']
+        except qbt_exceptions.LoginFailed as e:
+            self.login_failed = True
+            return [False,
+                    f'''Failed to login to qBittorrent@{qbt.client.host}:{qbt.client.port}:
+{e}''']
         except qbt_exceptions.APIError as e:
             # An error occured with the connection attempt
             return [False,
