@@ -15,6 +15,7 @@ FROM alpine:3.13 AS base
 
 ARG HAMSTERY_VERSION
 ENV HAMSTERY_VERSION=$HAMSTERY_VERSION
+ENV HAMSTERY_PORT=8001
 
 # Install alpine dependecy
 RUN apk add --no-cache \
