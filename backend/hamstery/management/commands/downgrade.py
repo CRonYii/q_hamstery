@@ -26,7 +26,22 @@ class Command(BaseCommand):
             return
         downgrade_to_name = migration_version_map[version]
 
-        # Load migrations from disk/DB
+        # Print current database migration information
+        current_migration = MigrationRecorder.Migration.objects.filter(
+            app=app_name).latest('id')
+        if not current_migration:
+            logger.error("The database does not have any migrations applied. Abort.")
+            return
+        cur_version = "<unknown>"
+        for version in migration_version_map:
+            if migration_version_map[version] == current_migration.name:
+                cur_version = version
+                break
+        logger.info("Database currently running %s (%s)" % (cur_version, current_migration.name))
+        if cur_version == "<unknown>":
+            logger.warning("You may be running a dev version of Hamstery")
+        
+        # Get target migration to downgrade to
         downgrade_migration = MigrationRecorder.Migration.objects.filter(
             app=app_name, name=downgrade_to_name).first()
         if not downgrade_migration:
@@ -37,6 +52,7 @@ class Command(BaseCommand):
             logger.error(
                 "The database is running at a version older than %s already" % version)
             return
+        # Perform downgrade
         logger.info("CAUTION: ")
         logger.info("Make sure you backup your data before proceeding!")
         logger.info("You could lose your data if fail to do so!")
