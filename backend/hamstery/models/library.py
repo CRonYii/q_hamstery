@@ -353,7 +353,7 @@ class TvSeason(models.Model):
 
     async def scan_episodes(self, episodes):
         episode_map = self.get_episode_to_dir_map()
-        episode_map = {}
+        episode_tmdbid_map = {}
         for episode in episodes:
             episode_number = episode['episode_number']
             path = episode_map.get(episode_number, '')
@@ -362,9 +362,9 @@ class TvSeason(models.Model):
         # Clearing episodes
         async for episode in self.episodes.all():
             # Case that a episode has been removed from TMDB
-            if episode.tmdb_id in episode_map:
+            if episode.tmdb_id in episode_tmdbid_map:
                 # Case that a episode's number has changed but TMDB id remains the same and caused a duplicated episode with the same tmdb_id
-                if episode.episode_number == episode_map[episode.tmdb_id]:
+                if episode.episode_number == episode_tmdbid_map[episode.tmdb_id]:
                     continue
             if episode.status == TvEpisode.Status.MISSING:
                 await episode.adelete()
