@@ -358,7 +358,7 @@ class TvSeason(models.Model):
             episode_number = episode['episode_number']
             path = episode_map.get(episode_number, '')
             await TvEpisode.objects.create_or_update_by_episode_number(season=self, details=episode, dirpath=path)
-            episode_map[episode['id']] = episode_number
+            episode_tmdbid_map[episode['id']] = episode_number
         # Clearing episodes
         async for episode in self.episodes.all():
             # Case that a episode has been removed from TMDB
