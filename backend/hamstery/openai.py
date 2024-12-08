@@ -25,6 +25,13 @@ supported_models = [
     'gpt-4o-mini-2024-07-18',
 ]
 
+JSON_MODE_PROMPT = '''You are an API that receives user input in JSON format and respond only in JSON format. If the input format is incorrect or if you cannot determine a proper response from the input, respond with { "error": "<error msg>" }
+'''
+
+class OpenAIException(Exception):
+    def __init__(self, message):
+        super().__init__(message)
+
 
 def is_supported_model(model: Model):
     for id in supported_models:
@@ -65,59 +72,64 @@ class OpenAIManager:
         return [{'id': model.id, 'created': model.created, 'owned_by': model.owned_by} for model in models]
 
     @lru_cache(maxsize=128)
-    def get_episode_number_from_title(self, model: str, prompt: str, title: str) -> int:
+    def __chatgpt_json_response(self, model: str, prompt: str, data: str) -> dict:
+        response = self.client.chat.completions.create(
+            model=model,
+            messages=[
+                {
+                    "role": "system",
+                    "content": JSON_MODE_PROMPT + prompt
+                },
+                {
+                    "role": "user",
+                    "content": data
+                },
+            ],
+            response_format={"type": "json_object"},
+        )
+
+        choice = response.choices[0]
+        # We are not handling finish_reason=length since it's not very likely to happen for a single episode name parsing
+        if choice.finish_reason != "stop":
+            raise OpenAIException("OpenAI API failed with: %s" %
+                                  (choice['finish_reason']))
+        try:
+            content = json.loads(choice.message.content)
+        except:
+            raise OpenAIException("Faile to decode ChatGPT JSON response: %s" %
+                                  (choice.message.content))
+        if 'error' in content:
+            raise OpenAIException(
+                "OpenAI ChatGPT failed to extract episode number: %s" % (content['error']))
+
+        return content, response
+
+    def get_episode_number_from_title(self, title: str) -> int:
         if self.enable_handle_title is False:
             return None
+        settings = settings_manager.settings
+        model = settings.openai_title_parser_model
+        prompt = settings.openai_title_parser_prompt
         stats = HamsteryStats.singleton()
         try:
             logger.info(
                 "Querying OpenAI ChatCompletion API Model '%s' to extract episode number from '%s'" % (model, title))
             stats.update_title_parser_stats(calls=1)
-            response = self.client.chat.completions.create(
-                model=model,
-                messages=[
-                    {
-                        "role": "system",
-                        "content": prompt
-                    },
-                    {
-                        "role": "user",
-                        "content": '{ "title": "%s" }' % (title)
-                    },
-                ],
-                response_format={"type": "json_object"},
+            content, response = self.__chatgpt_json_response(
+                model, prompt, '{ "title": "%s" }' % (title)
             )
+            if response.usage:
+                stats.update_title_parser_stats(prompt_tokens=response.usage.prompt_tokens,
+                                                completion_tokens=response.usage.completion_tokens,
+                                                total_tokens=response.usage.total_tokens)
+            episode_number = content['episode']
+            logger.info("OpenAI ChatCompletion extracted '%s' from '%s'" %
+                        (episode_number, title))
+            return episode_number
         except Exception:
             stats.update_title_parser_stats(fails=1)
             logger.error(traceback.format_exc())
             return None
-        if response.usage:
-            stats.update_title_parser_stats(prompt_tokens=response.usage.prompt_tokens,
-                                            completion_tokens=response.usage.completion_tokens,
-                                            total_tokens=response.usage.total_tokens)
-        choice = response.choices[0]
-        # We are not handling finish_reason=length since it's not very likely to happen for a single episode name parsing
-        if choice.finish_reason != "stop":
-            stats.update_title_parser_stats(fails=1)
-            logger.error("OpenAI API failed with: %s" %
-                         (choice['finish_reason']))
-            return None
-        try:
-            content = json.loads(choice.message.content)
-        except:
-            stats.update_title_parser_stats(fails=1)
-            logger.error("Faile to decode ChatGPT JSON response: %s" %
-                         (choice.message.content))
-            return None
-        if 'error' in content:
-            stats.update_title_parser_stats(fails=1)
-            logger.error(
-                "OpenAI ChatGPT failed to extract episode number: %s" % (content['error']))
-            return None
-        episode_number = content['episode']
-        logger.info("OpenAI ChatCompletion extracted '%s' from '%s'" %
-                    (episode_number, title))
-        return episode_number
 
 
 openai_manager = OpenAIManager()

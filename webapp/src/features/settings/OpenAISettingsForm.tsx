@@ -45,7 +45,7 @@ const OpenAISettingsForm: React.FC<{
                             })
                         } else {
                             notification.error({
-                                message: `Title Parser failed to extract episode: Got${data.episode} from ${data.title}`,
+                                message: `Title Parser failed to extract episode: Got ${data.episode} from ${data.title}`,
                                 duration: 0,
                             })
                         }
