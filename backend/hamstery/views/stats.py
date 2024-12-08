@@ -1,10 +1,9 @@
 from rest_framework import mixins, viewsets
 from rest_framework.decorators import action
-from django.http import JsonResponse
 from rest_framework.response import Response
 
-from ..models import HamsteryStats
-from ..serializers import HamsteryStatsSerializer
+from ..models import HamsteryStats, OpenAITitleParserLogs
+from ..serializers import HamsteryStatsSerializer, OpenAITitleParserLogsSerializer
 
 # Create your views here.
 
@@ -24,3 +23,8 @@ class HamsteryStatsView(mixins.RetrieveModelMixin,
         stats = self.get_object()
         stats.reset_title_parser_stats()
         return Response('Ok')
+
+
+class OpenAITitleParserLogsViews(viewsets.ReadOnlyModelViewSet):
+    queryset = OpenAITitleParserLogs.objects.all()
+    serializer_class = OpenAITitleParserLogsSerializer

@@ -16,6 +16,7 @@ router.register(r'monitored-tvdownload', views.MonitoredDownloadView, 'monitored
 router.register(r'show-subscription', views.ShowSubscriptionView, 'show-subscription')
 router.register(r'settings', views.HamsterySettingsView, 'settings')
 router.register(r'stats', views.HamsteryStatsView, 'stats')
+router.register(r'title-parser', views.OpenAITitleParserLogsViews, 'title-parser')
 
 urlpatterns = [
     path('api/', include(router.urls)),

@@ -134,6 +134,16 @@ export interface IShowSubscription {
     done: boolean,
 }
 
+export interface ITitleParserLog {
+    id: number,
+    model: string,
+    title: string,
+    episode_number: number,
+    exception: string,
+    tokens_used: number,
+    time: string,
+}
+
 export type ISeasonSearchResult = Record<string, {
     title: string,
     link: string,

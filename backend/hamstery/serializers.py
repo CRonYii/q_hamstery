@@ -66,12 +66,20 @@ class ShowSubscriptionSerializer(serializers.ModelSerializer):
         fields = ('id', 'season', 'indexer', 'query',
                   'priority', 'offset', 'exclude', 'done')
 
+
 class HamsterySettingsSerializer(serializers.ModelSerializer):
     class Meta:
         model = HamsterySettings
         fields = '__all__'
 
+
 class HamsteryStatsSerializer(serializers.ModelSerializer):
     class Meta:
         model = HamsteryStats
+        fields = '__all__'
+
+
+class OpenAITitleParserLogsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OpenAITitleParserLogs
         fields = '__all__'

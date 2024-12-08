@@ -1,10 +1,11 @@
 import { Button, Col, Divider, Row, Statistic, Typography } from 'antd'
 import React, { useState } from 'react'
-import { IHamsteryStats } from '../../app/entities'
+import { IHamsteryStats, ITitleParserLog } from '../../app/entities'
 import { useAppDispatch } from '../../app/hook'
 import hamstery from '../api/hamstery'
 import { hamsterySlice } from '../api/hamsterySlice'
 import ApiLoading from '../general/ApiLoading'
+import TitleParserLogs from './TitleParserLogs'
 
 interface IStat {
     title: string,
@@ -60,24 +61,29 @@ const StatsPage: React.FC = () => {
     }
 
     return <ApiLoading getters={{
-        'stats': () => hamsterySlice.useGetStatsQuery('1')
+        'stats': () => hamsterySlice.useGetStatsQuery('1'),
+        'title_parser_logs': hamsterySlice.useGetTitleParserLogsQuery,
     }}>
         {
             ({ values }) => {
                 const stats: IHamsteryStats = values.stats.data
-                return <Stats stats={[
-                    {
-                        title: 'OpenAI Title Parser',
-                        data: [
-                            [{ name: 'API Calls', value: stats.openai_title_parser_calls }, { name: 'API Failures', value: stats.openai_title_parser_failures },],
-                            [{ name: 'Total Tokens Used', value: stats.openai_title_parser_total_tokens_used }, { name: 'Pormpt Tokens Used', value: stats.openai_title_parser_prompt_tokens_used }, { name: 'Completion Tokens Used', value: stats.openai_title_parser_completion_tokens_used },],
-                        ],
-                        reset: async () => {
-                            await hamstery.resetTitleParserStats()
-                            resetStats()
-                        }
-                    },
-                ]} />
+                const titleParserLogs: ITitleParserLog[] = values.title_parser_logs.data
+                return <div>
+                    <Stats stats={[
+                        {
+                            title: 'OpenAI Title Parser',
+                            data: [
+                                [{ name: 'API Calls', value: stats.openai_title_parser_calls }, { name: 'API Failures', value: stats.openai_title_parser_failures },],
+                                [{ name: 'Total Tokens Used', value: stats.openai_title_parser_total_tokens_used }, { name: 'Pormpt Tokens Used', value: stats.openai_title_parser_prompt_tokens_used }, { name: 'Completion Tokens Used', value: stats.openai_title_parser_completion_tokens_used },],
+                            ],
+                            reset: async () => {
+                                await hamstery.resetTitleParserStats()
+                                resetStats()
+                            }
+                        },
+                    ]} />
+                    <TitleParserLogs logs={titleParserLogs} />
+                </div>
             }
         }
     </ApiLoading>

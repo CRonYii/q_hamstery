@@ -7,9 +7,10 @@ from django.conf import settings
 from openai import OpenAI
 from openai.types import Model
 
+from hamstery import utils
 from hamstery.hamstery_settings import SettingsHandler, settings_manager
 from hamstery.models.settings import HamsterySettings
-from hamstery.models.stats import HamsteryStats
+from hamstery.models.stats import HamsteryStats, OpenAITitleParserLogs
 
 logger = logging.getLogger(__name__)
 
@@ -28,8 +29,10 @@ supported_models = [
 JSON_MODE_PROMPT = '''You are an API that receives user input in JSON format and respond only in JSON format. If the input format is incorrect or if you cannot determine a proper response from the input, respond with { "error": "<error msg>" }
 '''
 
+
 class OpenAIException(Exception):
-    def __init__(self, message):
+    def __init__(self, response, message):
+        self.response = response
         super().__init__(message)
 
 
@@ -91,22 +94,25 @@ class OpenAIManager:
         choice = response.choices[0]
         # We are not handling finish_reason=length since it's not very likely to happen for a single episode name parsing
         if choice.finish_reason != "stop":
-            raise OpenAIException("OpenAI API failed with: %s" %
+            raise OpenAIException(response, "OpenAI API failed with: %s" %
                                   (choice['finish_reason']))
         try:
             content = json.loads(choice.message.content)
         except:
-            raise OpenAIException("Faile to decode ChatGPT JSON response: %s" %
+            raise OpenAIException(response, "Faile to decode ChatGPT JSON response: %s" %
                                   (choice.message.content))
         if 'error' in content:
-            raise OpenAIException(
-                "OpenAI ChatGPT failed to extract episode number: %s" % (content['error']))
+            raise OpenAIException(response,
+                                  "OpenAI ChatGPT failed to extract episode number: %s" % (content['error']))
 
         return content, response
 
     def get_episode_number_from_title(self, title: str) -> int:
         if self.enable_handle_title is False:
             return None
+        episode_number = None
+        response = None
+        error = None
         settings = settings_manager.settings
         model = settings.openai_title_parser_model
         prompt = settings.openai_title_parser_prompt
@@ -122,14 +128,30 @@ class OpenAIManager:
                 stats.update_title_parser_stats(prompt_tokens=response.usage.prompt_tokens,
                                                 completion_tokens=response.usage.completion_tokens,
                                                 total_tokens=response.usage.total_tokens)
-            episode_number = content['episode']
+            episode_number = int(content['episode'])
             logger.info("OpenAI ChatCompletion extracted '%s' from '%s'" %
                         (episode_number, title))
-            return episode_number
-        except Exception:
+        except OpenAIException as e:
+            stats.update_title_parser_stats(fails=1)
+            error = str(e)
+            logger.error(error)
+            response = e.response
+        except Exception as e:
+            error = str(e)
             stats.update_title_parser_stats(fails=1)
             logger.error(traceback.format_exc())
-            return None
+        log = OpenAITitleParserLogs(
+            model=model,
+            title=title,
+        )
+        if episode_number:
+            log.episode_number = episode_number
+        if response and response.usage:
+            log.tokens_used = response.usage.total_tokens
+        if error:
+            log.exception = error
+        log.save()
+        return episode_number
 
 
 openai_manager = OpenAIManager()

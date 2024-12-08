@@ -29,3 +29,11 @@ class HamsteryStats(SingletonModel):
 
     def __str__(self) -> str:
         return 'Hamstery Stats'
+
+class OpenAITitleParserLogs(models.Model):
+    model = models.CharField(max_length=128)
+    title = models.CharField(max_length=256)
+    episode_number = models.IntegerField(default=0)
+    exception = models.CharField(max_length=512, blank=True, default='')
+    tokens_used = models.IntegerField(default=0)
+    time = models.DateTimeField(auto_now_add=True)

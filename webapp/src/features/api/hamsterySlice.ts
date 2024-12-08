@@ -2,9 +2,9 @@ import { TagDescription } from '@reduxjs/toolkit/dist/query/endpointDefinitions'
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import Cookies from 'js-cookie';
 import flatten from 'lodash/flatten';
-import { IDjangoOptions, IHamsterySettings, IHamsteryStats, IIndexer, IParamOptions, ISeasonSearchResult, IShowSubscription, ITorznab, ITvDownload, ITvEpisode, ITvLibrary, ITvSeason, ITvShow, ITvStorage } from '../../app/entities';
+import { IDjangoOptions, IHamsterySettings, IHamsteryStats, IIndexer, IParamOptions, ISeasonSearchResult, IShowSubscription, ITitleParserLog, ITorznab, ITvDownload, ITvEpisode, ITvLibrary, ITvSeason, ITvShow, ITvStorage } from '../../app/entities';
 
-type TagTypes = 'stats' | 'settings' | 'tvlib' | 'tvstorage' | 'tvshow' | 'tvseason' | 'tvepisode' | 'tvdownload' | 'monitored-tvdownload' | 'indexer' | 'torznab' | 'show-subscription'
+type TagTypes = 'stats' | 'settings' | 'tvlib' | 'tvstorage' | 'tvshow' | 'tvseason' | 'tvepisode' | 'tvdownload' | 'monitored-tvdownload' | 'indexer' | 'torznab' | 'show-subscription' | 'title-parser'
 
 export interface IPageNumberResult<T> {
     count: number
@@ -24,7 +24,7 @@ export const hamsterySlice = createApi({
             return headers
         }
     }),
-    tagTypes: ['stats', 'settings', 'tvlib', 'tvstorage', 'tvshow', 'tvseason', 'tvepisode', 'tvdownload', 'monitored-tvdownload', 'indexer', 'torznab', 'show-subscription'],
+    tagTypes: ['stats', 'settings', 'tvlib', 'tvstorage', 'tvshow', 'tvseason', 'tvepisode', 'tvdownload', 'monitored-tvdownload', 'indexer', 'torznab', 'show-subscription', 'title-parser'],
     endpoints: builder => {
         const CRUDEntity = <T>(
             {
@@ -168,6 +168,7 @@ export const hamsterySlice = createApi({
         const indexer = CRUDEntity<IIndexer>({ name: 'indexer', url: '/indexer/' })
         const torznab = CRUDEntity<ITorznab>({ name: 'torznab', url: '/torznab/' })
         const show_subscriptions = CRUDEntity<IShowSubscription>({ name: 'show-subscription', url: '/show-subscription/' })
+        const title_parser = CRUDEntity<ITitleParserLog>({ name: 'title-parser', url: '/title-parser/' })
         return {
             // Hamstery Settings
             getSettings: settings.get,
@@ -312,6 +313,9 @@ export const hamsterySlice = createApi({
                     url: `/show-subscription/${id}/monitor/`,
                 }),
             }),
+            // OpenAITitleParserLogs
+            getTitleParserLogs: title_parser.getAll,
+            getTitleParserLog: title_parser.get,
         }
     }
 })
