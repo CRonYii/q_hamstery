@@ -5,7 +5,7 @@ services:
     container_name: q_hamstery
     image: q_hamstery:latest
     ports:
-      - "8000:80"
+      - "8001:8001"
     environment:
       - PUID=
       - PGID=
@@ -13,10 +13,8 @@ services:
       - SECRET_KEY=
       - HOST_NAME=
       - HOST=
+      - HAMSTERY_PORT=
     volumes:
-      - uwsgi_data:/tmp/uwsgi/
       - /path/to/library:/home/library/
       - /path/to/app_data:/app/backend/app_data/
     restart: unless-stopped
-volumes:
-  uwsgi_data:
