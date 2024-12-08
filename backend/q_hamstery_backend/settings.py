@@ -176,6 +176,7 @@ LOGGING = {
         },
         'console': {
             'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
         },
     },
     'loggers': {
