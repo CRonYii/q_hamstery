@@ -62,7 +62,9 @@ COPY backend/ ./
 RUN python3 ./manage.py collectstatic --no-input && \
 	python3 ./manage.py migrate && \
 	python3 ./manage.py createsuperuser --noinput && \
-	mv app_data/db.sqlite3 ./default.sqlite3
+	mv app_data/db.sqlite3 ./default.sqlite3 && \
+	mkdir -p /var/www/html && \
+	cp -r ./static /var/www/html
 
 # Setup Frontend
 WORKDIR /run/nginx
