@@ -238,7 +238,7 @@ class TvShow(models.Model):
                             pass
                     await season.adelete()
                 else:
-                    logger.warn('Failed to remove %s - Season %02d: local video file linked to it already.' % (season.show.name, season.season_number))
+                    logger.warning('Failed to remove %s - Season %02d: local video file linked to it already.' % (season.show.name, season.season_number))
                     season.warn_removed = True
                     await season.asave()
 
@@ -352,22 +352,27 @@ class TvSeason(models.Model):
         return res
 
     async def scan_episodes(self, episodes):
-        # We should not need to worry about clearing episodes unless # of episodes is reduced (which is unlikely)
         episode_map = self.get_episode_to_dir_map()
-        episode_set = set()
+        episode_map = {}
         for episode in episodes:
             episode_number = episode['episode_number']
             path = episode_map.get(episode_number, '')
             await TvEpisode.objects.create_or_update_by_episode_number(season=self, details=episode, dirpath=path)
-            episode_set.add(episode['id'])
+            episode_map[episode['id']] = episode_number
+        # Clearing episodes
         async for episode in self.episodes.all():
-            if episode.tmdb_id not in episode_set:
-                if episode.status == TvEpisode.Status.MISSING:
-                    await episode.adelete()
-                else:
-                    logger.warn('Failed to remove %s - Season %02d EP %02d: local video file linked to it already.' % (episode.season.show.name, episode.season_number, episode.episode_number))
-                    episode.warn_removed = True
-                    await episode.asave()
+            # Case that a episode has been removed from TMDB
+            if episode.tmdb_id in episode_map:
+                # Case that a episode's number has changed but TMDB id remains the same and caused a duplicated episode with the same tmdb_id
+                if episode.episode_number == episode_map[episode.tmdb_id]:
+                    continue
+            if episode.status == TvEpisode.Status.MISSING:
+                await episode.adelete()
+            else:
+                logger.warning('Failed to remove %s - Season %02d EP %02d: local video file linked to it already.' % (episode.season.show.name, episode.season_number, episode.episode_number))
+                episode.warn_removed = True
+                await episode.asave()
+            
 
     def search_episodes_from_indexer(self, query: str, indexer: Indexer, offset=0, exclude=''):
         eps: List[TvEpisode] = self.episodes.all()
@@ -514,7 +519,7 @@ class TvEpisode(models.Model):
         path = Path(pathstr)
         season_folder = Path(self.get_folder())
         if not path.exists() or not path.is_file() or not is_video_extension(pathstr):
-            logger.warn('Attempt to import invalid file: %s' % pathstr)
+            logger.warning('Attempt to import invalid file: %s' % pathstr)
             return False
         if season_folder not in path.parents:
             # Need to first move the file to season folder and rename
@@ -553,7 +558,7 @@ class TvEpisode(models.Model):
                 try:
                     import_single_file(sup_file, dst_sup_file_path, mode)
                 except OSError as e:
-                    logger.warn('Error when importing supplemental file "%s": %s' % (sup_file, str(e)))
+                    logger.warning('Error when importing supplemental file "%s": %s' % (sup_file, str(e)))
         self.path = pathstr
         self.status = TvEpisode.Status.READY
         if manually is True:
@@ -566,7 +571,7 @@ class TvEpisode(models.Model):
             return False
         sup_file = Path(pathstr)
         if not sup_file.exists() or not sup_file.is_file() or not is_supplemental_file_extension(pathstr):
-            logger.warn('Attempt to import invalid supplemental file: %s' % pathstr)
+            logger.warning('Attempt to import invalid supplemental file: %s' % pathstr)
             return False
         final_folder = os.path.dirname(self.path)
         final_basename, _ = os.path.splitext(os.path.basename(self.path))
@@ -579,7 +584,7 @@ class TvEpisode(models.Model):
         try:
             import_single_file(sup_file, dst_sup_file_path, mode)
         except OSError as e:
-            logger.warn('Error when importing supplemental file "%s": %s' % (sup_file, str(e)))
+            logger.warning('Error when importing supplemental file "%s": %s' % (sup_file, str(e)))
         return True
 
     def cancel_related_downloads(self, type: str):
