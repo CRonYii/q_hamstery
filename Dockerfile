@@ -8,7 +8,7 @@ WORKDIR /app/webapp
 COPY webapp ./
 
 RUN npm ci && \
-PUBLIC_URL=/webapp npm run build
+PUBLIC_URL=/ npm run build
 
 ### Ngnix and Django
 FROM alpine:3.13 AS base
@@ -69,7 +69,7 @@ WORKDIR /run/nginx
 
 COPY nginx.conf /etc/nginx/nginx.conf.template
 
-COPY --from=build /app/webapp/build /var/www/html/webapp
+COPY --from=build /app/webapp/build /var/www/html/
 
 # Remove unnecessary files from runtime
 RUN apk del gcc \
