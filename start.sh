@@ -1,5 +1,6 @@
 #!/bin/ash
 
+export BUILDING=True
 
 PUID=${PUID:-1000}
 PGID=${PGID:-1000}
@@ -24,7 +25,7 @@ if [ "$#" -ne 0 ]; then
 			exit 1
 		fi
 		version="$2"
-		BUILDING=True python3 manage.py downgrade $version
+		python3 manage.py downgrade $version
 		exit 0
 	fi
 	echo "Unknown command."
@@ -39,5 +40,8 @@ fi
 envsubst '${HOST},${HAMSTERY_PORT}' < /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf
 nginx
 
-BUILDING=True python3 manage.py run_migration
+python3 manage.py run_migration
+chown -R hamstery:hamstery /app
+
+export BUILDING=False
 exec su-exec hamstery uwsgi --ini q_hamstery_backend.uwsgi.ini
