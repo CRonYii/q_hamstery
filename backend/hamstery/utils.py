@@ -379,3 +379,16 @@ def read_last_nlines(f: io.BufferedIOBase, n: int, d = b'\n') -> bytes:
             # We do not have N lines. Return everthing.
             arr.appendleft(seg)
     return b"".join(arr)
+
+def decode_str_to_dict(s: str, *args):
+    data = {}
+    res = []
+    params = s.split(',')
+    for param in params:
+        [key, value] = param.split('=')
+        data[key] = value
+    for k in args:
+        if k not in data:
+            return failure('"%s" is not present' % (k))
+        res.append(data[k])
+    return success(res)

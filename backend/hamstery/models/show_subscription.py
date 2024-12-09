@@ -61,12 +61,12 @@ class ShowSubscription(models.Model):
             torrent = torrents[0]
             try:
                 if 'magneturl' in torrent:
-                    ep.monitor_download_by_url(self.id, torrent['magneturl'])
+                    ep.download(urls=torrent['magneturl'], monitor=self.id)
                 elif torrent['link'].startswith('magnet:'):
-                    ep.monitor_download_by_url(self.id, torrent['link'])
+                    ep.download(urls=torrent['link'], monitor=self.id)
                 else:
                     r = requests.get(torrent['link'])
-                    ep.monitor_download_by_torrents(self.id, r.content)
+                    ep.download(torrents=r.content, monitor=self.id)
             except Exception:
                 logger.error('Failed to download monitored-tv (%s): %s' % (torrent['title'], traceback.format_exc()))
         return

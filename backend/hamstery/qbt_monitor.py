@@ -6,13 +6,12 @@ from typing import Any, Callable
 
 from apscheduler.schedulers.blocking import BlockingScheduler
 from apscheduler.triggers.interval import IntervalTrigger
-from django.conf import settings
 
 from hamstery.hamstery_settings import settings_manager
 from hamstery.models.download import Download, MonitoredTvDownload, TvDownload
 from hamstery.models.library import TvEpisode
 from hamstery.models.show_subscription import ShowSubscription
-from hamstery.qbittorrent import qbt
+from hamstery.qbittorrent import *
 from hamstery.utils import (Result, failure, is_supplemental_file_extension,
                             is_video_extension, success)
 from hamstery import utils
@@ -37,9 +36,6 @@ def schedule_qbittorrent_job():
 def start():
     if schedule_qbittorrent_job():
         scheduler.start()
-
-
-HAMSTERY_CATEGORY = "hamstery-download (%s)" % settings.HOST_NAME
 
 
 def qbittorrent_monitor_step():
@@ -96,29 +92,22 @@ def task_handler(error_tag, finish_tag, tasks):
 
 
 ### TV Workflows ###
-# General Tags
-ERROR_TV_TAG = "error-tv"
-ORGANIZED_TV_TAG = "organized-tv"
-MONITORED_TV_TAG = "monitored-tv"
-
-# Dedicated Episode Workflow
-DEDICATED_UNSCHEDULED_TV_TAG = "unscheduled-tv"
-DEDICATED_FETCHING_TV_TAG = "fetching-tv"
-
-# Organize Workflow - Shared
-DOWNLOADING_TV_TAG = "downloading-tv"
-
-
 def handle_unscheduled_dedicated_episode_task(task):
     if MONITORED_TV_TAG in task['tags']:
-        [ep_id, sub_id] = task['name'].split(',')
+        res = utils.decode_str_to_dict(task['name'], 'episode', 'monitor')
+        if not res.success:
+            return res
+        [ep_id, sub_id] = res.data()
         try:
             sub_id = int(sub_id)
             sub: ShowSubscription = ShowSubscription.objects.get(pk=sub_id)
         except (ShowSubscription.DoesNotExist, ValueError):
             return failure('Cannot find Show Subscription in DB')
     else:
-        ep_id = task['name']
+        res = utils.decode_str_to_dict(task['name'], 'episode')
+        if not res.success:
+            return res
+        [ep_id] = res.data()
 
     try:
         ep_id = int(ep_id)

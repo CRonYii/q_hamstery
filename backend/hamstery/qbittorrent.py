@@ -13,6 +13,30 @@ logger = logging.getLogger(__name__)
 # require Web API >= 2.8.3 to run properly
 MINIMUM_WEB_API_VERSION = version.parse('2.8.3')
 
+HAMSTERY_CATEGORY = "hamstery-download (%s)" % settings.HOST_NAME
+
+### TV Workflows ###
+# General Tags
+ERROR_TV_TAG = "error-tv"
+ORGANIZED_TV_TAG = "organized-tv"
+MONITORED_TV_TAG = "monitored-tv"
+
+# Dedicated Episode Workflow
+DEDICATED_MODE = "dedicated"
+DEDICATED_UNSCHEDULED_TV_TAG = "unscheduled-tv"
+DEDICATED_FETCHING_TV_TAG = "fetching-tv"
+
+# Organize Workflow - Shared
+DOWNLOADING_TV_TAG = "downloading-tv"
+
+
+DOWNLOAD_MODE_DEF = {
+    DEDICATED_MODE: {
+        "tag": DEDICATED_UNSCHEDULED_TV_TAG,
+        "params": ["episode"]
+    },
+}
+
 
 class Qbittorrent:
 
@@ -92,6 +116,40 @@ qBittorrent Web API Version: {qbt.client.app.web_api_version}''']
             return [False,
                     f'''Connection to qBittorrent@{qbt.client.host}:{qbt.client.port} failed with error:
 {e}''']
+
+    def download(self, mode: str, urls=None, torrents=None, data={}, monitor=0):
+        if mode not in DOWNLOAD_MODE_DEF:
+            logger.warning(
+                'Try to download with unknown mode=%s monitor=%s data=%s'
+                % (mode, monitor, data))
+            return False
+        if urls is None and torrents is None:
+            logger.warning(
+                'Try to download without providing urls/torrent mode=%s monitor=%s data=%s'
+                % (mode, monitor, data))
+            return False
+        tags = []
+        params = []
+        mode_def = DOWNLOAD_MODE_DEF[mode]
+        tags.append(mode_def['tag'])
+        for p in mode_def['params']:
+            if p not in data:
+                logger.warning(
+                    'download mode=%s missing param %s mode=%s monitor=%s data=%s'
+                    % (mode, p, monitor, data))
+                return False
+            params.append('%s=%s' % (p, data[p]))
+        if monitor:
+            tags.append(MONITORED_TV_TAG)
+            params.append('monitor=%s' % (monitor))
+        res = qbt.client.torrents_add(
+            urls=urls,
+            torrent_files=torrents,
+            rename=','.join(params),
+            category=HAMSTERY_CATEGORY,
+            tags=tags,
+            is_paused=False)
+        return res == 'Ok.'
 
 
 qbt = Qbittorrent()
