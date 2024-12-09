@@ -29,6 +29,9 @@ supported_models = [
 JSON_MODE_PROMPT = '''You are an API that receives user input in JSON format and respond only in JSON format. If the input format is incorrect or if you cannot determine a proper response from the input, respond with { "error": "<error msg>" }
 '''
 
+OPENAI_TITLE_PARSER_DEFAULT_PROMPT = '''Goal: Identify the episode number from the title. The video name may follow various naming conventions and contain indicators of episode numbers in different languages (e.g., English, Chinese, Japanese, etc.). Episode numbers may be embedded in various formats, such as "EP01" or other natural language patterns
+Input: A JSON object containing the title of a video file. For example: { "title": "([POPGO][Ghost_in_the_Shell][S.A.C._2nd_GIG][08][AVC_FLACx2+AC3][BDrip][1080p][072D2CD7]).mkv" }
+Response: A JSON object with the extracted episode number. For example: { "episode": 8 }'''
 
 class OpenAIException(Exception):
     def __init__(self, response, message):
@@ -115,14 +118,13 @@ class OpenAIManager:
         error = None
         settings = settings_manager.settings
         model = settings.openai_title_parser_model
-        prompt = settings.openai_title_parser_prompt
         stats = HamsteryStats.singleton()
         try:
             logger.info(
                 "Querying OpenAI ChatCompletion API Model '%s' to extract episode number from '%s'" % (model, title))
             stats.update_title_parser_stats(calls=1)
             content, response = self.__chatgpt_json_response(
-                model, prompt, '{ "title": "%s" }' % (title)
+                model, OPENAI_TITLE_PARSER_DEFAULT_PROMPT, '{ "title": "%s" }' % (title)
             )
             if response.usage:
                 stats.update_title_parser_stats(prompt_tokens=response.usage.prompt_tokens,

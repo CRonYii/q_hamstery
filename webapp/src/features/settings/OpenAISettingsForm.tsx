@@ -84,10 +84,6 @@ const OpenAISettingsForm: React.FC<{
                     />
                 }
             },
-            {
-                key: 'openai_title_parser_prompt', displayName: 'ChatGPT Title Parsing Prompt',
-                help: 'The prompt for title parser',
-            }
         ]} />
 }
 
