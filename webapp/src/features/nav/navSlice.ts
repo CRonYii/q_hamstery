@@ -16,6 +16,7 @@ const initialState = navAdapter.setAll(navAdapter.getInitialState(), [
     { key: 'indexers', to: '/indexers', label: 'Indexers', },
     { key: 'settings', to: '/settings', label: 'Settings', },
     { key: 'stats', to: '/stats', label: 'Statistics', },
+    { key: 'logs', to: '/logs', label: 'Logs', },
 ])
 
 const navSlice = createSlice({

@@ -77,6 +77,14 @@ const hamstery = {
             }
         })
     },
+    retrieveHamsteryLogs(lines?: number, file?: boolean) {
+        const params: any = {}
+        if (lines)
+            params['lines'] = lines
+        if (lines)
+            params['file'] = file
+        return axios.get<string>(`/hamstery/api/logs/hamstery?${new URLSearchParams(params)}`)
+    },
 };
 
 export default hamstery;

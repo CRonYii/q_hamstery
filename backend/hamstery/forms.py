@@ -31,3 +31,7 @@ class ListMediaForm(forms.Form):
 
 class EpisodeNumberForm(forms.Form):
     title = forms.CharField(required=True)
+
+class LogRqeustForm(forms.Form):
+    lines = forms.IntegerField(required=False)
+    file = forms.BooleanField(required=False)

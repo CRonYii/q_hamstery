@@ -1,4 +1,6 @@
 import base64
+from collections import deque
+import io
 import filecmp
 import json
 import os
@@ -317,3 +319,63 @@ def get_numbered_filename(src, dst):
         number += 1
 
     return dst
+
+def read_last_nlines(f: io.BufferedIOBase, n: int, d = b'\n') -> bytes:
+    """"readlast(f: io.IOBase, n: int, d: bytes = b'\n') -> bytes
+
+    Return the last N segments of file `f`, containing data segments separated by
+    `d`.
+    """
+
+    arr = deque(); d_sz = len(d); step = d_sz; pos = -1;  i = 0
+    try:
+        # Seek to last byte of file, save it to arr as to not check for newline.
+        pos = f.seek(-1, io.SEEK_END) 
+        arr.appendleft(f.read())
+        # Seek past the byte read, plus one to use as the first segment.
+        pos = f.seek(-2, io.SEEK_END) 
+        seg = f.read(1)
+        # Break when 'd' occurs, store index of the rightmost match in 'i'.
+        while True:
+            while (d_idx := seg.rfind(d)) == -1:
+                # Store segments with no b'\n' in a memory-efficient 'deque'.
+                arr.appendleft(seg)
+                # Step back in file, past the bytes just read plus twice that.
+                pos = f.seek(-step*3, io.SEEK_CUR)
+                # Read new segment, twice as big as the one read previous iteration.
+                step *= 2
+                seg = f.read(step)
+            # Read 1 line.
+            i = i + 1
+            if i >= n:
+                # We have read N lines. Ignore the characters up to 'i', and the triggering `d`.
+                arr.appendleft(seg[d_idx+d_sz:])
+                break
+            # We store the line including the triggering `d`, and search for next line
+            arr.appendleft(seg[d_idx:])
+            if d_idx > 0:
+                # The remaining could have stored another `d`. We use the remaining as the next seg to be searched.
+                pos = f.seek(-step+d_idx, io.SEEK_CUR)
+                step = d_idx
+                seg = seg[:d_idx]
+            else:
+                # Reset everthing.
+                pos = f.seek(-step+d_idx-d_sz, io.SEEK_CUR)
+                step = d_sz
+                seg = f.read(step)
+    except OSError as e: 
+        # Reached beginning of file. Read remaining data and check for newline.
+        f.seek(0)
+        seg = f.read(pos)
+        while (d_idx := seg.rfind(d)) != -1:
+            i = i + 1
+            if i >= n:
+                # We have read N lines. Ignore the characters up to 'i', and the triggering `d`.
+                arr.appendleft(seg[d_idx+d_sz:])
+                break
+            arr.appendleft(seg[d_idx:])
+            seg = seg[:d_idx]
+        if i < n:
+            # We do not have N lines. Return everthing.
+            arr.appendleft(seg)
+    return b"".join(arr)

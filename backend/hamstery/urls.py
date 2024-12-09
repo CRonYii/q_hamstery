@@ -25,4 +25,5 @@ urlpatterns = [
     path('auth/test', views.test_auth_view),
     path('api/media/list', views.media_list_root_view),
     path('api/media/episode_number', views.extract_episode_number_from_title_view),
+    path('api/logs/hamstery', views.hamstery_log_view),
 ]

@@ -162,13 +162,15 @@ REST_FRAMEWORK = {
 FIRST_RUN = env('FIRST_RUN')
 BUILDING = env('BUILDING')
 
+LOG_PATH = 'app_data/hamstery.log'
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
     'handlers': {
         'hamstery': {
             'class': 'logging.handlers.RotatingFileHandler',
-            'filename': 'app_data/hamstery.log',
+            'filename': LOG_PATH,
             'encoding': 'utf8',
             'maxBytes': 10485760,  # 1024 * 1024 * 10B = 10MB
             'backupCount': 2,
@@ -193,11 +195,7 @@ LOGGING = {
     },
     'formatters': {
         'verbose': {
-            'format': '{name} {levelname} {asctime} {message}',
-            'style': '{',
-        },
-        'simple': {
-            'format': '{levelname} {asctime} {message}',
+            'format': '{asctime} {levelname} <{name}> {message}',
             'style': '{',
         },
     },

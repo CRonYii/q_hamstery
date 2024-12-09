@@ -6,6 +6,7 @@ import { useAppSelector } from './app/hook';
 import GlobalModal from './features/general/GlobalModal';
 import { responsiveComputeSelector, useResponsiveUpdater } from './features/general/responsiveSlice';
 import TorznabIndexer from './features/indexers/torznab/TorznabIndexer';
+import LogsPage from './features/logs/LogsPage';
 import { IndexerBreadcrumbNav, TvShowsBreadcrumbNav } from './features/nav/BreadcrumbNav';
 import { IndexerSideNavMenu, TvLibrarySideNavMenu, TvSeasonSideNavMenu, TvShowSideNavMenu } from './features/nav/SideNavMenu';
 import TopNavMenu from './features/nav/TopNavMenu';
@@ -33,6 +34,7 @@ const AppContent = () => {
     <Route path='/indexers/torznab' element={<TorznabIndexer />} />
     <Route path='/settings' element={<SettingsPage />} />
     <Route path='/stats' element={<StatsPage />} />
+    <Route path='/logs' element={<LogsPage />} />
     <Route path='*' element={<Navigate to={'/tvshows'} replace />} />
   </Routes>)
 }
@@ -97,7 +99,7 @@ const App: React.FC = () => {
         </Layout>
       </Content>
       <Footer style={{ textAlign: 'center' }}>
-        Hamstery {process.env.REACT_APP_VERSION ? process.env.REACT_APP_VERSION :'<unknown>'} - Tech otakus save the world
+        Hamstery {process.env.REACT_APP_VERSION ? process.env.REACT_APP_VERSION : '<unknown>'} - Tech otakus save the world
       </Footer>
     </Layout>);
   }
