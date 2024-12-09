@@ -12,7 +12,6 @@ class TvDownloadView(viewsets.GenericViewSet):
     queryset = TvDownload.objects.all()
     serializer_class = TvDownloadSerializer
     filterset_fields = {
-        'done': ['exact'],
         'episode': ['exact', 'in'],
     }
 

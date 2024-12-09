@@ -164,7 +164,7 @@ export const hamsterySlice = createApi({
             extraArgTags: (arg) => [{ type: 'tvepisode', id: arg.episode }],
             keepUnusedDataFor: 1,
         })
-        const monitored_tvdownload = CRUDEntity<IIndexer>({ name: 'monitored-tvdownload', url: '/monitored-tvdownload/' })
+        const monitored_tvdownload = CRUDEntity<ITvDownload>({ name: 'monitored-tvdownload', url: '/monitored-tvdownload/' })
         const indexer = CRUDEntity<IIndexer>({ name: 'indexer', url: '/indexer/' })
         const torznab = CRUDEntity<ITorznab>({ name: 'torznab', url: '/torznab/' })
         const show_subscriptions = CRUDEntity<IShowSubscription>({ name: 'show-subscription', url: '/show-subscription/' })

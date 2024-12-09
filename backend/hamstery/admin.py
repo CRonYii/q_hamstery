@@ -45,11 +45,11 @@ class TvSeasonAdmin(admin.ModelAdmin):
 
 @admin.register(TvDownload)
 class TvDownloadAdmin(admin.ModelAdmin):
-    list_display = ['hash', 'episode', 'done']
+    list_display = ['download', 'episode', 'filename']
 
 @admin.register(MonitoredTvDownload)
 class MonitoredTvDownloadAdmin(admin.ModelAdmin):
-    list_display = ['subscription', 'hash', 'episode', 'done']
+    list_display = ['download', 'subscription', 'episode', 'filename']
 
 @admin.register(ShowSubscription)
 class ShowSubscriptionAdmin(admin.ModelAdmin):
