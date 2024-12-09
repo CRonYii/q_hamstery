@@ -84,20 +84,21 @@ if [[ $cur_ver =~ $semver_regex ]]; then
     cd ..
     # backend
     cd backend
-    latest_migration_path=$(ls -t -A1 hamstery/migrations/*.py | head -n 1)
+    latest_migration_path=$(ls -I __init__.py -I __pycache__ -1 hamstery/migrations/ | sort -r | head -n 1)
     latest_migration_name=$(basename -s .py $latest_migration_path)
     echo "$new_ver=$latest_migration_name" >> "migration-version.ini"
     echo "Tagged backend migration for downgrade $new_ver=$latest_migration_name"
     cd ..
     # Tag and commit the version change
-    git add .version webapp/package.json webapp/package-lock.json backend/migration-version.ini
     git diff
     read -p "Confirm commit? (y/n) > " confirm
     confirm="${confirm,,}"
     if [[ $confirm != "y" ]]; then
+		git checkout -- .
         echo "Operation Aborted"
         exit 0
     fi
+    git add .version webapp/package.json webapp/package-lock.json backend/migration-version.ini
     git commit -m "Release $new_ver"
     git tag $new_ver
     cur_tags=$(git tag --points-at HEAD --list v*.*.*)
