@@ -20,7 +20,7 @@ class Download(models.Model):
 
 
 class TvDownload(models.Model):
-    download: Download = models.ForeignKey(
+    task: Download = models.ForeignKey(
         Download, on_delete=models.CASCADE)
     episode: TvEpisode = models.ForeignKey(
         TvEpisode, related_name='downloads', on_delete=models.CASCADE, parent_link=True)

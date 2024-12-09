@@ -50,7 +50,7 @@ class ShowSubscription(models.Model):
             if ep.status == TvEpisode.Status.READY:
                 # If episode already exist, checks if the episode is downloaded by a subscriotion
                 downloads = MonitoredTvDownload.objects.filter(
-                    episode=ep, done=True)
+                    episode=ep, task__done=True)
                 if len(downloads) == 0:
                     # Skip since episode is downloaded/imported by user
                     continue
@@ -83,7 +83,7 @@ class ShowSubscription(models.Model):
             if ep.status == TvEpisode.Status.MISSING:
                 return False
             downloads = MonitoredTvDownload.objects.filter(
-                episode=ep, done=True)
+                episode=ep, task__done=True)
             if len(downloads) == 0:
                 continue
             if downloads[0].subscription.priority > self.priority:

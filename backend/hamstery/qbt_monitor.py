@@ -1,6 +1,7 @@
 import logging
 import os
 import traceback
+from typing import List
 from typing import Any, Callable
 
 from apscheduler.schedulers.blocking import BlockingScheduler
@@ -8,7 +9,7 @@ from apscheduler.triggers.interval import IntervalTrigger
 from django.conf import settings
 
 from hamstery.hamstery_settings import settings_manager
-from hamstery.models.download import MonitoredTvDownload, TvDownload
+from hamstery.models.download import Download, MonitoredTvDownload, TvDownload
 from hamstery.models.library import TvEpisode
 from hamstery.models.show_subscription import ShowSubscription
 from hamstery.qbittorrent import qbt
@@ -47,10 +48,11 @@ def qbittorrent_monitor_step():
     settings_manager.manual_update()
     qbt.test_connection()
     if qbt.known_status is True:
-        qbittorrent_handle_tv_downloads()
+        dedicated_episode_downloads()
+        organize_downloads()
 
 
-def task_handler(download_table, error_tag, finish_tag, tasks):
+def task_handler(error_tag, finish_tag, tasks):
     def handle_tasks(handler: Callable[[Any], Result], tag, next_tag, status=None):
         tasks = qbt.client.torrents_info(
             status_filter=status, category=HAMSTERY_CATEGORY, tag=tag)
@@ -64,7 +66,7 @@ def task_handler(download_table, error_tag, finish_tag, tasks):
                     in_db = r.data() != 'Cannot find download in DB'
                     qbt.client.torrents_delete(in_db, task['hash'])
                     if in_db:
-                        download_table.objects.filter(pk=task['hash']).delete()
+                        Download.objects.filter(pk=task['hash']).delete()
                     logger.warning('%s Download "%s" cancelled: %s' %
                                    (tag, task['name'], r.data()))
                 else:
@@ -93,17 +95,21 @@ def task_handler(download_table, error_tag, finish_tag, tasks):
     return run
 
 
-### TV ###
-UNSCHEDULED_TV_TAG = "unscheduled-tv"
-FETCHING_TV_TAG = "fetching-tv"
-DOWNLOADING_TV_TAG = "downloading-tv"
-DOWNLOADED_TV_TAG = "downloaded-tv"
+### TV Workflows ###
+# General Tags
+ERROR_TV_TAG = "error-tv"
 ORGANIZED_TV_TAG = "organized-tv"
 MONITORED_TV_TAG = "monitored-tv"
-ERROR_TV_TAG = "error-tv"
+
+# Dedicated Episode Workflow
+DEDICATED_UNSCHEDULED_TV_TAG = "unscheduled-tv"
+DEDICATED_FETCHING_TV_TAG = "fetching-tv"
+
+# Organize Workflow - Shared
+DOWNLOADING_TV_TAG = "downloading-tv"
 
 
-def handle_unscheduled_tv_task(task):
+def handle_unscheduled_dedicated_episode_task(task):
     if MONITORED_TV_TAG in task['tags']:
         [ep_id, sub_id] = task['name'].split(',')
         try:
@@ -121,16 +127,21 @@ def handle_unscheduled_tv_task(task):
         return failure('Cannot find download in DB')
     filename = episode.get_formatted_filename()
 
+    # There could be cases that a download is deleted in qbt but not in DB. Restart the task.
+    query = Download.objects.filter(pk=task['hash'])
+    if query.exists():
+        query.first().delete()
+    download: Download = Download.objects.create(hash=task['hash'])
+    download.save()
     if MONITORED_TV_TAG in task['tags']:
-        download: MonitoredTvDownload = MonitoredTvDownload.objects.create(
-            hash=task['hash'], episode=episode, subscription=sub)
-        download.save()
+        tv_download: MonitoredTvDownload = MonitoredTvDownload.objects.create(
+            task=download, episode=episode, subscription=sub)
         logger.info('Subscription started download for %s - %s' %
                     (sub.season.show, episode))
     else:
-        download: TvDownload = TvDownload.objects.create(
-            hash=task['hash'], episode=episode)
-        download.save()
+        tv_download: TvDownload = TvDownload.objects.create(
+            task=download, episode=episode)
+    tv_download.save()
     qbt.client.torrents_rename(task['hash'], filename)
 
     return success('"%s" Download scheduled' % filename)
@@ -141,12 +152,12 @@ def is_valid_tv_download_file(file, target_file):
     return target_file in name and (is_video_extension(name) or is_supplemental_file_extension(name))
 
 
-def handle_fetching_tv_task(task):
-    try:
-        hash = task['hash']
-        download: TvDownload = TvDownload.objects.get(pk=hash)
-    except (TvDownload.DoesNotExist, ValueError):
+def handle_fetching_dedicated_episode_task(task):
+    hash = task['hash']
+    query = TvDownload.objects.filter(task__hash=hash)
+    if query.count() != 1:
         return failure('Cannot find download in DB')
+    download: TvDownload = query.first()
     files = qbt.client.torrents_files(hash)
     if len(files) == 0:
         # skip this time, torrents need some time to fecth content...
@@ -182,61 +193,69 @@ def handle_fetching_tv_task(task):
 
 
 def handle_downloading_tv_task(task):
+    hash = task['hash']
     monitored_task = MONITORED_TV_TAG in task['tags']
     if monitored_task:
-        try:
-            hash = task['hash']
-            download: MonitoredTvDownload = MonitoredTvDownload.objects.get(
-                pk=hash)
-        except (MonitoredTvDownload.DoesNotExist, ValueError):
+        query = MonitoredTvDownload.objects.filter(
+            task__hash=hash)
+        if not query.exists():
             return failure('Cannot find download in DB')
+        downloads: List[MonitoredTvDownload] = query.all()
     else:
-        try:
-            hash = task['hash']
-            download: TvDownload = TvDownload.objects.get(pk=hash)
-        except (TvDownload.DoesNotExist, ValueError):
+        query = TvDownload.objects.filter(
+            task__hash=hash)
+        if not query.exists():
             return failure('Cannot find download in DB')
-    episode: TvEpisode = download.episode
+        downloads: List[TvDownload] = query.all()
 
-    if monitored_task:
-        # Cancel all other subscribed downloads with a lower or equal priority
-        sub = download.subscription
-        downloads = MonitoredTvDownload.objects.filter(episode=episode)
-        for d in downloads:
-            if d == download:
-                continue
-            if d.subscription.priority >= sub.priority:
-                if d.done is True:
-                    download.episode.remove_episode()  # remove episode will delete download for us
-                    download.episode.save()
-                else:
-                    d.cancel()
-        # Episode is still ready after cancelling all monitored downloads,
-        # meaning it's downloaded/imported by used in the mean time, cancel self
-        if episode.status == episode.Status.READY:
-            download.cancel()
-            return failure('Monitored TV download cancelled due to episode is already downloaded/imported by user mannually')
+    dbtask = downloads[0].task
+    dbtask.done = True
+    dbtask.save()
 
-    download.done = True
-    download.save()
+    # Import all episodes in this download
+    for download in downloads:
+        episode: TvEpisode = download.episode
 
-    src_path = os.path.join(task['save_path'], download.filename)
-    if not episode.import_video(src_path, manually=(not monitored_task), mode='link'):
-        return failure('Failed to import TV download')
-    episode.save()
+        if monitored_task:
+            # Cancel all other subscribed downloads with a lower or equal priority
+            sub = download.subscription
+            other_downloads = MonitoredTvDownload.objects.filter(
+                episode=episode)
+            for d in other_downloads:
+                if d == download:
+                    continue
+                if d.subscription.priority >= sub.priority:
+                    if d.task.done is True:
+                        download.episode.remove_episode()  # remove episode will delete download for us
+                        download.episode.save()
+                    else:
+                        d.task.cancel()
+            # Episode is still ready after cancelling all monitored downloads,
+            # meaning it's downloaded/imported by used in the mean time, cancel self
+            if episode.status == episode.Status.READY:
+                download.task.cancel()
+                return failure('Monitored TV download cancelled due to episode is already downloaded/imported by user mannually')
+
+        src_path = os.path.join(task['save_path'], download.filename)
+        if not episode.import_video(src_path, manually=(not monitored_task), mode='link'):
+            return failure('Failed to import TV download')
+        episode.save()
 
     return success('TV organized')
 
 
-qbittorrent_handle_tv_downloads = task_handler(TvDownload, error_tag=ERROR_TV_TAG, finish_tag=ORGANIZED_TV_TAG, tasks=[
+dedicated_episode_downloads = task_handler(error_tag=ERROR_TV_TAG, finish_tag=DOWNLOADING_TV_TAG, tasks=[
     {
-        'tag': UNSCHEDULED_TV_TAG,
-        'handler': handle_unscheduled_tv_task,
+        'tag': DEDICATED_UNSCHEDULED_TV_TAG,
+        'handler': handle_unscheduled_dedicated_episode_task,
     },
     {
-        'tag': FETCHING_TV_TAG,
-        'handler': handle_fetching_tv_task,
+        'tag': DEDICATED_FETCHING_TV_TAG,
+        'handler': handle_fetching_dedicated_episode_task,
     },
+])
+
+organize_downloads = task_handler(error_tag=ERROR_TV_TAG, finish_tag=ORGANIZED_TV_TAG, tasks=[
     {
         'tag': DOWNLOADING_TV_TAG,
         'handler': handle_downloading_tv_task,

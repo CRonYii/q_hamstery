@@ -30,7 +30,7 @@ class TvDownloadView(viewsets.GenericViewSet):
 
     def destroy(self, request, *args, **kwargs):
         instance: TvDownload = self.get_object()
-        instance.cancel()
+        instance.task.cancel()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     def append_extra_info(self, download):

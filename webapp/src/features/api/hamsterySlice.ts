@@ -160,7 +160,6 @@ export const hamsterySlice = createApi({
         const tvdownload = CRUDEntity<ITvDownload>({
             name: 'tvdownload',
             url: '/tvdownload/',
-            idSelector: d => d.hash,
             extraArgTags: (arg) => [{ type: 'tvepisode', id: arg.episode }],
             keepUnusedDataFor: 1,
         })

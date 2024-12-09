@@ -592,12 +592,12 @@ class TvEpisode(models.Model):
             downloads = self.downloads.all()
         elif type == 'downloading':
             downloads = self.downloads.filter(
-                Q(monitoredtvdownload__isnull=False) | Q(done=False))
+                Q(monitoredtvdownload__isnull=False) | Q(task__done=False))
         elif type == 'done':
-            downloads = self.downloads.filter(done=True)
+            downloads = self.downloads.filter(task__done=True)
         for download in downloads:
             logger.info('Deleted download "%s"' % download.filename)
-            download.cancel()
+            download.task.cancel()
 
     def get_formatted_file_destination(self, name, option='full'):
         _, video_filename = os.path.split(name)
@@ -626,18 +626,18 @@ class TvEpisode(models.Model):
         from hamstery.models import MonitoredTvDownload
         if self.status != TvEpisode.Status.READY:
             return False
-        downloads = MonitoredTvDownload.objects.filter(episode=self, done=True)
+        downloads = MonitoredTvDownload.objects.filter(episode=self, task__done=True)
         return len(downloads) == 0
 
     def download_by_url(self, urls):
         if self.is_manually_ready():
             return False
-        from ..qbt_monitor import HAMSTERY_CATEGORY, UNSCHEDULED_TV_TAG, qbt
+        from ..qbt_monitor import HAMSTERY_CATEGORY, DEDICATED_UNSCHEDULED_TV_TAG, qbt
         res = qbt.client.torrents_add(
             urls=urls,
             rename=self.id,
             category=HAMSTERY_CATEGORY,
-            tags=UNSCHEDULED_TV_TAG,
+            tags=DEDICATED_UNSCHEDULED_TV_TAG,
             is_paused=False)
         if res == 'Ok.':
             return True
@@ -647,12 +647,12 @@ class TvEpisode(models.Model):
     def download_by_torrents(self, torrents):
         if self.is_manually_ready():
             return False
-        from ..qbt_monitor import HAMSTERY_CATEGORY, UNSCHEDULED_TV_TAG, qbt
+        from ..qbt_monitor import HAMSTERY_CATEGORY, DEDICATED_UNSCHEDULED_TV_TAG, qbt
         res = qbt.client.torrents_add(
             torrent_files=torrents,
             rename=self.id,
             category=HAMSTERY_CATEGORY,
-            tags=UNSCHEDULED_TV_TAG,
+            tags=DEDICATED_UNSCHEDULED_TV_TAG,
             is_paused=False)
         if res == 'Ok.':
             return True
@@ -661,12 +661,12 @@ class TvEpisode(models.Model):
 
     def monitor_download_by_url(self, sub_id, urls):
         from ..qbt_monitor import (HAMSTERY_CATEGORY, MONITORED_TV_TAG,
-                                   UNSCHEDULED_TV_TAG, qbt)
+                                   DEDICATED_UNSCHEDULED_TV_TAG, qbt)
         res = qbt.client.torrents_add(
             urls=urls,
             rename='%s,%s' % (self.id, sub_id),
             category=HAMSTERY_CATEGORY,
-            tags=[UNSCHEDULED_TV_TAG, MONITORED_TV_TAG],
+            tags=[DEDICATED_UNSCHEDULED_TV_TAG, MONITORED_TV_TAG],
             is_paused=False)
         if res == 'Ok.':
             return True
@@ -675,12 +675,12 @@ class TvEpisode(models.Model):
 
     def monitor_download_by_torrents(self, sub_id, torrents):
         from ..qbt_monitor import (HAMSTERY_CATEGORY, MONITORED_TV_TAG,
-                                   UNSCHEDULED_TV_TAG, qbt)
+                                   DEDICATED_UNSCHEDULED_TV_TAG, qbt)
         res = qbt.client.torrents_add(
             torrent_files=torrents,
             rename='%s,%s' % (self.id, sub_id),
             category=HAMSTERY_CATEGORY,
-            tags=[UNSCHEDULED_TV_TAG, MONITORED_TV_TAG],
+            tags=[DEDICATED_UNSCHEDULED_TV_TAG, MONITORED_TV_TAG],
             is_paused=False)
         if res == 'Ok.':
             return True

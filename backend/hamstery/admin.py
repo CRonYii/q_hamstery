@@ -43,13 +43,17 @@ class TvSeasonAdmin(admin.ModelAdmin):
     list_display = ['tmdb_id', 'name', 'path']
     inlines = (TvEpisodeInline, )
 
+@admin.register(Download)
+class DownloadAdmin(admin.ModelAdmin):
+    model = Download
+
 @admin.register(TvDownload)
 class TvDownloadAdmin(admin.ModelAdmin):
-    list_display = ['download', 'episode', 'filename']
+    list_display = ['task', 'episode', 'filename']
 
 @admin.register(MonitoredTvDownload)
 class MonitoredTvDownloadAdmin(admin.ModelAdmin):
-    list_display = ['download', 'subscription', 'episode', 'filename']
+    list_display = ['task', 'subscription', 'episode', 'filename']
 
 @admin.register(ShowSubscription)
 class ShowSubscriptionAdmin(admin.ModelAdmin):

@@ -87,7 +87,7 @@ export const TvDownloadInfo: React.FC<{ episode: ITvEpisode, downloads: ITvDownl
     const renderDownloadItem = (download: ITvDownload) => {
         const deleteButton = <Popconfirm title={"This download will be deleted!"}
             onConfirm={() => {
-                remove(download.hash)
+                remove(download.id)
                 dispatch(hamsterySlice.util.invalidateTags([{ type: 'tvepisode', id: episode.id }]))
             }}>
             <DeleteTwoTone twoToneColor="#eb2f96" />

@@ -14,13 +14,13 @@ def migrate_tvdownloads(apps, schema_edtior):
     for mon in MonitoredTvDownload.objects.all():
         new_dl = Download.objects.create(hash=mon.hash, done=mon.done)
         MonitoredTvEpisodeDownload.objects.create(
-            download=new_dl, episode=mon.episode, filename=mon.filename, subscription=mon.subscription)
+            task=new_dl, episode=mon.episode, filename=mon.filename, subscription=mon.subscription)
     for dl in TvDownload.objects.all():
         if MonitoredTvDownload.objects.filter(hash=dl.hash).exists():
             continue
         new_dl = Download.objects.create(hash=dl.hash, done=dl.done)
         TvEpisodeDownload.objects.create(
-            episode=dl.episode, filename=dl.filename, download=new_dl)
+            task=new_dl, episode=dl.episode, filename=dl.filename)
 
 
 def migrate_tvdownloads_reverse(apps, schema_edtior):
@@ -31,11 +31,11 @@ def migrate_tvdownloads_reverse(apps, schema_edtior):
     MonitoredTvEpisodeDownload = apps.get_model(
         'hamstery', 'MonitoredTvEpisodeDownload')
     for mon_ep in MonitoredTvEpisodeDownload.objects.all():
-        dl = mon_ep.download
+        dl = mon_ep.task
         MonitoredTvDownload.objects.create(
             hash=dl.hash, done=dl.done, episode=mon_ep.episode, filename=mon_ep.filename, subscription=mon_ep.subscription)
     for ep_dl in TvEpisodeDownload.objects.all():
-        dl = ep_dl.download
+        dl = ep_dl.task
         if MonitoredTvDownload.objects.filter(hash=dl.hash).exists():
             continue
         TvDownload.objects.create(
@@ -84,7 +84,7 @@ class Migration(migrations.Migration):
                 ("filename", models.CharField(
                     blank=True, default="", max_length=4096)),
                 (
-                    "download",
+                    "task",
                     models.ForeignKey(
                         on_delete=django.db.models.deletion.CASCADE,
                         to="hamstery.download",

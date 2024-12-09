@@ -62,10 +62,10 @@ class TvDownloadSerializer(serializers.ModelSerializer):
         fields = ('id', 'hash', 'episode', 'filename', 'done')
         
     def get_hash(self, obj):
-        return obj.download.hash
+        return obj.task.hash
         
     def get_done(self, obj):
-        return obj.download.done
+        return obj.task.done
 
 
 class MonitoredTvDownloadSerializer(serializers.ModelSerializer):
@@ -77,10 +77,10 @@ class MonitoredTvDownloadSerializer(serializers.ModelSerializer):
         fields = ('id', 'hash', 'episode', 'filename', 'subscription', 'done')
             
     def get_hash(self, obj):
-        return obj.download.hash
+        return obj.task.hash
         
     def get_done(self, obj):
-        return obj.download.done
+        return obj.task.done
 
 
 class ShowSubscriptionSerializer(serializers.ModelSerializer):

@@ -71,6 +71,7 @@ export interface ITvEpisode {
 }
 
 export interface ITvDownload {
+    id: string,
     hash: string,
     done: boolean,
     episode: number,
