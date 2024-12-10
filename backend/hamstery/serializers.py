@@ -54,34 +54,14 @@ class DownloadSerializer(serializers.ModelSerializer):
         fields = ('hash', 'done')
 
 class TvDownloadSerializer(serializers.ModelSerializer):
-    hash = serializers.SerializerMethodField()
-    done = serializers.SerializerMethodField()
-
     class Meta:
         model = TvDownload
-        fields = ('id', 'hash', 'episode', 'filename', 'done')
-        
-    def get_hash(self, obj):
-        return obj.task.hash
-        
-    def get_done(self, obj):
-        return obj.task.done
-
+        fields = ('id', 'task', 'episode', 'filename', 'done')
 
 class MonitoredTvDownloadSerializer(serializers.ModelSerializer):
-    hash = serializers.SerializerMethodField()
-    done = serializers.SerializerMethodField()
-
     class Meta:
         model = MonitoredTvDownload
-        fields = ('id', 'hash', 'episode', 'filename', 'subscription', 'done')
-            
-    def get_hash(self, obj):
-        return obj.task.hash
-        
-    def get_done(self, obj):
-        return obj.task.done
-
+        fields = ('id', 'task', 'episode', 'filename', 'subscription', 'done')
 
 class ShowSubscriptionSerializer(serializers.ModelSerializer):
     class Meta:

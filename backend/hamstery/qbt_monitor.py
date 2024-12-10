@@ -197,10 +197,6 @@ def handle_downloading_tv_task(task):
             return failure('Cannot find download in DB')
         downloads: List[TvDownload] = query.all()
 
-    dbtask = downloads[0].task
-    dbtask.done = True
-    dbtask.save()
-
     # Import all episodes in this download
     for download in downloads:
         episode: TvEpisode = download.episode
@@ -214,7 +210,7 @@ def handle_downloading_tv_task(task):
                 if d == download:
                     continue
                 if d.subscription.priority >= sub.priority:
-                    if d.task.done is True:
+                    if d.done is True:
                         download.episode.remove_episode()  # remove episode will delete download for us
                         download.episode.save()
                     else:
@@ -224,6 +220,9 @@ def handle_downloading_tv_task(task):
             if episode.status == episode.Status.READY:
                 download.task.cancel()
                 return failure('Monitored TV download cancelled due to episode is already downloaded/imported by user mannually')
+
+        download.done = True
+        download.save()
 
         src_path = os.path.join(task['save_path'], download.filename)
         if not episode.import_video(src_path, manually=(not monitored_task), mode='link'):

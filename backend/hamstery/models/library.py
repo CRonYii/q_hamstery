@@ -605,9 +605,9 @@ class TvEpisode(models.Model):
             downloads = self.downloads.all()
         elif type == 'downloading':
             downloads = self.downloads.filter(
-                Q(monitoredtvdownload__isnull=False) | Q(task__done=False))
+                Q(monitoredtvdownload__isnull=False) | Q(done=False))
         elif type == 'done':
-            downloads = self.downloads.filter(task__done=True)
+            downloads = self.downloads.filter(done=True)
         for download in downloads:
             logger.info('Deleted download "%s"' % download.filename)
             download.task.cancel()
@@ -640,7 +640,7 @@ class TvEpisode(models.Model):
         if self.status != TvEpisode.Status.READY:
             return False
         downloads = MonitoredTvDownload.objects.filter(
-            episode=self, task__done=True)
+            episode=self, done=True)
         return len(downloads) == 0
 
     def download(self, urls=None, torrents=None, monitor=0):
