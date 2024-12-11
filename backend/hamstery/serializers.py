@@ -51,17 +51,17 @@ class TvLibrarySerializer(serializers.ModelSerializer):
 class DownloadSerializer(serializers.ModelSerializer):
     class Meta:
         model = Download
-        fields = ('hash', 'done')
+        fields = '__all__'
 
 class TvDownloadSerializer(serializers.ModelSerializer):
     class Meta:
         model = TvDownload
-        fields = ('id', 'task', 'episode', 'filename', 'done')
+        fields = ('id', 'task', 'episode', 'filename', 'error', 'done')
 
 class MonitoredTvDownloadSerializer(serializers.ModelSerializer):
     class Meta:
         model = MonitoredTvDownload
-        fields = ('id', 'task', 'episode', 'filename', 'subscription', 'done')
+        fields = ('id', 'task', 'episode', 'filename', 'subscription', 'error', 'done')
 
 class ShowSubscriptionSerializer(serializers.ModelSerializer):
     class Meta:

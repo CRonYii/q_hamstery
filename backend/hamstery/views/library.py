@@ -141,11 +141,11 @@ class TvEpisodeView(viewsets.ReadOnlyModelViewSet):
             return Response(form.errors, status=status.HTTP_400_BAD_REQUEST)
         url = form.cleaned_data['url']
         if url is not None and url != '':
-            if episode.download(urls=url):
+            if episode.download(magnet=url):
                 return Response('Ok')
         elif 'torrent' in request.FILES:
             torrent = request.FILES['torrent']
-            if episode.download(torrents=torrent):
+            if episode.download(torrent=torrent):
                 return Response('Ok')
         return Response('Invalid download', status=status.HTTP_400_BAD_REQUEST)
 

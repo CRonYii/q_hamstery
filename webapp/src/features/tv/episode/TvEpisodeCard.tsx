@@ -1,4 +1,4 @@
-import { CheckCircleTwoTone, CloudDownloadOutlined, DeleteTwoTone } from '@ant-design/icons';
+import { CheckCircleTwoTone, CloseCircleTwoTone, CloudDownloadOutlined, DeleteTwoTone } from '@ant-design/icons';
 import { Badge, Card, List, Popconfirm, Row, Tooltip, notification } from 'antd';
 import React from 'react';
 import { ITvDownload, ITvEpisode, ITvSeason, ITvShow, TvEpisodeStatus } from '../../../app/entities';
@@ -110,6 +110,16 @@ export const TvDownloadInfo: React.FC<{ episode: ITvEpisode, downloads: ITvDownl
                         <b> Uploaded: </b>{formatBytes(extra_info.uploaded)} <br />
                         <b> Upspeed↑: </b>{formatBytes(extra_info.upspeed)}/s <br />
                         <Row align='middle' justify='center'><CheckCircleTwoTone twoToneColor="#52c41a" /></Row>
+                    </span>}
+                />
+                {deleteButton}
+            </List.Item>
+        } else if (download.error) {
+            return <List.Item>
+                <List.Item.Meta
+                    title={<DownloadName title={download.filename} length={downloadNameLength} />}
+                    description={<span>
+                        <Row align='middle' justify='center'><CloseCircleTwoTone twoToneColor="#eb2f96" /> An Error has occured</Row>
                     </span>}
                 />
                 {deleteButton}

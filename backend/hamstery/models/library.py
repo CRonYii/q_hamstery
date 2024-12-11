@@ -610,7 +610,7 @@ class TvEpisode(models.Model):
             downloads = self.downloads.filter(done=True)
         for download in downloads:
             logger.info('Deleted download "%s"' % download.filename)
-            download.task.cancel()
+            download.cancel()
 
     def get_formatted_file_destination(self, name, option='full'):
         _, video_filename = os.path.split(name)
@@ -639,16 +639,30 @@ class TvEpisode(models.Model):
         from hamstery.models import MonitoredTvDownload
         if self.status != TvEpisode.Status.READY:
             return False
+        # Monitored download is not considered a manual download
         downloads = MonitoredTvDownload.objects.filter(
             episode=self, done=True)
-        return len(downloads) == 0
+        return not downloads.exists()
 
-    def download(self, urls=None, torrents=None, monitor=0):
+    def download(self, magnet=None, torrent=None, monitor=None):
+        '''
+        Dedicated episode download. 
+        Creates exactly one TvDownload to import exactly one episode from this download.
+        '''
         if self.is_manually_ready():
             return False
-        data = {"episode": self.id}
-        return qbt.download(mode=DEDICATED_MODE, urls=urls,
-                     torrents=torrents, data=data, monitor=monitor)
+        from hamstery.models.download import Download, TvDownload, MonitoredTvDownload
+        task: Download = Download.objects.download(magnet=magnet, torrent=torrent)
+        if not task:
+            return False
+        if not monitor:
+            TvDownload.objects.create(task=task, episode=self)
+        else:
+            MonitoredTvDownload.objects.create(task=task, episode=self, subscription=monitor)
+        task.notify_new_downloads()
+        return True
+            
+
 
     def __str__(self):
         return "%s - S%02dE%02d - %s" % (self.id, self.season_number, self.episode_number, self.name)

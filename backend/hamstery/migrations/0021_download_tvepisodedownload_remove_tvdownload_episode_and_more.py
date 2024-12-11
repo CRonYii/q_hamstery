@@ -12,13 +12,13 @@ def migrate_tvdownloads(apps, schema_edtior):
     MonitoredTvEpisodeDownload = apps.get_model(
         'hamstery', 'MonitoredTvEpisodeDownload')
     for mon in MonitoredTvDownload.objects.all():
-        new_dl = Download.objects.create(hash=mon.hash)
+        new_dl = Download.objects.create(hash=mon.hash, name=mon.filename, completed=mon.done, fetched=mon.done)
         MonitoredTvEpisodeDownload.objects.create(
             task=new_dl, episode=mon.episode, filename=mon.filename, subscription=mon.subscription, done=mon.done)
     for dl in TvDownload.objects.all():
         if MonitoredTvDownload.objects.filter(hash=dl.hash).exists():
             continue
-        new_dl = Download.objects.create(hash=dl.hash)
+        new_dl = Download.objects.create(hash=dl.hash, name=dl.filename, completed=dl.done, fetched=dl.done)
         TvEpisodeDownload.objects.create(
             task=new_dl, episode=dl.episode, filename=dl.filename, done=dl.done)
 
@@ -56,6 +56,18 @@ class Migration(migrations.Migration):
                     models.CharField(
                         max_length=256, primary_key=True, serialize=False),
                 ),
+                (
+                    'completed',
+                    models.BooleanField(default=False),
+                ),
+                (
+                    'fetched',
+                    models.BooleanField(default=False),
+                ),
+                (
+                    'name',
+                    models.CharField(blank=True, default='', max_length=4096),
+                ),
             ],
         ),
         migrations.CreateModel(
@@ -79,6 +91,7 @@ class Migration(migrations.Migration):
                         to="hamstery.tvepisode",
                     ),
                 ),
+                ("file_index", models.IntegerField(default=-1)),
                 ("filename", models.CharField(
                     blank=True, default="", max_length=4096)),
                 (
@@ -89,6 +102,7 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 ("done", models.BooleanField(default=False)),
+                ("error", models.BooleanField(default=False)),
             ],
         ),
         migrations.CreateModel(

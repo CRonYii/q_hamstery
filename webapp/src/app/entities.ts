@@ -73,6 +73,7 @@ export interface ITvEpisode {
 export interface ITvDownload {
     id: string,
     task: string,
+    error: boolean,
     done: boolean,
     episode: number,
     filename: string,

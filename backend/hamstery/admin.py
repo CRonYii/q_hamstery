@@ -49,11 +49,11 @@ class DownloadAdmin(admin.ModelAdmin):
 
 @admin.register(TvDownload)
 class TvDownloadAdmin(admin.ModelAdmin):
-    list_display = ['task', 'episode', 'filename', 'done']
+    list_display = ['task', 'episode', 'filename', 'error', 'done']
 
 @admin.register(MonitoredTvDownload)
 class MonitoredTvDownloadAdmin(admin.ModelAdmin):
-    list_display = ['task', 'subscription', 'episode', 'filename', 'done']
+    list_display = ['task', 'subscription', 'episode', 'filename', 'error', 'done']
 
 @admin.register(ShowSubscription)
 class ShowSubscriptionAdmin(admin.ModelAdmin):
