@@ -60,7 +60,7 @@ class OpenAIManager:
         ], self.on_openai_config_update))
 
     def load_client(self, instance: HamsterySettings):
-        self.client = OpenAI(api_key=instance.openai_api_key)
+        self.client = OpenAI(api_key=instance.openai_api_key, timeout=10) # Set a timeout in case OpenAI API is broken
         self.enable_openai = instance.openai_api_key != ''
         self.enable_handle_title = self.enable_openai and (
             instance.openai_title_parser_mode != HamsterySettings.TitleParserMode.DISABLED) and (instance.openai_title_parser_model != '')
