@@ -81,7 +81,7 @@ const hamstery = {
         const params: any = {}
         if (lines)
             params['lines'] = lines
-        if (lines)
+        if (file)
             params['file'] = file
         return axios.get<string>(`/hamstery/api/logs/hamstery?${new URLSearchParams(params)}`)
     },
