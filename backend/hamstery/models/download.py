@@ -1,5 +1,9 @@
 import logging
+import heapq
+from collections import deque
 import os
+from polymorphic.models import PolymorphicModel
+
 
 from django.db import models
 
@@ -23,7 +27,8 @@ class DownloadManager(models.Manager):
             query = self.filter(hash=info_hash)
             if query.exists():
                 # Verify if it exists in qbt
-                qbt_tasks = qbt.client.torrents_info(torrent_hashes=[info_hash])
+                qbt_tasks = qbt.client.torrents_info(
+                    torrent_hashes=[info_hash])
                 if len(qbt_tasks) != 0:
                     # No need to create task. Return the Download directly
                     return query.first()
@@ -84,10 +89,10 @@ class Download(models.Model):
             except Exception as e:
                 res = utils.failure(e)
             if res.success:
-                logger.info('Organized TvDownload "%s": %s' %
+                logger.info('Parsed files TvDownload "%s": %s' %
                             (epdl.filename, res.data()))
             else:
-                logger.warning('Cancelled organizing TvDownload "%s": %s' % (
+                logger.warning('Cancelled parsing file TvDownload "%s": %s' % (
                     epdl.filename, res.data()))
 
     def organize(self, task):
@@ -119,7 +124,7 @@ class Download(models.Model):
         self.delete()
 
 
-class TvDownload(models.Model):
+class TvDownload(PolymorphicModel):
     task: Download = models.ForeignKey(
         Download, on_delete=models.CASCADE)
     episode: TvEpisode = models.ForeignKey(
@@ -129,29 +134,49 @@ class TvDownload(models.Model):
     done = models.BooleanField(default=False)
     error = models.BooleanField(default=False)
 
+    def map_files_to_episodes(files):
+        ep_heap = []
+        ep_map = {}
+        for file in files:
+            if not utils.is_video_extension(file['name']):
+                continue
+            ep_n = utils.get_episode_number_from_title(file['name'])
+            if not ep_n:
+                continue
+            if ep_n in ep_map:
+                # XXX Consider not to download this episode since it has duplicated detection
+                continue
+            ep_map[ep_n] = {
+                'episode': ep_n,
+                'index': file['index'],
+                'name': file['name']
+            }
+            heapq.heappush(ep_heap, ep_n)
+        order_eps = list()
+        while len(ep_heap):
+            ep_n = heapq.heappop(ep_heap)
+            order_eps.append(ep_map[ep_n])
+
+        return order_eps
+
     def parse_files(self, files):
         if self.file_index != -1:
             return utils.success('Already fetched file')
-        target_files = list(
-            filter(lambda f: utils.is_video_extension(f['name']), files))
-        if len(target_files) == 0:
-            return self.fail('No video file found in download')
+        ep_files = TvDownload.map_files_to_episodes(files)
         target_file = None
-        if len(target_files) > 1:
-            for file in target_files:
-                if self.get_adjusted_episode_number() == utils.get_episode_number_from_title(file['name']):
-                    target_file = file
-                    break
-            if not target_file:
-                return self.fail('Failed to locate target video file from a multiple video files torrent for single episode download')
-        else:
-            target_file = target_files[0]
+        for f in ep_files:
+            if f['episode'] == self.episode.episode_number:
+                target_file = f
+                break
+
+        if target_file is None:
+            return self.fail('Failed to locate video file for episode %s' % (self.episode.episode_number))
 
         self.file_index = target_file['index']
         self.filename = target_file['name']
         self.save()
 
-        return utils.success('Validated')
+        return utils.success('Parsed files')
 
     def organize(self, task, manually=False):
         if self.file_index == -1:
@@ -178,38 +203,93 @@ class TvDownload(models.Model):
         self.save()
         return utils.failure(msg)
 
-    def get_adjusted_episode_number(self):
-        return self.episode.episode_number
-
 
 class MonitoredTvDownload(TvDownload):
     subscription = models.ForeignKey(
         ShowSubscription, related_name='downloads', on_delete=models.DO_NOTHING, parent_link=True)
+    auto_matched = models.BooleanField(default=False)
+
+    def parse_files(self, files):
+        if self.file_index != -1:
+            return utils.success('Already fetched file')
+        ep_files = TvDownload.map_files_to_episodes(files)
+        continuous = True
+        last_ep = -1
+        target_file = None
+        for f in ep_files:
+            if f['episode'] == self.subscription.offset + self.episode.episode_number:
+                target_file = f
+            if last_ep != -1 and last_ep + 1 != f['episode']:
+                continuous = False
+            last_ep = f['episode']
+
+        if target_file is None:
+            return self.fail('Failed to locate video file for episode %s' % (self.episode.episode_number))
+
+        self.file_index = target_file['index']
+        self.filename = target_file['name']
+        self.save()
+
+        # Handles the rest of the detected episodes
+        if len(ep_files) > 1 and continuous:
+            auto_matching_qualified = True
+            # First, we checks sanity check if auto matching would work
+            for f in ep_files:
+                if f == target_file:
+                    continue
+                episode_query = TvEpisode.objects.filter(
+                    season=self.subscription.season, episode_number=f['episode'])
+                if not episode_query.exists():
+                    auto_matching_qualified = False
+                    break
+                f['episode'] = episode_query.first()
+
+            if auto_matching_qualified:
+                for f in ep_files:
+                    if f == target_file:
+                        continue
+                    MonitoredTvDownload.objects.create(
+                        task=self.task,
+                        episode=f['episode'], file_index=f['index'], filename=f['name'],
+                        auto_matched=True,
+                        subscription=self.subscription)
+                    logger.info('Auto matched Episode "%s" for download "%s"' % (
+                        f['episode'], self.task.name))
+
+        return utils.success('Monitor parsed files')
+
+    def cmp_priority(self, other: 'MonitoredTvDownload'):
+        cmp = other.subscription.priority - self.subscription.priority
+        if cmp:
+            return cmp
+        if self.auto_matched != other.auto_matched:
+            if other.auto_matched:
+                return 1
+            else:
+                return -1
+        return 0
 
     def organize(self, task):
         episode: TvEpisode = self.episode
         # Cancel all other subscribed downloads with a lower or equal priority
-        sub: ShowSubscription = self.subscription
         other_downloads = MonitoredTvDownload.objects.filter(
             episode=episode)
-        for d in other_downloads:
-            if d == self:
+        for other in other_downloads:
+            if other == self:
                 continue
-            if d.subscription.priority >= sub.priority:
-                if d.done is True:
+            if other.done is True:
+                if self.cmp_priority(other) > 0:
                     # XXX: Consider implement episde.replace_video() so in case import fails the previous video is kept
                     episode.remove_episode()  # remove episode will delete download for us
                     episode.save()
-                else:
-                    d.cancel()
+            else:
+                if self.cmp_priority(other) >= 0:
+                    other.cancel()
         # Episode is still ready after cancelling all monitored downloads,
         # meaning it's downloaded/imported by used in the mean time, cancel self
         episode.refresh_from_db()
         if episode.status == episode.Status.READY:
             self.cancel()
-            return utils.failure('Monitored download is already downloaded/imported by user mannually')
+            return utils.failure('Monitored download is already downloaded/imported')
 
         return super().organize(task, manually=True)
-
-    def get_adjusted_episode_number(self):
-        return self.episode.episode_number + self.subscription.offset

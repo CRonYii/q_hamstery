@@ -655,10 +655,13 @@ class TvEpisode(models.Model):
         task: Download = Download.objects.download(magnet=magnet, torrent=torrent)
         if not task:
             return False
+        if TvDownload.objects.filter(task=task, episode=self).exists():
+            return False
         if not monitor:
             TvDownload.objects.create(task=task, episode=self)
         else:
             MonitoredTvDownload.objects.create(task=task, episode=self, subscription=monitor)
+        logger.info('Episode "%s" started a new download "%s"' % (self, task.hash))
         task.notify_new_downloads()
         return True
             

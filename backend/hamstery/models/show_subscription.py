@@ -51,10 +51,10 @@ class ShowSubscription(models.Model):
                 # If episode already exist, checks if the episode is downloaded by a subscriotion
                 downloads = MonitoredTvDownload.objects.filter(
                     episode=ep, done=True)
-                if len(downloads) == 0:
+                if not downloads.exists():
                     # Skip since episode is downloaded/imported by user
                     continue
-                if downloads[0].subscription.priority <= self.priority:
+                if downloads.first().subscription.priority <= self.priority:
                     # Skip since download has equal or higher priority
                     continue
             # We only download the first matched torrent

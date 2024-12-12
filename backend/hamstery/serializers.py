@@ -61,7 +61,7 @@ class TvDownloadSerializer(serializers.ModelSerializer):
 class MonitoredTvDownloadSerializer(serializers.ModelSerializer):
     class Meta:
         model = MonitoredTvDownload
-        fields = ('id', 'task', 'episode', 'filename', 'subscription', 'error', 'done')
+        fields = ('id', 'task', 'episode', 'filename', 'subscription', 'error', 'done', 'auto_matched')
 
 class ShowSubscriptionSerializer(serializers.ModelSerializer):
     class Meta:

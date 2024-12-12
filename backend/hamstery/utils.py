@@ -276,6 +276,7 @@ def get_episode_number_from_title(title: str, force_local=False) -> int:
     from hamstery.hamstery_settings import settings_manager
     from hamstery.models.settings import HamsterySettings
     from hamstery.openai import openai_manager
+    title: str = os.path.basename(title)
     settings = settings_manager.settings
     if not force_local and settings.openai_title_parser_mode == HamsterySettings.TitleParserMode.PRIMARY:
         ep = openai_manager.get_episode_number_from_title(title)

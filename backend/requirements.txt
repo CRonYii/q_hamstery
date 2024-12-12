@@ -6,6 +6,7 @@ Django==4.2.16
 djangorestframework==3.14.0
 django-environ==0.10.0
 django-filter==23.5
+django-polymorphic==3.1.0
 lxml==4.9.4
 qbittorrent-api==2023.11.57
 requests==2.31.0
