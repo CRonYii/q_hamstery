@@ -2,6 +2,9 @@
 
 from django.db import migrations, models
 import django.db.models.deletion
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def migrate_tvdownloads(apps, schema_edtior):
@@ -12,13 +15,15 @@ def migrate_tvdownloads(apps, schema_edtior):
     MonitoredTvEpisodeDownload = apps.get_model(
         'hamstery', 'MonitoredTvEpisodeDownload')
     for mon in MonitoredTvDownload.objects.all():
-        new_dl = Download.objects.create(hash=mon.hash, name=mon.filename, completed=mon.done, fetched=mon.done)
+        new_dl = Download.objects.create(
+            hash=mon.hash, name=mon.filename, completed=mon.done, fetched=mon.done)
         MonitoredTvEpisodeDownload.objects.create(
             task=new_dl, episode=mon.episode, filename=mon.filename, subscription=mon.subscription, done=mon.done)
     for dl in TvDownload.objects.all():
         if MonitoredTvDownload.objects.filter(hash=dl.hash).exists():
             continue
-        new_dl = Download.objects.create(hash=dl.hash, name=dl.filename, completed=dl.done, fetched=dl.done)
+        new_dl = Download.objects.create(
+            hash=dl.hash, name=dl.filename, completed=dl.done, fetched=dl.done)
         TvEpisodeDownload.objects.create(
             task=new_dl, episode=dl.episode, filename=dl.filename, done=dl.done)
 
@@ -31,11 +36,19 @@ def migrate_tvdownloads_reverse(apps, schema_edtior):
         'hamstery', 'MonitoredTvEpisodeDownload')
     for mon_ep in MonitoredTvEpisodeDownload.objects.all():
         dl = mon_ep.task
+        if TvDownload.objects.filter(hash=dl.hash).exists():
+            logger.warning('Skip reverting download "%s" for Episode "%s" since this hamstery version only supported 1 file in 1 download' % (
+                mon_ep.filename, mon_ep.episode))
+            continue
         MonitoredTvDownload.objects.create(
             hash=dl.hash, done=mon_ep.done, episode=mon_ep.episode, filename=mon_ep.filename, subscription=mon_ep.subscription)
     for ep_dl in TvEpisodeDownload.objects.all():
         dl = ep_dl.task
-        if MonitoredTvDownload.objects.filter(hash=dl.hash).exists():
+        if MonitoredTvEpisodeDownload.objects.filter(tvepisodedownload_ptr_id=ep_dl.id).exists():
+            continue
+        if TvDownload.objects.filter(hash=dl.hash).exists():
+            logger.warning('Skip reverting download "%s" for Episode "%s" since this hamstery version only supported 1 file in 1 download' % (
+                mon_ep.filename, mon_ep.episode))
             continue
         TvDownload.objects.create(
             hash=dl.hash, done=ep_dl.done, episode=ep_dl.episode, filename=ep_dl.filename)
@@ -128,6 +141,7 @@ class Migration(migrations.Migration):
                         to="hamstery.showsubscription",
                     ),
                 ),
+                ("auto_matched", models.BooleanField(default=False)),
             ],
             bases=("hamstery.tvepisodedownload",),
         ),

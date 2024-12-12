@@ -22,7 +22,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ("contenttypes", "0002_remove_content_type_name"),
-        ("hamstery", "0023_monitoredtvdownload_auto_matched"),
+        ("hamstery", "0022_rename_tvepisodedownload_tvdownload_and_more"),
     ]
 
     operations = [
