@@ -48,16 +48,11 @@ const computeResponsiveMode = () => {
 }
 
 interface IResponsive {
-    mode: ResponsiveMode,
-    size: {
-        height: number,
-        width: number,
-    }
+    mode: ResponsiveMode
 }
 
 const initialState: IResponsive = {
-    mode: computeResponsiveMode(),
-    size: getWindowDimensions(),
+    mode: computeResponsiveMode()
 }
 
 const responsiveSlice = createSlice({
@@ -65,13 +60,9 @@ const responsiveSlice = createSlice({
     initialState,
     reducers: {
         update(state, action: PayloadAction<{
-            mode: ResponsiveMode, size: {
-                height: number,
-                width: number,
-            }
+            mode: ResponsiveMode
         }>) {
             state.mode = action.payload.mode
-            state.size = action.payload.size
         },
     },
 });
@@ -104,7 +95,7 @@ export const useResponsiveUpdater = () => {
     const dispatch = useAppDispatch()
     useEffect(() => {
         const handleResize = () => {
-            dispatch(responsiveAction.update({ mode: computeResponsiveMode(), size: getWindowDimensions() }))
+            dispatch(responsiveAction.update({ mode: computeResponsiveMode() }))
         }
 
         window.addEventListener('resize', handleResize);
