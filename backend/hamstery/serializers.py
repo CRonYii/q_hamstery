@@ -53,15 +53,33 @@ class DownloadSerializer(serializers.ModelSerializer):
         model = Download
         fields = '__all__'
 
+
 class TvDownloadSerializer(serializers.ModelSerializer):
     class Meta:
         model = TvDownload
-        fields = ('id', 'task', 'episode', 'filename', 'error', 'done')
+        fields = ('id', 'task', 'episode', 'filename',
+                  'file_index', 'error', 'done')
+
 
 class MonitoredTvDownloadSerializer(serializers.ModelSerializer):
     class Meta:
         model = MonitoredTvDownload
-        fields = ('id', 'task', 'episode', 'filename', 'subscription', 'error', 'done', 'auto_matched')
+        fields = ('id', 'task', 'episode', 'filename', 'file_index',
+                  'subscription', 'error', 'done', 'auto_matched')
+
+
+class SeasonDownloadSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SeasonDownload
+        fields = '__all__'
+
+
+class SeasonEpisodeDownloadSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SeasonEpisodeDownload
+        fields = ('id', 'task', 'episode', 'filename',
+                  'file_index', 'error', 'done', 'season_download')
+
 
 class ShowSubscriptionSerializer(serializers.ModelSerializer):
     class Meta:

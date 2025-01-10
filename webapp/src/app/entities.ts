@@ -70,6 +70,20 @@ export interface ITvEpisode {
     warn_removed: boolean,
 }
 
+interface DownloadExtraInfo {
+    name: string,
+    state: string,
+    progress: number,
+    dlspeed: number,
+    completed: number,
+    completion_on: number,
+    size: number,
+    eta: number,
+    ratio: number,
+    uploaded: number,
+    upspeed: number,
+}
+
 export interface ITvDownload {
     id: string,
     task: string,
@@ -77,18 +91,20 @@ export interface ITvDownload {
     done: boolean,
     episode: number,
     filename: string,
-    extra_info: {
-        state: string,
-        progress: number,
-        dlspeed: number,
-        completed: number,
-        completion_on: number,
+    file_index: number,
+    extra_info: DownloadExtraInfo,
+}
+
+export interface ISeasonDownload {
+    id: number,
+    season: number,
+    task: string,
+    extra_info: DownloadExtraInfo,
+    files: {
+        file_index: number,
+        name: string,
         size: number,
-        eta: number,
-        ratio: number,
-        uploaded: number,
-        upspeed: number,
-    }
+    }[]
 }
 
 export interface IIndexer {

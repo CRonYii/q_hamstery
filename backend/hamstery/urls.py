@@ -12,11 +12,18 @@ router.register(r'tvshow', views.TvShowView, 'tv-show')
 router.register(r'tvseason', views.TvSeasonView, 'tv-season')
 router.register(r'tvepisode', views.TvEpisodeView, 'tv-episode')
 router.register(r'tvdownload', views.TvDownloadView, 'tv-download')
-router.register(r'monitored-tvdownload', views.MonitoredDownloadView, 'monitored-tv-download')
-router.register(r'show-subscription', views.ShowSubscriptionView, 'show-subscription')
+router.register(r'monitored-tvdownload',
+                views.MonitoredDownloadView, 'monitored-tv-download')
+router.register(r'season-download',
+                views.SeasonDownloadView, 'season-download')
+router.register(r'season-episode-download',
+                views.SeasonEpisodeDownloadView, 'season-episode-download')
+router.register(r'show-subscription',
+                views.ShowSubscriptionView, 'show-subscription')
 router.register(r'settings', views.HamsterySettingsView, 'settings')
 router.register(r'stats', views.HamsteryStatsView, 'stats')
-router.register(r'title-parser', views.OpenAITitleParserLogsViews, 'title-parser')
+router.register(r'title-parser',
+                views.OpenAITitleParserLogsViews, 'title-parser')
 
 urlpatterns = [
     path('api/', include(router.urls)),

@@ -3,9 +3,13 @@ import { ITvEpisode, ITvSeason } from '../../app/entities';
 import { RootState } from '../../app/store';
 
 
+type IndexerSearchState = 'single' | 'download' | 'closed';
+type IndexerSearchType = 'episode' | 'season';
+
 interface IndexerState {
-    search: 'single' | 'download' | 'closed',
+    search: IndexerSearchState,
     defaultQuery: string,
+    type: IndexerSearchType,
     season?: ITvSeason,
     episode?: ITvEpisode,
     searchId?: string,
@@ -13,7 +17,8 @@ interface IndexerState {
 
 const initialState: IndexerState = {
     defaultQuery: '',
-    search: 'closed'
+    search: 'closed',
+    type: 'episode',
 }
 
 const indexerSlice = createSlice({
@@ -24,11 +29,12 @@ const indexerSlice = createSlice({
             state.search = 'single'
             state.searchId = action.payload.id
         },
-        download(state, action: PayloadAction<{ season: ITvSeason, episode: ITvEpisode, query: string }>) {
+        download(state, action: PayloadAction<{ season: ITvSeason, episode?: ITvEpisode, query: string }>) {
             state.search = 'download'
             state.season = action.payload.season
             state.episode = action.payload.episode
             state.defaultQuery = action.payload.query
+            state.type = state.episode ? 'episode' : 'season'
         },
         closeSearch(state, action: PayloadAction<void>) {
             state.search = 'closed'

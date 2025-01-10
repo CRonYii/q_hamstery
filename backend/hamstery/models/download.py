@@ -1,13 +1,12 @@
 import logging
 import heapq
-from collections import deque
 import os
 from polymorphic.models import PolymorphicModel
 
 
 from django.db import models
 
-from hamstery.models.library import TvEpisode
+from hamstery.models.library import TvEpisode, TvSeason
 from hamstery.models.show_subscription import ShowSubscription
 from hamstery.qbittorrent import *
 from hamstery import utils
@@ -74,13 +73,22 @@ class Download(models.Model):
 
         self.organize(task)
 
+    @property
+    def info(self):
+        [task] = qbt.client.torrents_info(torrent_hashes=[self.hash])
+        return task
+
+    @property
+    def files(self):
+        if self.fetched:
+            return qbt.client.torrents_files(self.hash)
+        return []
+
     def notify_new_downloads(self):
         if self.fetched:
-            files = qbt.client.torrents_files(self.hash)
-            self.parse_files(files)
+            self.parse_files(self.files)
         if self.completed:
-            [task] = qbt.client.torrents_info(torrent_hashes=[self.hash])
-            self.organize(task)
+            self.organize(self.info)
 
     def parse_files(self, files):
         for epdl in TvDownload.objects.filter(task=self, done=False, error=False, file_index=-1).all():
@@ -110,6 +118,8 @@ class Download(models.Model):
 
     def in_use(self):
         if TvDownload.objects.filter(task=self).exists():
+            return True
+        if SeasonDownload.objects.filter(task=self).exists():
             return True
         return False
 
@@ -293,3 +303,78 @@ class MonitoredTvDownload(TvDownload):
             return utils.failure('Monitored download is already downloaded/imported')
 
         return super().organize(task, manually=True)
+
+
+class SeasonDownload(models.Model):
+    task: Download = models.ForeignKey(
+        Download, on_delete=models.CASCADE)
+    season: TvSeason = models.ForeignKey(
+        TvSeason, related_name='downloads', on_delete=models.CASCADE, parent_link=True)
+
+    def update_episode_mappings(self, mappings: list):
+        errors = []
+        if not self.task.fetched:
+            return ["Download has not finished fetching yet"]
+        files = self.task.files
+        for mapping in mappings:
+            episode_number = mapping['episode']
+            file_index = mapping['file_index']
+
+            query = TvEpisode.objects.filter(
+                season=self.season, episode_number=episode_number)
+            if not query.exists():
+                errors.append(f'Cannot find episode EP{episode_number}')
+                continue
+            episode: TvEpisode = query.first()
+
+            file = None
+            for f in files:
+                if f['index'] == file_index:
+                    file = f
+                    break
+            if not file:
+                errors.append(f'Cannot find file with file_index {
+                              file_index} for EP{episode_number}')
+                continue
+            if not utils.is_video_extension(file['name']):
+                errors.append(f'{file['name']} does not seem to be a video file for EP{
+                              episode_number}')
+                continue
+            # instead of just create new downloads, update old mappings as well
+            query = SeasonEpisodeDownload.objects.filter(
+                season_download=self, episode=episode)
+            if query.exists():
+                dl: SeasonEpisodeDownload = query.first()
+                if dl.file_index == file_index:
+                    # Same mapping, no need to update
+                    continue
+                if not dl.done:
+                    # It has not ran organize yet, we'll just update the file index then
+                    dl.file_index = file_index
+                    dl.filename = file['name']
+                    dl.save()
+                    continue
+            if episode.is_manually_ready():
+                errors.append(
+                    f'EP{episode_number} is already available locally, please remove it before proceeding')
+                continue
+            SeasonEpisodeDownload.objects.create(
+                season_download=self, task=self.task, episode=episode, file_index=file_index, filename=file['name'])
+
+        self.task.notify_new_downloads()
+        return errors
+
+    def cancel(self):
+        # we must delete before cancel so that task knows it's not in used anymore
+        self.delete()
+        self.task.cancel_file()
+
+
+class SeasonEpisodeDownload(TvDownload):
+    season_download: SeasonDownload = models.ForeignKey(
+        SeasonDownload, related_name='episodes', on_delete=models.CASCADE, parent_link=True)
+
+    def parse_files(self, files):
+        if self.file_index != -1:
+            return utils.success('Season episode download already mapped')
+        return self.fail('Season episode download did not have a mapping')

@@ -405,6 +405,16 @@ class TvSeason(models.Model):
             results[ep.episode_number] = matched_torrents
         return results
 
+    def download(self, magnet=None, torrent=None):
+        from hamstery.models.download import Download, SeasonDownload
+        task: Download = Download.objects.download(magnet=magnet, torrent=torrent)
+        if not task:
+            return False
+        SeasonDownload.objects.get_or_create(task=task, season=self)
+        logger.info('Season "%s" started a new download "%s"' % (self, task.hash))
+        task.notify_new_downloads()
+        return True
+
     def get_number_of_ready_episodes(self):
         eps: List[TvEpisode] = self.episodes.all()
         ready = len(

@@ -1,4 +1,4 @@
-import { HeartTwoTone, ImportOutlined, LinkOutlined, ReloadOutlined } from '@ant-design/icons';
+import { CloudDownloadOutlined, HeartTwoTone, ImportOutlined, LinkOutlined, ReloadOutlined } from '@ant-design/icons';
 import { Button, Col, Pagination, Radio, Row } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
@@ -112,6 +112,11 @@ const TVSeasonComponent: React.FC<{ show: ITvShow, season: ITvSeason }> = ({
                         <Col>
                             <Button onClick={() => navigate('./subscription')}>
                                 <HeartTwoTone twoToneColor="#eb2f96" />Subscribe
+                            </Button>
+                        </Col>
+                        <Col>
+                            <Button onClick={() => navigate('./bundle')}>
+                                <CloudDownloadOutlined />Season Bundle Download
                             </Button>
                         </Col>
                         <Col>

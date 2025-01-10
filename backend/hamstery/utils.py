@@ -422,9 +422,12 @@ class InfoHashException(Exception):
 
 def calculate_info_hash(magnet=None, torrent=None):
     if magnet:
-        match = re.search(r"xt=urn:btih:([a-fA-F0-9]+)", magnet)
+        match = re.search(r'xt=urn:btih:([a-fA-F0-9]{40}|[a-zA-Z0-9]{32})', magnet)
         if match:
-            return match.group(1).lower()
+            info_hash =  match.group(1)
+            if len(info_hash) == 32:
+                info_hash = base64.b32decode(info_hash).hex()
+            return info_hash.lower()
         else:
             raise InfoHashException(
                 magnet, "Invalid magnet url, failed to extract Info Hash")
@@ -433,7 +436,7 @@ def calculate_info_hash(magnet=None, torrent=None):
             torrent_data = bencodepy.decode(torrent)
             info_data = torrent_data[b"info"]
             info_encoded = bencodepy.encode(info_data)
-            return hashlib.sha1(info_encoded).hexdigest()
+            return hashlib.sha1(info_encoded).hexdigest().lower()
         except Exception as e:
             raise InfoHashException(
                 torrent, f"Failed to decode torrent file: {e}")
