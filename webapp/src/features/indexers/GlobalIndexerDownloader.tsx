@@ -1,4 +1,4 @@
-import { Button, Col, Form, Input, Modal, notification, Row, Select, Tabs } from 'antd';
+import { Button, Col, Form, Input, Modal, notification, Radio, Row, Select, Tabs } from 'antd';
 import axios from 'axios';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
@@ -7,6 +7,7 @@ import { useAppDispatch } from '../../app/hook';
 import { getEpNumber } from '../../app/utils';
 import { hamsterySlice } from '../api/hamsterySlice';
 import ApiLoading from '../general/ApiLoading';
+import { MagnetUrlDownloader, TorrentFileDownloader } from '../media/Downloader';
 import IndexerSearcher from './IndexerSearcher';
 import { indexerActions, indexerSelector } from './indexerSlice';
 
@@ -40,6 +41,7 @@ const EpisodeDownloader: React.FC<{
   const [downloads, setDownloads] = useState<IndexerSearchResult[]>([])
   const [download, { isLoading }] = hamsterySlice.useDownloadTvEpisodeMutation()
   const [episode_numbers, setEpisoedNumbers] = useState<Record<string, number>>({})
+  const [downloadMode, setDownloadMode] = useState<'search' | 'magnet' | 'torrent_file'>('search')
 
   const missingEps = useMemo(() => new Set(episodes
     .filter((e) => e.status === TvEpisodeStatus.MISSING)
@@ -61,38 +63,96 @@ const EpisodeDownloader: React.FC<{
     })
   }, [missingEps, downloads])
 
-  const searchTab = <div>
-    <Row gutter={8} align='middle'>
-      <Col>Choose Indexer: </Col>
-      <Col flex='auto'>
-        <Select
-          showSearch
-          style={{ width: '100%' }}
-          filterOption={(input, option) => (option?.label as unknown as string).toLowerCase().includes(input)}
-          options={indexers.map(({ name }, idx) => ({ label: `${name}`, value: idx }))}
-          onChange={(idx) => {
-            const { id } = indexers[idx]
-            setSearcher(String(id))
-            setDownloads([])
-          }}
-        />
-      </Col>
-    </Row>
-    <Row>
-      <Col flex='auto'>
-        {
-          searcher
-            ? <IndexerSearcher
-              defaultKeyword={indexer.defaultQuery}
-              indexerId={searcher}
-              onDownloadChosen={(downloads) => {
-                setDownloads(downloads)
-              }}
-            />
-            : null}
+  const downloadPages = {
+    'search': <>
+      <Row gutter={8} align='middle'>
+        <Col>Choose Indexer: </Col>
+        <Col flex='auto'>
+          <Select
+            showSearch
+            style={{ width: '100%' }}
+            filterOption={(input, option) => (option?.label as unknown as string).toLowerCase().includes(input)}
+            options={indexers.map(({ name }, idx) => ({ label: `${name}`, value: idx }))}
+            onChange={(idx) => {
+              const { id } = indexers[idx]
+              setSearcher(String(id))
+              setDownloads([])
+            }}
+          />
+        </Col>
+      </Row>
+      <Row>
+        <Col flex='auto'>
+          {
+            searcher
+              ? <IndexerSearcher
+                defaultKeyword={indexer.defaultQuery}
+                indexerId={searcher}
+                onDownloadChosen={(downloads) => {
+                  setDownloads(downloads)
+                }}
+              />
+              : null}
 
+        </Col>
+      </Row>
+    </>,
+    'magnet': <>
+      <MagnetUrlDownloader
+        id={`downloadMagnetShows-${indexer.episode?.id}`}
+        onDownload={async (magneturl) => {
+          if (!indexer.episode) {
+            notification.error({ message: 'Downloading to unknown Episode' })
+            return
+          }
+          try {
+            await download({ id: String(indexer.episode.id), data: magneturl }).unwrap()
+            dispatch(indexerActions.closeSearch())
+          } catch (e: any) {
+            notification.error({ message: `Failed to strat download: ${e.data}` })
+          }
+        }}
+        isLoading={isLoading}
+      />
+    </>,
+    'torrent_file': <>
+      <TorrentFileDownloader
+        id={`downloadTorrentShows-${indexer.episode?.id}`}
+        onDownload={async (file) => {
+          if (!indexer.episode) {
+            notification.error({ message: 'Downloading to unknown Episode' })
+            return
+          }
+          try {
+            await download({ id: String(indexer.episode.id), data: file }).unwrap()
+            dispatch(indexerActions.closeSearch())
+          } catch (e: any) {
+            notification.error({ message: `Failed to strat download: ${e.data}` })
+          }
+        }}
+        isLoading={isLoading}
+      />
+    </>,
+  }
+
+  const selectDownloadTab = <div>
+    <Row gutter={8} align='middle'>
+      <Col span={8} offset={8}>
+        <Radio.Group
+          defaultValue='search'
+          buttonStyle='solid'
+          value={downloadMode}
+          onChange={(e) => {
+            setDownloadMode(e.target.value)
+          }}
+        >
+          <Radio.Button value='search'>Search</Radio.Button>
+          <Radio.Button value='magnet'>Magnet URL</Radio.Button>
+          <Radio.Button value='torrent_file'>Torrent File</Radio.Button>
+        </Radio.Group>
       </Col>
     </Row>
+    {downloadPages[downloadMode]}
   </div>
 
   const startDownloadTab = <Form
@@ -168,9 +228,9 @@ const EpisodeDownloader: React.FC<{
 
   const items = [
     {
-      label: 'Search',
-      key: 'search',
-      children: searchTab
+      label: 'Select Download',
+      key: 'select',
+      children: selectDownloadTab
     },
   ]
   if (downloads.length !== 0) {
@@ -191,8 +251,7 @@ const EpisodeDownloader: React.FC<{
     }}
     footer={null}
   >
-    <Tabs defaultActiveKey='search' centered items={items} />
-
+    <Tabs defaultActiveKey='select' centered items={items} />
   </Modal>
 }
 

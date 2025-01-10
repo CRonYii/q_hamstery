@@ -41,7 +41,7 @@ const TvEpisodeCard: React.FC<{ show: ITvShow, season: ITvSeason, episode: ITvEp
     }
     if (episode.status === TvEpisodeStatus.MISSING) {
         actions.push(<CloudDownloadOutlined onClick={() =>
-            dispatch(indexerActions.download({ season, query: show.name }))}
+            dispatch(indexerActions.download({ season, episode, query: show.name }))}
         />)
     } else if (episode.status === TvEpisodeStatus.READY) {
         actions.push(<CheckCircleTwoTone twoToneColor="#52c41a" />)
