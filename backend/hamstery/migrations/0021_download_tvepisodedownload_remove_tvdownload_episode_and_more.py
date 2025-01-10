@@ -48,7 +48,7 @@ def migrate_tvdownloads_reverse(apps, schema_edtior):
             continue
         if TvDownload.objects.filter(hash=dl.hash).exists():
             logger.warning('Skip reverting download "%s" for Episode "%s" since this hamstery version only supported 1 file in 1 download' % (
-                mon_ep.filename, mon_ep.episode))
+                ep_dl.filename, ep_dl.episode))
             continue
         TvDownload.objects.create(
             hash=dl.hash, done=ep_dl.done, episode=ep_dl.episode, filename=ep_dl.filename)
