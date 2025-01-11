@@ -37,6 +37,8 @@ export function formatBytes(bytes: number, decimals = 2) {
 export function secondsToDhms(seconds: number) {
     if (seconds <= 0) {
         return '0 sec'
+    } else if (seconds >= 8640000) {
+        return '∞'
     }
     const d = Math.floor(seconds / (3600 * 24));
     const h = Math.floor(seconds % (3600 * 24) / 3600);

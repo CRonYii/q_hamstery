@@ -13,7 +13,7 @@ import { indexerActions, indexerSelector } from './indexerSlice';
 
 const GlobalIndexerDownloader: React.FC = () => {
   const indexer = useSelector(indexerSelector)
-  if (!indexer.season)
+  if (!indexer.season || indexer.type !== 'episode')
     return <div />
   return <div>
     <ApiLoading getters={{
@@ -91,6 +91,7 @@ const EpisodeDownloader: React.FC<{
                 onDownloadChosen={(downloads) => {
                   setDownloads(downloads)
                 }}
+                selection='checkbox'
               />
               : null}
 

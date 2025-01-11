@@ -14,6 +14,7 @@ import SettingsPage from './features/settings/SettingsPage';
 import StatsPage from './features/stats/StatsPage';
 import TvLibraryHome from './features/tv/library/TvLibraryHome';
 import TvLibraryPage from './features/tv/library/TvLibraryPage';
+import TVBundleDownloadPage from './features/tv/season/TvBundleDownloadPage';
 import TVSeasonPage from './features/tv/season/TvSeasonPage';
 import TVSubscriptionPage from './features/tv/season/TvSubscriptionPage';
 import TvShowPage from './features/tv/show/TvShowPage';
@@ -25,6 +26,7 @@ const { Header, Content, Footer } = Layout;
 
 const AppContent = () => {
   return (<Routes>
+    <Route path='/tvshows/:library_id/:show_id/:season_id/bundle' element={<TVBundleDownloadPage />} />
     <Route path='/tvshows/:library_id/:show_id/:season_id/subscription' element={<TVSubscriptionPage />} />
     <Route path='/tvshows/:library_id/:show_id/:season_id' element={<TVSeasonPage />} />
     <Route path='/tvshows/:library_id/:show_id' element={<TvShowPage />} />
@@ -41,6 +43,7 @@ const AppContent = () => {
 
 const AppSideNavMenu = () => {
   return (<Routes>
+    <Route path='/tvshows/:library_id/:show_id/:season_id/bundle' element={<TvSeasonSideNavMenu />} />
     <Route path='/tvshows/:library_id/:show_id/:season_id/subscription' element={<TvSeasonSideNavMenu />} />
     <Route path='/tvshows/:library_id/:show_id/:season_id' element={<TvSeasonSideNavMenu />} />
     <Route path='/tvshows/:library_id/:show_id' element={<TvShowSideNavMenu />} />
@@ -53,6 +56,7 @@ const AppSideNavMenu = () => {
 
 const AppBreadcrumbNav = () => {
   return (<Routes>
+    <Route path='/tvshows/:library_id/:show_id/:season_id/bundle' element={<TvShowsBreadcrumbNav />} />
     <Route path='/tvshows/:library_id/:show_id/:season_id/subscription' element={<TvShowsBreadcrumbNav />} />
     <Route path='/tvshows/:library_id/:show_id/:season_id' element={<TvShowsBreadcrumbNav />} />
     <Route path='/tvshows/:library_id/:show_id' element={<TvShowsBreadcrumbNav />} />

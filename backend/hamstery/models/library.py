@@ -16,6 +16,7 @@ from hamstery.models import Indexer
 from hamstery.plex import plex_manager
 from hamstery.tmdb import (tmdb_search_tv_shows, tmdb_tv_season_details,
                            tmdb_tv_show_details)
+from hamstery.qbittorrent import *
 from hamstery.utils import (failure, get_episode_number_from_title,
                             get_numbered_filename, get_supplemental_file_ext,
                             get_valid_filename, import_single_file,
@@ -238,7 +239,8 @@ class TvShow(models.Model):
                             pass
                     await season.adelete()
                 else:
-                    logger.warning('Failed to remove %s - Season %02d: local video file linked to it already.' % (season.show.name, season.season_number))
+                    logger.warning('Failed to remove %s - Season %02d: local video file linked to it already.' %
+                                   (season.show.name, season.season_number))
                     season.warn_removed = True
                     await season.asave()
 
@@ -335,7 +337,8 @@ class TvSeason(models.Model):
             if not is_video_extension(filename):
                 continue
             fullpath = os.path.join(path, filename)
-            episode_number = get_episode_number_from_title(filename, force_local=True)
+            episode_number = get_episode_number_from_title(
+                filename, force_local=True)
             if episode_number:
                 episode_map[episode_number] = fullpath
         return episode_map
@@ -369,10 +372,10 @@ class TvSeason(models.Model):
             if episode.status == TvEpisode.Status.MISSING:
                 await episode.adelete()
             else:
-                logger.warning('Failed to remove %s - Season %02d EP %02d: local video file linked to it already.' % (episode.season.show.name, episode.season_number, episode.episode_number))
+                logger.warning('Failed to remove %s - Season %02d EP %02d: local video file linked to it already.' %
+                               (episode.season.show.name, episode.season_number, episode.episode_number))
                 episode.warn_removed = True
                 await episode.asave()
-            
 
     def search_episodes_from_indexer(self, query: str, indexer: Indexer, offset=0, exclude=''):
         eps: List[TvEpisode] = self.episodes.all()
@@ -401,10 +404,21 @@ class TvSeason(models.Model):
             matched_torrents = list(filter(filter_torrent, torrents))
             results[ep.episode_number] = matched_torrents
         return results
-    
+
+    def download(self, magnet=None, torrent=None):
+        from hamstery.models.download import Download, SeasonDownload
+        task: Download = Download.objects.download(magnet=magnet, torrent=torrent)
+        if not task:
+            return False
+        SeasonDownload.objects.get_or_create(task=task, season=self)
+        logger.info('Season "%s" started a new download "%s"' % (self, task.hash))
+        task.notify_new_downloads()
+        return True
+
     def get_number_of_ready_episodes(self):
         eps: List[TvEpisode] = self.episodes.all()
-        ready = len(list(filter(lambda ep: ep.status == TvEpisode.Status.READY, eps)))
+        ready = len(
+            list(filter(lambda ep: ep.status == TvEpisode.Status.READY, eps)))
         return {
             'ready': ready,
             'missing': self.number_of_episodes - ready,
@@ -526,7 +540,8 @@ class TvEpisode(models.Model):
             src = pathstr
             names = [
                 self.get_formatted_file_destination(src, 'full'),
-                self.get_formatted_file_destination(src, 'meta_simple_original'),
+                self.get_formatted_file_destination(
+                    src, 'meta_simple_original'),
                 self.get_formatted_file_destination(src, 'meta_full'),
                 self.get_formatted_file_destination(src, 'meta_simple'),
             ]
@@ -540,43 +555,50 @@ class TvEpisode(models.Model):
                 except OSError as e:
                     if e.errno == errno.ENAMETOOLONG:
                         continue
-                    logger.error('Error when importing episode "%s" : %s' % (src, str(e)))
+                    logger.error(
+                        'Error when importing episode "%s" : %s' % (src, str(e)))
                     return False
             if done is False:
-                logger.error('Error when importing episode "%s": All generated filename are too long' % src)
+                logger.error(
+                    'Error when importing episode "%s": All generated filename are too long' % src)
                 return False
             # Move/rename subtitle files as well
             final_basename, _ = os.path.splitext(os.path.basename(pathstr))
             for [p, f] in list_supplemental_file(src):
                 sup_file = os.path.join(p, f)
                 sup_ext = get_supplemental_file_ext(f)
-                dst_sup_file_path = os.path.join(self.get_folder(), "%s%s" % (final_basename, sup_ext))
-                dst_sup_file_path = get_numbered_filename(sup_file, dst_sup_file_path)
+                dst_sup_file_path = os.path.join(
+                    self.get_folder(), "%s%s" % (final_basename, sup_ext))
+                dst_sup_file_path = get_numbered_filename(
+                    sup_file, dst_sup_file_path)
                 if dst_sup_file_path is None:
                     # Same file already exists, skip
                     continue
                 try:
                     import_single_file(sup_file, dst_sup_file_path, mode)
                 except OSError as e:
-                    logger.warning('Error when importing supplemental file "%s": %s' % (sup_file, str(e)))
+                    logger.warning(
+                        'Error when importing supplemental file "%s": %s' % (sup_file, str(e)))
         self.path = pathstr
         self.status = TvEpisode.Status.READY
         if manually is True:
             self.cancel_related_downloads('downloading')
         plex_manager.refresh_plex_library_by_filepath(self.get_folder())
         return True
-    
+
     def import_supplemental(self, pathstr: str, mode='move') -> bool:
         if self.status != TvEpisode.Status.READY:
             return False
         sup_file = Path(pathstr)
         if not sup_file.exists() or not sup_file.is_file() or not is_supplemental_file_extension(pathstr):
-            logger.warning('Attempt to import invalid supplemental file: %s' % pathstr)
+            logger.warning(
+                'Attempt to import invalid supplemental file: %s' % pathstr)
             return False
         final_folder = os.path.dirname(self.path)
         final_basename, _ = os.path.splitext(os.path.basename(self.path))
         sup_ext = get_supplemental_file_ext(pathstr)
-        dst_sup_file_path = os.path.join(final_folder, "%s%s" % (final_basename, sup_ext))
+        dst_sup_file_path = os.path.join(
+            final_folder, "%s%s" % (final_basename, sup_ext))
         dst_sup_file_path = get_numbered_filename(pathstr, dst_sup_file_path)
         if dst_sup_file_path is None:
             # Same file already exists, skip
@@ -584,7 +606,8 @@ class TvEpisode(models.Model):
         try:
             import_single_file(sup_file, dst_sup_file_path, mode)
         except OSError as e:
-            logger.warning('Error when importing supplemental file "%s": %s' % (sup_file, str(e)))
+            logger.warning(
+                'Error when importing supplemental file "%s": %s' % (sup_file, str(e)))
         return True
 
     def cancel_related_downloads(self, type: str):
@@ -626,66 +649,33 @@ class TvEpisode(models.Model):
         from hamstery.models import MonitoredTvDownload
         if self.status != TvEpisode.Status.READY:
             return False
-        downloads = MonitoredTvDownload.objects.filter(episode=self, done=True)
-        return len(downloads) == 0
+        # Monitored download is not considered a manual download
+        downloads = MonitoredTvDownload.objects.filter(
+            episode=self, done=True)
+        return not downloads.exists()
 
-    def download_by_url(self, urls):
+    def download(self, magnet=None, torrent=None, monitor=None):
+        '''
+        Dedicated episode download. 
+        Creates exactly one TvDownload to import exactly one episode from this download.
+        '''
         if self.is_manually_ready():
             return False
-        from ..qbt_monitor import HAMSTERY_CATEGORY, UNSCHEDULED_TV_TAG, qbt
-        res = qbt.client.torrents_add(
-            urls=urls,
-            rename=self.id,
-            category=HAMSTERY_CATEGORY,
-            tags=UNSCHEDULED_TV_TAG,
-            is_paused=False)
-        if res == 'Ok.':
-            return True
-        else:
+        from hamstery.models.download import Download, TvDownload, MonitoredTvDownload
+        task: Download = Download.objects.download(magnet=magnet, torrent=torrent)
+        if not task:
             return False
+        if TvDownload.objects.filter(task=task, episode=self).exists():
+            return False
+        if not monitor:
+            TvDownload.objects.create(task=task, episode=self)
+        else:
+            MonitoredTvDownload.objects.create(task=task, episode=self, subscription=monitor)
+        logger.info('Episode "%s" started a new download "%s"' % (self, task.hash))
+        task.notify_new_downloads()
+        return True
+            
 
-    def download_by_torrents(self, torrents):
-        if self.is_manually_ready():
-            return False
-        from ..qbt_monitor import HAMSTERY_CATEGORY, UNSCHEDULED_TV_TAG, qbt
-        res = qbt.client.torrents_add(
-            torrent_files=torrents,
-            rename=self.id,
-            category=HAMSTERY_CATEGORY,
-            tags=UNSCHEDULED_TV_TAG,
-            is_paused=False)
-        if res == 'Ok.':
-            return True
-        else:
-            return False
-
-    def monitor_download_by_url(self, sub_id, urls):
-        from ..qbt_monitor import (HAMSTERY_CATEGORY, MONITORED_TV_TAG,
-                                   UNSCHEDULED_TV_TAG, qbt)
-        res = qbt.client.torrents_add(
-            urls=urls,
-            rename='%s,%s' % (self.id, sub_id),
-            category=HAMSTERY_CATEGORY,
-            tags=[UNSCHEDULED_TV_TAG, MONITORED_TV_TAG],
-            is_paused=False)
-        if res == 'Ok.':
-            return True
-        else:
-            return False
-
-    def monitor_download_by_torrents(self, sub_id, torrents):
-        from ..qbt_monitor import (HAMSTERY_CATEGORY, MONITORED_TV_TAG,
-                                   UNSCHEDULED_TV_TAG, qbt)
-        res = qbt.client.torrents_add(
-            torrent_files=torrents,
-            rename='%s,%s' % (self.id, sub_id),
-            category=HAMSTERY_CATEGORY,
-            tags=[UNSCHEDULED_TV_TAG, MONITORED_TV_TAG],
-            is_paused=False)
-        if res == 'Ok.':
-            return True
-        else:
-            return False
 
     def __str__(self):
         return "%s - S%02dE%02d - %s" % (self.id, self.season_number, self.episode_number, self.name)

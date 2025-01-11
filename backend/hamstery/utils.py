@@ -5,6 +5,8 @@ import filecmp
 import json
 import os
 import re
+import hashlib
+import bencodepy
 import shutil
 from datetime import datetime
 from functools import wraps
@@ -23,8 +25,10 @@ from rest_framework.response import Response
 
 tz = tzlocal.get_localzone()
 
+
 def now():
     return datetime.now(tz)
+
 
 def validate_directory_exist(dir):
     if not os.path.isdir(dir):
@@ -204,6 +208,11 @@ def is_video_extension(name):
     return VIDEO_FILE_RE.match(name)
 
 
+def is_valid_tv_download_file(file, target_file):
+    name: str = os.path.basename(file['name'])
+    return target_file in name and (is_video_extension(name) or is_supplemental_file_extension(name))
+
+
 SUPPLEMENTAL_FILE_RE = re.compile(r'.*?\.(ass|ssa|srt|idx|sub|mka|flac)$')
 
 
@@ -221,6 +230,7 @@ def list_supplemental_file(src):
     original_name, _ = os.path.splitext(os.path.basename(src))
     for res in filter(lambda f: is_supplemental_file(original_name, f[1]), files):
         yield res
+
 
 special_supplemental_ext = {
     # Chinese
@@ -241,6 +251,7 @@ special_supplemental_ext = {
 }
 
 supported_langcode_separator = ['.', '-', '_']
+
 
 def get_supplemental_file_ext(name):
     name, sup_ext = os.path.splitext(name)
@@ -265,6 +276,7 @@ def get_episode_number_from_title(title: str, force_local=False) -> int:
     from hamstery.hamstery_settings import settings_manager
     from hamstery.models.settings import HamsterySettings
     from hamstery.openai import openai_manager
+    title: str = os.path.basename(title)
     settings = settings_manager.settings
     if not force_local and settings.openai_title_parser_mode == HamsterySettings.TitleParserMode.PRIMARY:
         ep = openai_manager.get_episode_number_from_title(title)
@@ -280,7 +292,7 @@ def get_episode_number_from_title(title: str, force_local=False) -> int:
         match = re.search(title)
         if match:
             break
-    
+
     if not match:
         if not force_local and settings.openai_title_parser_mode == HamsterySettings.TitleParserMode.STANDBY:
             return openai_manager.get_episode_number_from_title(title)
@@ -299,6 +311,7 @@ def get_episode_number_from_title(title: str, force_local=False) -> int:
 def get_valid_filename(s: str) -> str:
     return re.sub(r"(?u)[^-\w.]", "", s)
 
+
 def import_single_file(src, dst, mode):
     if mode == 'symlink':
         os.symlink(src, dst)
@@ -306,6 +319,7 @@ def import_single_file(src, dst, mode):
         shutil.move(src, dst)
     elif mode == 'link':
         os.link(src, dst)
+
 
 def get_numbered_filename(src, dst):
     number = 1
@@ -320,20 +334,25 @@ def get_numbered_filename(src, dst):
 
     return dst
 
-def read_last_nlines(f: io.BufferedIOBase, n: int, d = b'\n') -> bytes:
+
+def read_last_nlines(f: io.BufferedIOBase, n: int, d=b'\n') -> bytes:
     """"readlast(f: io.IOBase, n: int, d: bytes = b'\n') -> bytes
 
     Return the last N segments of file `f`, containing data segments separated by
     `d`.
     """
 
-    arr = deque(); d_sz = len(d); step = d_sz; pos = -1;  i = 0
+    arr = deque()
+    d_sz = len(d)
+    step = d_sz
+    pos = -1
+    i = 0
     try:
         # Seek to last byte of file, save it to arr as to not check for newline.
-        pos = f.seek(-1, io.SEEK_END) 
+        pos = f.seek(-1, io.SEEK_END)
         arr.appendleft(f.read())
         # Seek past the byte read, plus one to use as the first segment.
-        pos = f.seek(-2, io.SEEK_END) 
+        pos = f.seek(-2, io.SEEK_END)
         seg = f.read(1)
         # Break when 'd' occurs, store index of the rightmost match in 'i'.
         while True:
@@ -363,7 +382,7 @@ def read_last_nlines(f: io.BufferedIOBase, n: int, d = b'\n') -> bytes:
                 pos = f.seek(-step+d_idx-d_sz, io.SEEK_CUR)
                 step = d_sz
                 seg = f.read(step)
-    except OSError as e: 
+    except OSError as e:
         # Reached beginning of file. Read remaining data and check for newline.
         f.seek(0)
         seg = f.read(pos)
@@ -379,3 +398,47 @@ def read_last_nlines(f: io.BufferedIOBase, n: int, d = b'\n') -> bytes:
             # We do not have N lines. Return everthing.
             arr.appendleft(seg)
     return b"".join(arr)
+
+
+def decode_str_to_dict(s: str, *args):
+    data = {}
+    res = []
+    params = s.split(',')
+    for param in params:
+        [key, value] = param.split('=')
+        data[key] = value
+    for k in args:
+        if k not in data:
+            return failure('"%s" is not present' % (k))
+        res.append(data[k])
+    return success(res)
+
+
+class InfoHashException(Exception):
+    def __init__(self, input, message):
+        self.input = input
+        super().__init__(message)
+
+
+def calculate_info_hash(magnet=None, torrent=None):
+    if magnet:
+        match = re.search(r'xt=urn:btih:([a-fA-F0-9]{40}|[a-zA-Z0-9]{32})', magnet)
+        if match:
+            info_hash =  match.group(1)
+            if len(info_hash) == 32:
+                info_hash = base64.b32decode(info_hash).hex()
+            return info_hash.lower()
+        else:
+            raise InfoHashException(
+                magnet, "Invalid magnet url, failed to extract Info Hash")
+    if torrent:
+        try:
+            torrent_data = bencodepy.decode(torrent)
+            info_data = torrent_data[b"info"]
+            info_encoded = bencodepy.encode(info_data)
+            return hashlib.sha1(info_encoded).hexdigest().lower()
+        except Exception as e:
+            raise InfoHashException(
+                torrent, f"Failed to decode torrent file: {e}")
+    raise InfoHashException(
+        None, "No input provided, please provide magneturl or torrent")

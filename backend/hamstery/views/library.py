@@ -47,7 +47,8 @@ class TvStorageView(viewsets.ModelViewSet):
 class TvShowView(viewsets.GenericViewSet):
     queryset = TvShow.objects.all()
     serializer_class = TvShowSerializer
-    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    filter_backends = [DjangoFilterBackend,
+                       filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['lib', 'storage']
     search_fields = ['name']
     ordering_fields = ['id', 'name', 'air_date']
@@ -68,7 +69,7 @@ class TvShowView(viewsets.GenericViewSet):
     def retrieve(self, request, pk=None):
         instance = self.get_object()
         return Response(self.generate_data(instance))
-    
+
     def generate_data(self, show: TvShow):
         serializer = self.get_serializer(show)
         data = serializer.data
@@ -103,16 +104,32 @@ class TvSeasonView(viewsets.GenericViewSet):
         season: TvSeason = TvSeason.objects.prefetch_related('show').get(pk=pk)
         season.show.storage.lib  # pre-fetch lib here
         return season.scan().into_response()
-    
+
+    @action(methods=['post'], detail=True)
+    def download(self, request, pk=None):
+        season: TvSeason = self.get_object()
+        form = DownloadForm(request.POST)
+        if not form.is_valid():
+            return Response(form.errors, status=status.HTTP_400_BAD_REQUEST)
+        url = form.cleaned_data['url']
+        if url is not None and url != '':
+            if season.download(magnet=url):
+                return Response('Ok')
+        elif 'torrent' in request.FILES:
+            torrent = request.FILES['torrent'].read()
+            if season.download(torrent=torrent):
+                return Response('Ok')
+        return Response('Invalid download', status=status.HTTP_400_BAD_REQUEST)
+
     def list(self, request):
         queryset = self.filter_queryset(self.get_queryset())
-        
+
         return Response(list(map(self.generate_data, queryset)))
 
     def retrieve(self, request, pk=None):
         instance = self.get_object()
         return Response(self.generate_data(instance))
-    
+
     def generate_data(self, season: TvSeason):
         serializer = self.get_serializer(season)
         data = serializer.data
@@ -120,11 +137,15 @@ class TvSeasonView(viewsets.GenericViewSet):
         data['warn_removed'] = season.is_warn_removed()
         return data
 
+
 class TvEpisodeFilter(FilterSet):
-    on_air = django_filters.DateFilter(field_name="air_date", lookup_expr='lte')
+    on_air = django_filters.DateFilter(
+        field_name="air_date", lookup_expr='lte')
+
     class Meta:
         model = TvEpisode
         fields = ['season', 'on_air']
+
 
 class TvEpisodeView(viewsets.ReadOnlyModelViewSet):
     queryset = TvEpisode.objects.all()
@@ -141,11 +162,11 @@ class TvEpisodeView(viewsets.ReadOnlyModelViewSet):
             return Response(form.errors, status=status.HTTP_400_BAD_REQUEST)
         url = form.cleaned_data['url']
         if url is not None and url != '':
-            if episode.download_by_url(url):
+            if episode.download(magnet=url):
                 return Response('Ok')
         elif 'torrent' in request.FILES:
-            torrent = request.FILES['torrent']
-            if episode.download_by_torrents(torrent):
+            torrent = request.FILES['torrent'].read()
+            if episode.download(torrent=torrent):
                 return Response('Ok')
         return Response('Invalid download', status=status.HTTP_400_BAD_REQUEST)
 

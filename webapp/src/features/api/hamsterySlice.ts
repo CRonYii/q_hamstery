@@ -4,7 +4,21 @@ import Cookies from 'js-cookie';
 import flatten from 'lodash/flatten';
 import { IDjangoOptions, IHamsterySettings, IHamsteryStats, IIndexer, IParamOptions, ISeasonSearchResult, IShowSubscription, ITitleParserLog, ITorznab, ITvDownload, ITvEpisode, ITvLibrary, ITvSeason, ITvShow, ITvStorage } from '../../app/entities';
 
-type TagTypes = 'stats' | 'settings' | 'tvlib' | 'tvstorage' | 'tvshow' | 'tvseason' | 'tvepisode' | 'tvdownload' | 'monitored-tvdownload' | 'indexer' | 'torznab' | 'show-subscription' | 'title-parser'
+type TagTypes = 'stats' |
+    'settings' |
+    'tvlib' |
+    'tvstorage' |
+    'tvshow' |
+    'tvseason' |
+    'tvepisode' |
+    'tvdownload' |
+    'monitored-tvdownload' |
+    'season-download' |
+    'season-episode-download' |
+    'indexer' |
+    'torznab' |
+    'show-subscription' |
+    'title-parser'
 
 export interface IPageNumberResult<T> {
     count: number
@@ -24,7 +38,23 @@ export const hamsterySlice = createApi({
             return headers
         }
     }),
-    tagTypes: ['stats', 'settings', 'tvlib', 'tvstorage', 'tvshow', 'tvseason', 'tvepisode', 'tvdownload', 'monitored-tvdownload', 'indexer', 'torznab', 'show-subscription', 'title-parser'],
+    tagTypes: [
+        'stats',
+        'settings',
+        'tvlib',
+        'tvstorage',
+        'tvshow',
+        'tvseason',
+        'tvepisode',
+        'tvdownload',
+        'monitored-tvdownload',
+        'season-download',
+        'season-episode-download',
+        'indexer',
+        'torznab',
+        'show-subscription',
+        'title-parser',
+    ],
     endpoints: builder => {
         const CRUDEntity = <T>(
             {
@@ -160,11 +190,12 @@ export const hamsterySlice = createApi({
         const tvdownload = CRUDEntity<ITvDownload>({
             name: 'tvdownload',
             url: '/tvdownload/',
-            idSelector: d => d.hash,
             extraArgTags: (arg) => [{ type: 'tvepisode', id: arg.episode }],
             keepUnusedDataFor: 1,
         })
-        const monitored_tvdownload = CRUDEntity<IIndexer>({ name: 'monitored-tvdownload', url: '/monitored-tvdownload/' })
+        const monitored_tvdownload = CRUDEntity<ITvDownload>({ name: 'monitored-tvdownload', url: '/monitored-tvdownload/' })
+        const season_download = CRUDEntity<ITvDownload>({ name: 'season-download', url: '/season-download/' })
+        const season_episode_download = CRUDEntity<ITvDownload>({ name: 'season-episode-download', url: '/season-episode-download/' })
         const indexer = CRUDEntity<IIndexer>({ name: 'indexer', url: '/indexer/' })
         const torznab = CRUDEntity<ITorznab>({ name: 'torznab', url: '/torznab/' })
         const show_subscriptions = CRUDEntity<IShowSubscription>({ name: 'show-subscription', url: '/show-subscription/' })
@@ -237,6 +268,27 @@ export const hamsterySlice = createApi({
                     url: `/tvseason/${sub.season}/search/?query=${sub.query}&indexer_id=${sub.indexer}&offset=${sub.offset}&exclude=${sub.exclude}`,
                 }),
             }),
+            downloadTvSeason: builder.mutation<void, { id: string, data: string | File }>({
+                query: ({ id, data }) => {
+                    if (typeof data === 'string') {
+                        return ({
+                            method: 'POST',
+                            url: `/tvseason/${id}/download/`,
+                            headers: { 'content-type': 'application/x-www-form-urlencoded' },
+                            body: `url=${encodeURIComponent(data)}`,
+                        })
+                    } else {
+                        const form = new FormData()
+                        form.append('torrent', data)
+                        return ({
+                            method: 'POST',
+                            url: `/tvseason/${id}/download/`,
+                            body: form,
+                        })
+                    }
+                },
+                invalidatesTags: ['season-download']
+            }),
             // TV Episode
             getTvEpisodes: tvepisode.getAll,
             getTvEpisodesPage: tvepisode.getPage,
@@ -290,6 +342,21 @@ export const hamsterySlice = createApi({
             removeTvDownload: tvdownload.delete,
             // Monitored TV Download,
             getMonitoredTvDownloads: monitored_tvdownload.getAll,
+            // Season Download
+            getSeasonDownloads: season_download.getAll,
+            getSeasonDownload: season_download.get,
+            removeSeasonDownload: season_download.delete,
+            updateSeasonDownloadMapping: builder.mutation<{ errors: string[] }, { id: string, args: { episode: number, file_index: number }[], }>({
+                query: ({ id, args }) => ({
+                    method: 'POST',
+                    url: `/season-download/${id}/download/`,
+                    headers: { 'content-type': 'application/json' },
+                    body: { mappings: args },
+                }),
+                invalidatesTags: ['season-episode-download']
+            }),
+            // Season Episode Download,
+            getSeasonEpisodeDownloads: season_episode_download.getAll,
             // Indexers
             getIndexers: indexer.getAll,
             getIndexer: indexer.get,

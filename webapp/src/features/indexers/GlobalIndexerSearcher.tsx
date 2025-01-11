@@ -19,7 +19,7 @@ const GlobalIndexerSearcher: React.FC = () => {
             }}
             footer={null}
         >
-            <IndexerSearcher key={indexer.searchId} indexerId={indexer.searchId} />
+            <IndexerSearcher key={indexer.searchId} selection='checkbox' indexerId={indexer.searchId} />
         </Modal>
     </div>
 }

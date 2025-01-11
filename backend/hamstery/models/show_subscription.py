@@ -51,22 +51,22 @@ class ShowSubscription(models.Model):
                 # If episode already exist, checks if the episode is downloaded by a subscriotion
                 downloads = MonitoredTvDownload.objects.filter(
                     episode=ep, done=True)
-                if len(downloads) == 0:
+                if not downloads.exists():
                     # Skip since episode is downloaded/imported by user
                     continue
-                if downloads[0].subscription.priority <= self.priority:
+                if downloads.first().subscription.priority <= self.priority:
                     # Skip since download has equal or higher priority
                     continue
             # We only download the first matched torrent
             torrent = torrents[0]
             try:
                 if 'magneturl' in torrent:
-                    ep.monitor_download_by_url(self.id, torrent['magneturl'])
+                    ep.download(magnet=torrent['magneturl'], monitor=self)
                 elif torrent['link'].startswith('magnet:'):
-                    ep.monitor_download_by_url(self.id, torrent['link'])
+                    ep.download(magnet=torrent['link'], monitor=self)
                 else:
                     r = requests.get(torrent['link'])
-                    ep.monitor_download_by_torrents(self.id, r.content)
+                    ep.download(torrent=r.content, monitor=self)
             except Exception:
                 logger.error('Failed to download monitored-tv (%s): %s' % (torrent['title'], traceback.format_exc()))
         return

@@ -13,6 +13,13 @@ logger = logging.getLogger(__name__)
 # require Web API >= 2.8.3 to run properly
 MINIMUM_WEB_API_VERSION = version.parse('2.8.3')
 
+HAMSTERY_CATEGORY = "hamstery-download (%s)" % settings.HOST_NAME
+
+ERROR_DOWNLOAD_TAG = "hamstery-error"
+FETCHING_DOWNLOAD_TAG = "hamstery-fetching"
+DOWNLOADING_DOWNLOAD_TAG = "hamstery-downloading"
+ORGANIZED_DOWNLOAD_TAG = "hamstery-organized"
+
 
 class Qbittorrent:
 

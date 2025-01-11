@@ -1,4 +1,5 @@
 import { Button, Input, notification, Table } from 'antd';
+import { RowSelectionType } from 'antd/lib/table/interface';
 import React, { useState } from 'react';
 import { IndexerSearchResult } from '../../app/entities';
 import { formatBytes } from '../../app/utils';
@@ -7,9 +8,10 @@ import hamstery from '../api/hamstery';
 const IndexerSearcher: React.FC<{
     defaultKeyword?: string,
     indexerId?: string,
+    selection: RowSelectionType,
     onSearch?: (query: string) => void,
     onDownloadChosen?: (downlaods: IndexerSearchResult[]) => void,
-}> = ({ defaultKeyword, indexerId, onSearch, onDownloadChosen }) => {
+}> = ({ defaultKeyword, indexerId, onSearch, onDownloadChosen, selection }) => {
     const [data, setData] = useState<IndexerSearchResult[]>([])
     const [loading, setLoading] = useState<boolean>(false)
 
@@ -62,7 +64,7 @@ const IndexerSearcher: React.FC<{
                 },
             ]}
             rowSelection={{
-                type: 'checkbox',
+                type: selection,
                 onChange: (selectedRowKeys, selectedRows) => {
                     if (onDownloadChosen)
                         onDownloadChosen(selectedRows)

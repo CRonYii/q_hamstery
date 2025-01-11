@@ -1,13 +1,14 @@
 import { configureStore } from "@reduxjs/toolkit";
 import { hamsterySlice } from "../features/api/hamsterySlice";
+import responsiveSlice from "../features/general/responsiveSlice";
 import indexerSlice from "../features/indexers/indexerSlice";
 import torznabIndexerSlice from "../features/indexers/torznab/torznabIndexerSlice";
 import navSlice from "../features/nav/navSlice";
-import seasonSlice from "../features/tv/season/seasonSlice";
 import tvlibrarySlice from "../features/tv/library/tvlibrarySlice";
-import userSlice from "../features/user/userSlice";
+import bundleSlice from "../features/tv/season/bundleSlice";
+import seasonSlice from "../features/tv/season/seasonSlice";
 import subscriptionSlice from "../features/tv/season/subscriptionSlice";
-import responsiveSlice from "../features/general/responsiveSlice";
+import userSlice from "../features/user/userSlice";
 
 const store = configureStore({
     reducer: {
@@ -19,6 +20,7 @@ const store = configureStore({
         torznab: torznabIndexerSlice,
         season: seasonSlice,
         subscription: subscriptionSlice,
+        bundle: bundleSlice,
         responsive: responsiveSlice,
     },
     middleware: getDefaultMiddleware =>
