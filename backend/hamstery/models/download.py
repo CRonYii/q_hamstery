@@ -333,12 +333,12 @@ class SeasonDownload(models.Model):
                     file = f
                     break
             if not file:
-                errors.append(f'Cannot find file with file_index {
-                              file_index} for EP{episode_number}')
+                errors.append(
+                    f'Cannot find file with file_index {file_index} for EP{episode_number}')
                 continue
             if not utils.is_video_extension(file['name']):
-                errors.append(f'{file['name']} does not seem to be a video file for EP{
-                              episode_number}')
+                errors.append(
+                    f'{file["name"]} does not seem to be a video file for EP{episode_number}')
                 continue
             # instead of just create new downloads, update old mappings as well
             query = SeasonEpisodeDownload.objects.filter(
