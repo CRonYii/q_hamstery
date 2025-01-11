@@ -38,8 +38,9 @@ if [ ! -e $db_path ]; then
 fi
 
 envsubst '${HOST},${HAMSTERY_PORT}' < /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf
-nginx
+envsubst '${NUM_WORKERS}' < q_hamstery_backend.uwsgi.ini.template > q_hamstery_backend.uwsgi.ini
 
+nginx
 python3 manage.py run_migration
 chown -R hamstery:hamstery /app
 

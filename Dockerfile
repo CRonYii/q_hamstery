@@ -16,6 +16,7 @@ FROM alpine:3.13 AS base
 ARG HAMSTERY_VERSION
 ENV HAMSTERY_VERSION=$HAMSTERY_VERSION
 ENV HAMSTERY_PORT=8001
+ENV NUM_WORKERS=1
 
 # Install alpine dependecy
 RUN apk add --no-cache \
@@ -47,7 +48,7 @@ RUN pip3 install --upgrade pip && \
 
 # Setup uwsgi
 RUN mkdir /tmp/uwsgi
-COPY q_hamstery_backend.uwsgi.ini /app/backend/q_hamstery_backend.uwsgi.ini
+COPY q_hamstery_backend.uwsgi.ini /app/backend/q_hamstery_backend.uwsgi.ini.template
 RUN pip3 install uwsgi
 
 # Set Django args
