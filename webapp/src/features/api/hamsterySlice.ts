@@ -268,18 +268,19 @@ export const hamsterySlice = createApi({
                     url: `/tvseason/${sub.season}/search/?query=${sub.query}&indexer_id=${sub.indexer}&offset=${sub.offset}&exclude=${sub.exclude}`,
                 }),
             }),
-            downloadTvSeason: builder.mutation<void, { id: string, data: string | File }>({
-                query: ({ id, data }) => {
+            downloadTvSeason: builder.mutation<void, { id: string, data: string | File, importExternal: boolean }>({
+                query: ({ id, data, importExternal }) => {
                     if (typeof data === 'string') {
                         return ({
                             method: 'POST',
                             url: `/tvseason/${id}/download/`,
-                            headers: { 'content-type': 'application/x-www-form-urlencoded' },
-                            body: `url=${encodeURIComponent(data)}`,
+                            headers: { 'content-type': 'application/json' },
+                            body: { url: data, importExternal },
                         })
                     } else {
                         const form = new FormData()
                         form.append('torrent', data)
+                        form.append('import_external', String(importExternal))
                         return ({
                             method: 'POST',
                             url: `/tvseason/${id}/download/`,
@@ -300,18 +301,19 @@ export const hamsterySlice = createApi({
                 }),
                 invalidatesTags: (result, error, id) => [{ type: 'tvepisode', id }]
             }),
-            downloadTvEpisode: builder.mutation<void, { id: string, data: string | File }>({
-                query: ({ id, data }) => {
+            downloadTvEpisode: builder.mutation<void, { id: string, data: string | File, importExternal: boolean }>({
+                query: ({ id, data, importExternal }) => {
                     if (typeof data === 'string') {
                         return ({
                             method: 'POST',
                             url: `/tvepisode/${id}/download/`,
-                            headers: { 'content-type': 'application/x-www-form-urlencoded' },
-                            body: `url=${encodeURIComponent(data)}`,
+                            headers: { 'content-type': 'application/json' },
+                            body: { url: data, importExternal },
                         })
                     } else {
                         const form = new FormData()
                         form.append('torrent', data)
+                        form.append('import_external', String(importExternal))
                         return ({
                             method: 'POST',
                             url: `/tvepisode/${id}/download/`,

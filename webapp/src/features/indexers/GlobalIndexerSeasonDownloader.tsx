@@ -1,4 +1,4 @@
-import { Button, Col, Modal, notification, Radio, Row, Select } from 'antd';
+import { Button, Checkbox, Col, Modal, notification, Radio, Row, Select, Tooltip } from 'antd';
 import axios from 'axios';
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
@@ -40,20 +40,21 @@ const SeasonDownloader: React.FC<{
   const [download, setDownload] = useState<IndexerSearchResult | undefined>()
   const [hamsteryDownloadSeason, { isLoading }] = hamsterySlice.useDownloadTvSeasonMutation()
   const [downloadMode, setDownloadMode] = useState<'search' | 'magnet' | 'torrent_file'>('search')
+  const [importExternal, setImportExternal] = useState<boolean>(false)
 
   async function downloadSeason(download: IndexerSearchResult) {
     try {
       const { title, magneturl, link } = download;
       if (magneturl) {
-        await hamsteryDownloadSeason({ id: String(season.id), data: magneturl }).unwrap()
+        await hamsteryDownloadSeason({ id: String(season.id), data: magneturl, importExternal }).unwrap()
       } else if (link.startsWith('magnet:')) {
-        await hamsteryDownloadSeason({ id: String(season.id), data: link }).unwrap()
+        await hamsteryDownloadSeason({ id: String(season.id), data: link, importExternal }).unwrap()
       } else if (link.startsWith('http://') || link.startsWith('https://')) {
         const { data } = await axios.get(link, {
           responseType: 'blob',
         })
         const file = new File([data], title + '.torrent')
-        await hamsteryDownloadSeason({ id: String(season.id), data: file }).unwrap()
+        await hamsteryDownloadSeason({ id: String(season.id), data: file, importExternal }).unwrap()
       }
       setDownload(undefined)
       dispatch(indexerActions.closeSearch())
@@ -115,7 +116,7 @@ const SeasonDownloader: React.FC<{
             return
           }
           try {
-            await hamsteryDownloadSeason({ id: String(season.id), data: magneturl }).unwrap()
+            await hamsteryDownloadSeason({ id: String(season.id), data: magneturl, importExternal }).unwrap()
             dispatch(indexerActions.closeSearch())
           } catch (e: any) {
             notification.error({ message: `Failed to strat download: ${e.data}` })
@@ -133,7 +134,7 @@ const SeasonDownloader: React.FC<{
             return
           }
           try {
-            await hamsteryDownloadSeason({ id: String(season.id), data: file }).unwrap()
+            await hamsteryDownloadSeason({ id: String(season.id), data: file, importExternal }).unwrap()
             dispatch(indexerActions.closeSearch())
           } catch (e: any) {
             notification.error({ message: `Failed to strat download: ${e.data}` })
@@ -169,6 +170,14 @@ const SeasonDownloader: React.FC<{
           <Radio.Button value='magnet'>Magnet URL</Radio.Button>
           <Radio.Button value='torrent_file'>Torrent File</Radio.Button>
         </Radio.Group>
+      </Col>
+      <Col flex='auto'></Col>
+      <Col>
+        <Tooltip title="Import an existing download in qbittorrent to hamstery. Hamstery will take control of it.">
+          <Checkbox value={importExternal} onChange={(e) => setImportExternal(e.target.checked)}>
+            Import Existing Download
+          </Checkbox>
+        </Tooltip>
       </Col>
     </Row>
     {downloadPages[downloadMode]}

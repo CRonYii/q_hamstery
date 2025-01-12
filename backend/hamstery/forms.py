@@ -6,9 +6,10 @@ class TMDBForm(forms.Form):
     tmdb_id = forms.IntegerField()
 
 
-class DownloadForm(forms.Form):
-    url = forms.CharField(required=False)
-    torrent = forms.FileField(required=False)
+class DownloadForm(serializers.Serializer):
+    url = serializers.CharField(required=False)
+    torrent = serializers.FileField(required=False)
+    import_external = serializers.BooleanField(default=False)
 
 
 class ImportForm(forms.Form):

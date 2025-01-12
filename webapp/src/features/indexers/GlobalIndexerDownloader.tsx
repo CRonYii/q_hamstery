@@ -1,4 +1,4 @@
-import { Button, Col, Form, Input, Modal, notification, Radio, Row, Select, Tabs } from 'antd';
+import { Button, Checkbox, Col, Form, Input, Modal, notification, Radio, Row, Select, Tabs, Tooltip } from 'antd';
 import axios from 'axios';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
@@ -42,6 +42,7 @@ const EpisodeDownloader: React.FC<{
   const [download, { isLoading }] = hamsterySlice.useDownloadTvEpisodeMutation()
   const [episode_numbers, setEpisoedNumbers] = useState<Record<string, number>>({})
   const [downloadMode, setDownloadMode] = useState<'search' | 'magnet' | 'torrent_file'>('search')
+  const [importExternal, setImportExternal] = useState<boolean>(false)
 
   const missingEps = useMemo(() => new Set(episodes
     .filter((e) => e.status === TvEpisodeStatus.MISSING)
@@ -107,7 +108,7 @@ const EpisodeDownloader: React.FC<{
             return
           }
           try {
-            await download({ id: String(indexer.episode.id), data: magneturl }).unwrap()
+            await download({ id: String(indexer.episode.id), data: magneturl, importExternal }).unwrap()
             dispatch(indexerActions.closeSearch())
           } catch (e: any) {
             notification.error({ message: `Failed to strat download: ${e.data}` })
@@ -125,7 +126,7 @@ const EpisodeDownloader: React.FC<{
             return
           }
           try {
-            await download({ id: String(indexer.episode.id), data: file }).unwrap()
+            await download({ id: String(indexer.episode.id), data: file, importExternal }).unwrap()
             dispatch(indexerActions.closeSearch())
           } catch (e: any) {
             notification.error({ message: `Failed to strat download: ${e.data}` })
@@ -152,6 +153,14 @@ const EpisodeDownloader: React.FC<{
           <Radio.Button value='torrent_file'>Torrent File</Radio.Button>
         </Radio.Group>
       </Col>
+      <Col flex='auto'></Col>
+      <Col>
+        <Tooltip title="Import an existing download in qbittorrent to hamstery. Hamstery will take control of it.">
+          <Checkbox value={importExternal} onChange={(e) => setImportExternal(e.target.checked)}>
+            Import Existing Download
+          </Checkbox>
+        </Tooltip>
+      </Col>
     </Row>
     {downloadPages[downloadMode]}
   </div>
@@ -168,15 +177,15 @@ const EpisodeDownloader: React.FC<{
           if (!episode)
             continue
           if (magneturl) {
-            await download({ id: String(episode.id), data: magneturl }).unwrap()
+            await download({ id: String(episode.id), data: magneturl, importExternal }).unwrap()
           } else if (link.startsWith('magnet:')) {
-            await download({ id: String(episode.id), data: link }).unwrap()
+            await download({ id: String(episode.id), data: link, importExternal }).unwrap()
           } else if (link.startsWith('http://') || link.startsWith('https://')) {
             const { data } = await axios.get(link, {
               responseType: 'blob',
             })
             const file = new File([data], title + '.torrent')
-            await download({ id: String(episode.id), data: file }).unwrap()
+            await download({ id: String(episode.id), data: file, importExternal }).unwrap()
           }
         }
         setDownloads([])

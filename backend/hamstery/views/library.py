@@ -108,16 +108,17 @@ class TvSeasonView(viewsets.GenericViewSet):
     @action(methods=['post'], detail=True)
     def download(self, request, pk=None):
         season: TvSeason = self.get_object()
-        form = DownloadForm(request.POST)
+        form = DownloadForm(data=request.data)
         if not form.is_valid():
             return Response(form.errors, status=status.HTTP_400_BAD_REQUEST)
-        url = form.cleaned_data['url']
-        if url is not None and url != '':
-            if season.download(magnet=url):
+        import_external = form.validated_data['import_external']
+        if 'url' in form.validated_data:
+            url = form.validated_data['url']
+            if season.download(magnet=url, import_external=import_external):
                 return Response('Ok')
-        elif 'torrent' in request.FILES:
-            torrent = request.FILES['torrent'].read()
-            if season.download(torrent=torrent):
+        elif 'torrent' in form.validated_data:
+            torrent = form.validated_data['torrent'].read()
+            if season.download(torrent=torrent, import_external=import_external):
                 return Response('Ok')
         return Response('Invalid download', status=status.HTTP_400_BAD_REQUEST)
 
@@ -157,16 +158,17 @@ class TvEpisodeView(viewsets.ReadOnlyModelViewSet):
     @action(methods=['post'], detail=True)
     def download(self, request, pk=None):
         episode: TvEpisode = self.get_object()
-        form = DownloadForm(request.POST)
+        form = DownloadForm(data=request.data)
         if not form.is_valid():
             return Response(form.errors, status=status.HTTP_400_BAD_REQUEST)
-        url = form.cleaned_data['url']
-        if url is not None and url != '':
-            if episode.download(magnet=url):
+        import_external = form.validated_data['import_external']
+        if 'url' in form.validated_data:
+            url = form.validated_data['url']
+            if episode.download(magnet=url, import_external=import_external):
                 return Response('Ok')
-        elif 'torrent' in request.FILES:
-            torrent = request.FILES['torrent'].read()
-            if episode.download(torrent=torrent):
+        elif 'torrent' in form.validated_data:
+            torrent = form.validated_data['torrent'].read()
+            if episode.download(torrent=torrent, import_external=import_external):
                 return Response('Ok')
         return Response('Invalid download', status=status.HTTP_400_BAD_REQUEST)
 

@@ -405,9 +405,9 @@ class TvSeason(models.Model):
             results[ep.episode_number] = matched_torrents
         return results
 
-    def download(self, magnet=None, torrent=None):
+    def download(self, magnet=None, torrent=None, import_external=False):
         from hamstery.models.download import Download, SeasonDownload
-        task: Download = Download.objects.download(magnet=magnet, torrent=torrent)
+        task: Download = Download.objects.download(magnet=magnet, torrent=torrent, import_external=import_external)
         if not task:
             return False
         SeasonDownload.objects.get_or_create(task=task, season=self)
@@ -654,7 +654,7 @@ class TvEpisode(models.Model):
             episode=self, done=True)
         return not downloads.exists()
 
-    def download(self, magnet=None, torrent=None, monitor=None):
+    def download(self, magnet=None, torrent=None, monitor=None, import_external=False):
         '''
         Dedicated episode download. 
         Creates exactly one TvDownload to import exactly one episode from this download.
@@ -662,7 +662,7 @@ class TvEpisode(models.Model):
         if self.is_manually_ready():
             return False
         from hamstery.models.download import Download, TvDownload, MonitoredTvDownload
-        task: Download = Download.objects.download(magnet=magnet, torrent=torrent)
+        task: Download = Download.objects.download(magnet=magnet, torrent=torrent, import_external=import_external)
         if not task:
             return False
         if TvDownload.objects.filter(task=task, episode=self).exists():

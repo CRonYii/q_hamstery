@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 
 class DownloadManager(models.Manager):
-    def download(self, magnet=None, torrent=None):
+    def download(self, magnet=None, torrent=None, import_external=False):
         try:
             if not qbt.known_status:
                 return
@@ -38,6 +38,11 @@ class DownloadManager(models.Manager):
                 tags=[FETCHING_DOWNLOAD_TAG],
                 is_paused=False)
             if res != 'Ok.':
+                if import_external:
+                    qbt_tasks = qbt.client.torrents_info(
+                        torrent_hashes=[info_hash])
+                    if len(qbt_tasks) != 0:
+                        return self.import_download(qbt_tasks[0])
                 logger.error('Failed to add download to qbt: %s' % res)
                 return
             task, created = self.get_or_create(hash=info_hash)
@@ -45,6 +50,21 @@ class DownloadManager(models.Manager):
         except utils.InfoHashException as e:
             logger.error(e)
             return
+
+    def import_download(self, qbt_task):
+        # Import an existing download to hamstery 1. update category 2. fetch and update download status
+        task, created = self.get_or_create(hash=qbt_task['hash'])
+        qbt.client.torrents_set_category(category=HAMSTERY_CATEGORY, torrent_hashes=[task.hash])
+        files = qbt.client.torrents_files(task.hash)
+        if len(files) == 0:
+            return task
+
+        task.name = qbt_task['name']
+        task.fetched = True
+        task.completed = qbt_task['completion_on'] > 0
+        task.save()
+
+        return task
 
 
 class Download(models.Model):
