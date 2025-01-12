@@ -4,7 +4,7 @@ from rest_framework.request import Request
 from rest_framework.decorators import action
 
 from ..models import TvDownload, MonitoredTvDownload, SeasonDownload, SeasonEpisodeDownload
-from ..qbittorrent import qbt
+from ..qbittorrent import *
 from ..serializers import TvDownloadSerializer, MonitoredTvDownloadSerializer, SeasonDownloadSerializer, SeasonEpisodeDownloadSerializer
 from ..forms import SeasonDownloadForm
 from .. import utils
@@ -41,7 +41,7 @@ class TvDownloadView(viewsets.GenericViewSet):
         hash = '|'.join(map(lambda d: d['task'], download))
         info = []
         if qbt.known_status:
-            info = qbt.client.torrents_info(torrent_hashes=hash)
+            info = qbt.client.torrents_info(torrent_hashes=hash, category=HAMSTERY_CATEGORY)
         for d in download:
             i = next((x for x in info if x['hash'] == d['task']), None)
             if i is None:
@@ -120,7 +120,7 @@ class SeasonDownloadView(viewsets.GenericViewSet):
 
             if qbt.known_status:
                 files = qbt.client.torrents_files(d['task'])
-                i = qbt.client.torrents_info(torrent_hashes=d['task'])[0]
+                i = qbt.client.torrents_info(torrent_hashes=d['task'], category=HAMSTERY_CATEGORY)[0]
                 extra['name'] = i['name']
                 extra['state'] = i['state']
                 extra['progress'] = i['progress']
