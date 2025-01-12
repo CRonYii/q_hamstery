@@ -38,12 +38,8 @@ class DownloadManager(models.Manager):
                 tags=[FETCHING_DOWNLOAD_TAG],
                 is_paused=False)
             if res != 'Ok.':
-                # There is a chance the download has been added to qbittorrent externally which was not via hamstery
-                qbt_tasks = qbt.client.torrents_info(
-                    torrent_hashes=[info_hash], category=HAMSTERY_CATEGORY)
-                if len(qbt_tasks) == 0:
-                    logger.error('Failed to add download to qbt: %s' % res)
-                    return
+                logger.error('Failed to add download to qbt: %s' % res)
+                return
             task, created = self.get_or_create(hash=info_hash)
             return task
         except utils.InfoHashException as e:
