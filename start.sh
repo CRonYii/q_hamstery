@@ -8,12 +8,13 @@ PGID=${PGID:-1000}
 groupmod -o -g "${PGID}" hamstery
 usermod -o -u "${PUID}" hamstery
 
-chown -R hamstery:hamstery \
-	/app \
-    /tmp/uwsgi \
-	/etc/nginx \
-	/var/lib/nginx \
-	/var/log/nginx
+function app_chown() {
+	chown -R hamstery:hamstery \
+		/app \
+		/tmp/uwsgi
+}
+
+app_chown
 
 db_path="app_data/db.sqlite3"
 
@@ -42,7 +43,8 @@ envsubst '${NUM_WORKERS}' < q_hamstery_backend.uwsgi.ini.template > q_hamstery_b
 
 nginx
 python3 manage.py run_migration
-chown -R hamstery:hamstery /app
+
+app_chown
 
 export BUILDING=False
 exec su-exec hamstery uwsgi --ini q_hamstery_backend.uwsgi.ini
