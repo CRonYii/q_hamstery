@@ -114,6 +114,11 @@ const TVSeasonBundleSelector: React.FC<{
 
     useEffect(() => {
       setReady(false)
+      if (episodes.length === downloads.length || files.length === downloads.length) {
+        // Skip doing file guess when all episodes are ready
+        setReady(true)
+        return
+      }
       guessEpisodeFromFiles(files)
         .then(episode_numbers => {
           const episodes: Record<number, number> = {}
@@ -123,7 +128,10 @@ const TVSeasonBundleSelector: React.FC<{
           setGuessedEpisode(episodes)
         })
         .finally(() => setReady(true))
-    }, [files])
+    }, [files, episodes, downloads])
+
+    if (!files.length)
+      return <></>
 
     if (!ready)
       return <Skeleton active />
