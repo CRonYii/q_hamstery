@@ -84,3 +84,84 @@ export function b64DecodeUnicode(str: string) {
         return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
     }).join(''))
 }
+
+export interface TreeMedia<T> {
+    path: Record<string, TreeMedia<T>>,
+    files: T[],
+}
+
+export function filePathsToTree<T>(paths: T[], selector: (entry: T) => string) {
+    const tree: TreeMedia<T> = {
+        path: {},
+        files: [],
+    };
+
+    paths.forEach(path => {
+        const parts = selector(path).split("/");
+        let current = tree;
+
+        parts.forEach((part, index) => {
+            if (index === parts.length - 1) {
+                current.files.push(path)
+            } else {
+                if (!current.path[part]) {
+                    current.path[part] = {
+                        path: {},
+                        files: [],
+                    };
+                }
+                current = current.path[part];
+            }
+        });
+    });
+
+    return tree
+}
+
+export function treeSelectNode<T>(tree: TreeMedia<T>, labels: string[]): TreeMedia<T> | null {
+    let node: TreeMedia<T> = tree
+    for (const label of labels) {
+        node = node.path[label]
+        if (!node)
+            break
+    }
+    return node;
+}
+
+interface CascaderOption {
+    value: string | number;
+    label?: React.ReactNode;
+    disabled?: boolean;
+    children?: CascaderOption[];
+    // Determines if this is a leaf node(effective when `loadData` is specified).
+    // `false` will force trade TreeNode as a parent node.
+    // Show expand icon even if the current node has no children.
+    isLeaf?: boolean;
+}
+
+export function treeToCascaderOptions<T>(tree: TreeMedia<T>, selector?: (t: T) => CascaderOption): CascaderOption[] {
+    const paths = []
+    for (const key in tree.path) {
+        const path = tree.path[key]
+        paths.push({
+            value: key,
+            label: key,
+            children: treeToCascaderOptions(path, selector)
+        })
+    }
+    let files: CascaderOption[] = []
+    if (selector)
+        files = tree.files.map(selector);
+    return [...paths, ...files]
+}
+
+export function getTopDirectory<T>(tree: TreeMedia<T>, selector: (t: TreeMedia<T>) => boolean): TreeMedia<T> | null {
+    if (selector(tree))
+        return tree
+    for (const key in tree.path) {
+        const res = getTopDirectory(tree.path[key], selector)
+        if (res)
+            return res
+    }
+    return null
+}

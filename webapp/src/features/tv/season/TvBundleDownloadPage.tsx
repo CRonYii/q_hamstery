@@ -1,10 +1,10 @@
 import { CheckCircleTwoTone, CloudDownloadOutlined, DeleteTwoTone, EditOutlined } from '@ant-design/icons';
-import { Button, Col, Form, Input, List, notification, Popconfirm, Row, Select, Typography } from 'antd';
-import React, { useEffect, useState } from 'react';
+import { Button, Cascader, Col, Form, Input, List, notification, Popconfirm, Row, Select, Skeleton, Typography } from 'antd';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { ISeasonDownload, ITvDownload, ITvEpisode, ITvSeason, ITvShow } from '../../../app/entities';
+import { IFileInfo, ISeasonDownload, ITvDownload, ITvEpisode, ITvSeason, ITvShow } from '../../../app/entities';
 import { useAppDispatch } from '../../../app/hook';
-import { formatBytes, getEpNumber, secondsToDhms } from '../../../app/utils';
+import { filePathsToTree, formatBytes, getEpNumber, secondsToDhms, treeSelectNode, treeToCascaderOptions } from '../../../app/utils';
 import { hamsterySlice } from '../../api/hamsterySlice';
 import ApiLoading from '../../general/ApiLoading';
 import { indexerActions } from '../../indexers/indexerSlice';
@@ -51,12 +51,12 @@ const TVSeasonBundles: React.FC<{ show: ITvShow, season: ITvSeason, downloads: I
       itemLayout='horizontal'
       bordered
       dataSource={downloads}
-      renderItem={download => (<TVSeasonSubscriptionListItem download={download} />)}
+      renderItem={download => (<TVSeasonSubscriptionListItem download={download} season={season} />)}
     />
   </div>
 }
 
-const TVSeasonSubscriptionListItem: React.FC<{ download: ISeasonDownload }> = ({ download }) => {
+const TVSeasonSubscriptionListItem: React.FC<{ download: ISeasonDownload, season: ITvSeason }> = ({ download, season }) => {
   const dispatch = useAppDispatch()
   const [removeSeasonDownload, { isLoading: isRemoveLoading }] = hamsterySlice.useRemoveSeasonDownloadMutation()
 
@@ -64,7 +64,7 @@ const TVSeasonSubscriptionListItem: React.FC<{ download: ISeasonDownload }> = ({
     actions={[
       <Button
         key='edit' icon={<EditOutlined />}
-        onClick={() => dispatch(bundleActions.updateBundle(download))}
+        onClick={() => dispatch(bundleActions.updateBundle({ download, season }))}
       />,
       <Popconfirm
         key='delete'
@@ -96,24 +96,121 @@ const TVSeasonSubscriptionListItem: React.FC<{ download: ISeasonDownload }> = ({
   </List.Item>
 }
 
-export const TVSeasonBundleUpdater: React.FC<{ download: ISeasonDownload }> = ({ download }) => {
-  const dispatch = useAppDispatch()
-  const [guessedEpisode, setGuessedEpisode] = useState<Record<number, number>>({})
-  useEffect(() => {
-    Promise.all(download.files.map(async ({ name, file_index }) => {
-      const episode_number = await getEpNumber(name)
-      return { file_index, episode_number }
-    })).then(episode_numbers => {
-      const episodes: Record<number, number> = {}
-      episode_numbers.forEach(episode => {
-        episodes[episode.episode_number] = episode.file_index
-      })
-      setGuessedEpisode(episodes)
-    })
-  }, [download])
+async function guessEpisodeFromFiles(files: IFileInfo[]) {
+  return Promise.all(files.map(async ({ name, file_index }) => {
+    const episode_number = await getEpNumber(name)
+    return { file_index, episode_number }
+  }))
+}
 
-  const [updateSeasonDownloadMapping, { isLoading }] = hamsterySlice.useUpdateSeasonDownloadMappingMutation()
-  return <ApiLoading getters={{
+const TVSeasonBundleSelector: React.FC<{
+  download: ISeasonDownload, episodes: ITvEpisode[], files: IFileInfo[], downloads: ITvDownload[],
+}> =
+  ({ download, episodes, files, downloads }) => {
+    const dispatch = useAppDispatch()
+    const [guessedEpisode, setGuessedEpisode] = useState<Record<number, number>>({})
+    const [ready, setReady] = useState<boolean>(false)
+    const [updateSeasonDownloadMapping, { isLoading }] = hamsterySlice.useUpdateSeasonDownloadMappingMutation()
+
+    useEffect(() => {
+      setReady(false)
+      guessEpisodeFromFiles(files)
+        .then(episode_numbers => {
+          const episodes: Record<number, number> = {}
+          episode_numbers.forEach(episode => {
+            episodes[episode.episode_number] = episode.file_index
+          })
+          setGuessedEpisode(episodes)
+        })
+        .finally(() => setReady(true))
+    }, [files])
+
+    if (!ready)
+      return <Skeleton active />
+
+    const episodeSelections = episodes.map((episode) => {
+      return {
+        episode,
+        existing: downloads.find(d => d.episode === episode.id),
+        guess: guessedEpisode[episode.episode_number]
+      }
+    })
+
+    return <Form
+      layout='vertical'
+      id="updateBundle"
+      name="updateBundle"
+      labelCol={{ span: 24 }}
+      onFinish={async (data: { mappings: { episode: number, file_index: number }[] }) => {
+        const mappings = data.mappings.filter(m => m.file_index != null)
+        const res = await updateSeasonDownloadMapping({ id: String(download.id), args: mappings }).unwrap()
+        res.errors.forEach((message) => {
+          notification.error({ message })
+        })
+        dispatch(bundleActions.closeBundle())
+      }}
+    >
+      <Form.List name="mappings"
+        rules={[]}
+      >
+        {(_, __, { errors }) =>
+          <div>
+            {episodeSelections
+              .map((selection, index) => {
+                const { episode, existing, guess } = selection;
+                return <Form.Item key={episode.episode_number}>
+                  <Form.Item name={[index, 'episode']} initialValue={episode.episode_number} hidden>
+                    <Input />
+                  </Form.Item>
+                  <Form.Item label={<span>EP{episode.episode_number} - {episode.name}</span>}
+                    name={[index, 'file_index']} initialValue={existing ? existing.file_index : guess}>
+                    <Select>
+                      {
+                        files
+                          .map((d) => {
+                            return <Select.Option key={d.file_index} value={d.file_index}>
+                              {existing?.file_index === d.file_index ? <CheckCircleTwoTone twoToneColor="#52c41a" /> : null}
+                              {d.name.split('/').pop()}
+                            </Select.Option>
+                          })
+                      }
+                    </Select>
+                  </Form.Item>
+                </Form.Item>
+              })
+            }
+            <Form.ErrorList errors={errors} />
+          </div>
+        }
+      </Form.List>
+      <Button key='submit' form="updateBundle" type="primary" htmlType="submit" loading={isLoading}>Update</Button>
+    </Form>
+  }
+
+export const TVSeasonBundleUpdater: React.FC<{ download: ISeasonDownload, season: ITvSeason }> = ({ download }) => {
+
+  const [files, setFiles] = useState<IFileInfo[]>([])
+  const tree = useMemo(() => filePathsToTree(download.files, (f) => f.name), [download])
+
+  const targetDirSelector = <Row>
+    <Col>Select Folder: </Col>
+    <Col span={12}>
+      <Cascader
+        placeholder='Select'
+        changeOnSelect={true}
+        style={{ minWidth: 200, width: '100%' }}
+        displayRender={(label) => label[label.length - 1]}
+        onChange={(value) => {
+          const node = treeSelectNode(tree, value as string[])
+          if (node)
+            setFiles(node.files)
+        }}
+        options={treeToCascaderOptions(tree)}
+      />
+    </Col>
+  </Row>
+
+  const mappingSelector = <ApiLoading getters={{
     'episodes': () => hamsterySlice.useGetTvEpisodesQuery({ season: download.season, ordering: 'episode_number' }),
     'downloads': () => hamsterySlice.useGetSeasonEpisodeDownloadsQuery({ season_download: download.id })
   }}>
@@ -122,62 +219,15 @@ export const TVSeasonBundleUpdater: React.FC<{ download: ISeasonDownload }> = ({
         const episodes: ITvEpisode[] = values.episodes.data
         const downloads: ITvDownload[] = values.downloads.data
 
-        const episodeSelections = episodes.map((episode) => {
-          return {
-            episode,
-            existing: downloads.find(d => d.episode === episode.id),
-            guess: guessedEpisode[episode.episode_number]
-          }
-        })
-        return <Form
-          layout='vertical'
-          id="updateBundle"
-          name="updateBundle"
-          labelCol={{ span: 24 }}
-          onFinish={async (data: { mappings: { episode: number, file_index: number }[] }) => {
-            const mappings = data.mappings.filter(m => m.file_index != null)
-            const res = await updateSeasonDownloadMapping({ id: String(download.id), args: mappings }).unwrap()
-            res.errors.forEach((message) => {
-              notification.error({ message })
-            })
-            dispatch(bundleActions.closeBundle())
-          }}
-        >
-          <Form.List name="mappings"
-            rules={[]}
-          >
-            {(_, __, { errors }) =>
-              <div>
-                {episodeSelections
-                  .map((selection, index) => {
-                    const { episode, existing, guess } = selection;
-                    return <Form.Item key={episode.episode_number}>
-                      <Form.Item name={[index, 'episode']} initialValue={episode.episode_number} hidden>
-                        <Input />
-                      </Form.Item>
-                      <Form.Item label={<span>EP{episode.episode_number} - {episode.name}</span>}
-                        name={[index, 'file_index']} initialValue={existing ? existing.file_index : guess}>
-                        <Select>
-                          {
-                            download.files
-                              .map((d) => {
-                                return <Select.Option key={d.file_index} value={d.file_index}>
-                                  {existing?.file_index === d.file_index ? <CheckCircleTwoTone twoToneColor="#52c41a" /> : null} {d.name}
-                                </Select.Option>
-                              })
-                          }
-                        </Select>
-                      </Form.Item>
-                    </Form.Item>
-                  })
-                }
-                <Form.ErrorList errors={errors} />
-              </div>
-            }
-          </Form.List>
-          <Button key='submit' form="updateBundle" type="primary" htmlType="submit" loading={isLoading}>Update</Button>
-        </Form>
+        return <TVSeasonBundleSelector
+          download={download} episodes={episodes} files={files} downloads={downloads}
+        />
       }
     }
   </ApiLoading>
+
+  return <>
+    {targetDirSelector}
+    {mappingSelector}
+  </>
 }

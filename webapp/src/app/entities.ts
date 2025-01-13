@@ -94,17 +94,17 @@ export interface ITvDownload {
     file_index: number,
     extra_info: DownloadExtraInfo,
 }
-
+export interface IFileInfo {
+    file_index: number,
+    name: string,
+    size: number,
+}
 export interface ISeasonDownload {
     id: number,
     season: number,
     task: string,
     extra_info: DownloadExtraInfo,
-    files: {
-        file_index: number,
-        name: string,
-        size: number,
-    }[]
+    files: IFileInfo[]
 }
 
 export interface IIndexer {

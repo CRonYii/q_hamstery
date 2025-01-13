@@ -15,7 +15,7 @@ const GlobalSeasonBundleModal: React.FC = () => {
         onCancel={() => dispatch(bundleActions.closeBundle())}
         footer={null}
     >
-        {bundle.download ? <TVSeasonBundleUpdater download={bundle.download} /> : null}
+        {bundle.download && bundle.season ? <TVSeasonBundleUpdater download={bundle.download} season={bundle.season} /> : null}
     </Modal>
 
 }
