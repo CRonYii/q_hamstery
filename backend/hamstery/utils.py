@@ -329,6 +329,8 @@ def get_best_episode_from_titles(entities, get_title, force_local=False):
     for entity in entities:
         title = get_title(entity)
         ep, score = get_episode_number_from_title(title, force_local=force_local)
+        if not ep:
+            continue
         res[title] = {
             "episode": ep,
             "entity": entity,
