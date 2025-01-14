@@ -72,7 +72,7 @@ const hamstery = {
         return axios.get<IEpisodeNumber>(`/hamstery/api/media/episode_number?title=${encodeURIComponent(title)}`)
     },
     getEpisodesMapping(titles: string[]) {
-        return axios.get<IEpisodesMapping>(`/hamstery/api/media/episodes_mapping?titles=${titles.map(t => `titles=${encodeURIComponent(t)}`).join('&')}`)
+        return axios.get<IEpisodesMapping>(`/hamstery/api/media/episodes_mapping?${titles.map(t => `titles=${encodeURIComponent(t)}`).join('&')}`)
     },
     getOpenAIModels() {
         return axios.get<{ models: IOpenAIModel[] }>('/hamstery/api/settings/1/openai_get_models/')
