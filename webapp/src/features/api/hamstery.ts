@@ -28,6 +28,7 @@ export interface ITitleParserResult {
 
 export interface IEpisodeNumber {
     episode_number: number,
+    score: number,
 }
 
 export interface IOpenAIModel {

@@ -26,12 +26,16 @@ supported_models = [
     'gpt-4o-mini-2024-07-18',
 ]
 
-JSON_MODE_PROMPT = '''You are an API that receives user input in JSON format and respond only in JSON format. If the input format is incorrect or if you cannot determine a proper response from the input, respond with { "error": "<error msg>" }
-'''
+JSON_MODE_PROMPT = '''You are an API that receives user input in JSON format and respond only in JSON format. If the input format is incorrect or if you cannot determine a proper response from the input, respond with { "error": "<error msg>" }'''
 
-OPENAI_TITLE_PARSER_DEFAULT_PROMPT = '''Goal: Identify the episode number from the title. The video name may follow various naming conventions and contain indicators of episode numbers in different languages (e.g., English, Chinese, Japanese, etc.). Episode numbers may be embedded in various formats, such as "EP01" or other natural language patterns
-Input: A JSON object containing the title of a video file. For example: { "title": "([POPGO][Ghost_in_the_Shell][S.A.C._2nd_GIG][08][AVC_FLACx2+AC3][BDrip][1080p][072D2CD7]).mkv" }
-Response: A JSON object with the extracted episode number. For example: { "episode": 8 }'''
+OPENAI_TITLE_PARSER_DEFAULT_PROMPT = '''Extract the episode number from a video file title. The title may use various naming conventions, languages (English, Chinese, Japanese, etc.), and include episode numbers in different formats (e.g., "EP01", numerical patterns).
+Input: A JSON object with a "title" field containing the video file name, which may or may not include an episode number.
+Example input:
+{ "title": "([POPGO][Ghost_in_the_Shell][S.A.C._2nd_GIG][08][AVC_FLACx2+AC3][BDrip][1080p][072D2CD7]).mkv" }
+Output: A JSON object with the extracted episode number and a confidence score between 1 and 100.
+Example output:
+{ "episode": 8, "score": 88 }
+'''
 
 class OpenAIException(Exception):
     def __init__(self, response, message):
@@ -77,7 +81,7 @@ class OpenAIManager:
         models = (filter(is_supported_model,  openai_models))
         return [{'id': model.id, 'created': model.created, 'owned_by': model.owned_by} for model in models]
 
-    @lru_cache(maxsize=128)
+    @lru_cache(maxsize=256)
     def __chatgpt_json_response(self, model: str, prompt: str, data: str) -> dict:
         response = self.client.chat.completions.create(
             model=model,
@@ -131,6 +135,9 @@ class OpenAIManager:
                                                 completion_tokens=response.usage.completion_tokens,
                                                 total_tokens=response.usage.total_tokens)
             episode_number = int(content['episode'])
+            score = 0
+            if 'score' in content:
+                score = int(content['score'])
             logger.info("OpenAI ChatCompletion extracted '%s' from '%s'" %
                         (episode_number, title))
         except OpenAIException as e:
@@ -153,7 +160,7 @@ class OpenAIManager:
         if error:
             log.exception = error
         log.save()
-        return episode_number
+        return episode_number, score
 
 
 openai_manager = OpenAIManager()

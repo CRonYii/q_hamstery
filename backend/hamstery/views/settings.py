@@ -40,7 +40,8 @@ class HamsterySettingsView(mixins.RetrieveModelMixin,
     def openai_test_title_parser(self, request, pk=None):
         from hamstery.openai import openai_manager
         title = "(アニメ DVD) ぼくらの 第23話 「雪景色」(704×480 x264 AAC)"
-        ep = openai_manager.get_episode_number_from_title(title)
+        ep, score = openai_manager.get_episode_number_from_title(title)
         return JsonResponse({'title': title,
                              "episode": ep,
+                             "score": score,
                              "success": ep == 23})

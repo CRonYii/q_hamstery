@@ -279,12 +279,12 @@ def get_episode_number_from_title(title: str, force_local=False) -> int:
     title: str = os.path.basename(title)
     settings = settings_manager.settings
     if not force_local and settings.openai_title_parser_mode == HamsterySettings.TitleParserMode.PRIMARY:
-        ep = openai_manager.get_episode_number_from_title(title)
+        ep, score = openai_manager.get_episode_number_from_title(title)
         if ep:
-            return ep
+            return ep, score
     try:
         ep = int(title)
-        return ep
+        return ep, 100
     except ValueError:
         pass
 
@@ -296,16 +296,41 @@ def get_episode_number_from_title(title: str, force_local=False) -> int:
     if not match:
         if not force_local and settings.openai_title_parser_mode == HamsterySettings.TitleParserMode.STANDBY:
             return openai_manager.get_episode_number_from_title(title)
-        return None
+        return None, 0
 
     ep = match.group(1)
     try:
         ep = int(ep)
-        return ep
+        return ep, 110
     except ValueError:
         pass
 
-    return cn2an.cn2an(ep, mode='smart')
+    return cn2an.cn2an(ep, mode='smart'), 120
+
+
+def get_best_episode_from_titles(entities, get_title, force_local=False):
+    res = {}
+    for entity in entities:
+        title = get_title(entity)
+        ep, score = get_episode_number_from_title(title, force_local=force_local)
+        res[title] = {
+            "episode": ep,
+            "entity": entity,
+            "score": score
+        }
+    episodes = {}
+    for title in res:
+        entity = res[title]["entity"]
+        ep = res[title]["episode"]
+        score = res[title]["score"]
+        if ep in episodes and score <= episodes[ep]["score"]:
+            continue
+        episodes[ep] = {
+            "episode": ep,
+            "entity": entity,
+            "score": score,
+        }
+    return episodes
 
 
 def get_valid_filename(s: str) -> str:
@@ -422,9 +447,10 @@ class InfoHashException(Exception):
 
 def calculate_info_hash(magnet=None, torrent=None):
     if magnet:
-        match = re.search(r'xt=urn:btih:([a-fA-F0-9]{40}|[a-zA-Z0-9]{32})', magnet)
+        match = re.search(
+            r'xt=urn:btih:([a-fA-F0-9]{40}|[a-zA-Z0-9]{32})', magnet)
         if match:
-            info_hash =  match.group(1)
+            info_hash = match.group(1)
             if len(info_hash) == 32:
                 info_hash = base64.b32decode(info_hash).hex()
             return info_hash.lower()

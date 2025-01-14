@@ -27,6 +27,6 @@ def media_list_root_view(request):
 @validate_params(EpisodeNumberForm)
 def extract_episode_number_from_title_view(request):
     title = request.data['title']
-    episode_number = get_episode_number_from_title(title)
+    episode_number, score = get_episode_number_from_title(title)
     
-    return JsonResponse({ 'episode_number': episode_number })
+    return JsonResponse({ 'episode_number': episode_number, 'score': score })

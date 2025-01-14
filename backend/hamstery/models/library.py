@@ -17,12 +17,7 @@ from hamstery.plex import plex_manager
 from hamstery.tmdb import (tmdb_search_tv_shows, tmdb_tv_season_details,
                            tmdb_tv_show_details)
 from hamstery.qbittorrent import *
-from hamstery.utils import (failure, get_episode_number_from_title,
-                            get_numbered_filename, get_supplemental_file_ext,
-                            get_valid_filename, import_single_file,
-                            is_supplemental_file_extension, is_video_extension,
-                            list_dir, list_supplemental_file, success,
-                            tree_media, validate_directory_exist, value_or)
+from hamstery.utils import *
 
 logger = logging.getLogger(__name__)
 
@@ -337,7 +332,7 @@ class TvSeason(models.Model):
             if not is_video_extension(filename):
                 continue
             fullpath = os.path.join(path, filename)
-            episode_number = get_episode_number_from_title(
+            episode_number, score = get_episode_number_from_title(
                 filename, force_local=True)
             if episode_number:
                 episode_map[episode_number] = fullpath
@@ -390,28 +385,36 @@ class TvSeason(models.Model):
                 results[ep.episode_number] = []
                 continue
 
-            def filter_torrent(torrent):
-                title = torrent['title']
-                if exclude_re and exclude_re.search(title):
-                    return False
-                return get_episode_number_from_title(title) == adjusted_ep_n
             result = indexer.search(
                 '%s %02d' % (query, adjusted_ep_n))
             if result.success != True:
                 results[ep.episode_number] = []
                 continue
+
             torrents = result.data()
-            matched_torrents = list(filter(filter_torrent, torrents))
-            results[ep.episode_number] = matched_torrents
+            filtered_torrents = []
+            for torrent in torrents:
+                title = torrent['title']
+                if exclude_re and exclude_re.search(title):
+                    return False
+                episode, score = get_episode_number_from_title(title)
+                if episode != adjusted_ep_n:
+                    continue
+                filtered_torrents.append({"torrent": torrent, "score": score})
+            torrents = map(lambda item: item["torrent"], sorted(
+                filtered_torrents, key=lambda x: x["score"], reverse=True))
+            results[ep.episode_number] = list(torrents)
         return results
 
     def download(self, magnet=None, torrent=None, import_external=False):
         from hamstery.models.download import Download, SeasonDownload
-        task: Download = Download.objects.download(magnet=magnet, torrent=torrent, import_external=import_external)
+        task: Download = Download.objects.download(
+            magnet=magnet, torrent=torrent, import_external=import_external)
         if not task:
             return False
         SeasonDownload.objects.get_or_create(task=task, season=self)
-        logger.info('Season "%s" started a new download "%s"' % (self, task.hash))
+        logger.info('Season "%s" started a new download "%s"' %
+                    (self, task.hash))
         task.notify_new_downloads()
         return True
 
@@ -654,7 +657,7 @@ class TvEpisode(models.Model):
             episode=self, done=True)
         return not downloads.exists()
 
-    def download(self, magnet=None, torrent=None, monitor=None, import_external=False):
+    def download(self, magnet=None, torrent=None, monitor=None, import_external=True):
         '''
         Dedicated episode download. 
         Creates exactly one TvDownload to import exactly one episode from this download.
@@ -662,7 +665,8 @@ class TvEpisode(models.Model):
         if self.is_manually_ready():
             return False
         from hamstery.models.download import Download, TvDownload, MonitoredTvDownload
-        task: Download = Download.objects.download(magnet=magnet, torrent=torrent, import_external=import_external)
+        task: Download = Download.objects.download(
+            magnet=magnet, torrent=torrent, import_external=import_external)
         if not task:
             return False
         if TvDownload.objects.filter(task=task, episode=self).exists():
@@ -670,12 +674,12 @@ class TvEpisode(models.Model):
         if not monitor:
             TvDownload.objects.create(task=task, episode=self)
         else:
-            MonitoredTvDownload.objects.create(task=task, episode=self, subscription=monitor)
-        logger.info('Episode "%s" started a new download "%s"' % (self, task.hash))
+            MonitoredTvDownload.objects.create(
+                task=task, episode=self, subscription=monitor)
+        logger.info('Episode "%s" started a new download "%s"' %
+                    (self, task.hash))
         task.notify_new_downloads()
         return True
-            
-
 
     def __str__(self):
         return "%s - S%02dE%02d - %s" % (self.id, self.season_number, self.episode_number, self.name)
