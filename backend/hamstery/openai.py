@@ -32,10 +32,11 @@ OPENAI_TITLE_PARSER_DEFAULT_PROMPT = '''Extract the episode number from a video 
 Input: A JSON object with a "title" field containing the video file name, which may or may not include an episode number.
 Example input:
 { "title": "([POPGO][Ghost_in_the_Shell][S.A.C._2nd_GIG][08][AVC_FLACx2+AC3][BDrip][1080p][072D2CD7]).mkv" }
-Output: A JSON object with the extracted episode number and a confidence score between 1 and 100.
+Output: A JSON object with the extracted episode number and a confidence score between 1 and 100. Should have a lower score for contents (Preview/PV etc.) that are not liekly an episode.
 Example output:
 { "episode": 8, "score": 88 }
 '''
+
 
 class OpenAIException(Exception):
     def __init__(self, response, message):
@@ -64,7 +65,8 @@ class OpenAIManager:
         ], self.on_openai_config_update))
 
     def load_client(self, instance: HamsterySettings):
-        self.client = OpenAI(api_key=instance.openai_api_key, timeout=10) # Set a timeout in case OpenAI API is broken
+        # Set a timeout in case OpenAI API is broken
+        self.client = OpenAI(api_key=instance.openai_api_key, timeout=10)
         self.enable_openai = instance.openai_api_key != ''
         self.enable_handle_title = self.enable_openai and (
             instance.openai_title_parser_mode != HamsterySettings.TitleParserMode.DISABLED) and (instance.openai_title_parser_model != '')
@@ -129,7 +131,8 @@ class OpenAIManager:
                 "Querying OpenAI ChatCompletion API Model '%s' to extract episode number from '%s'" % (model, title))
             stats.update_title_parser_stats(calls=1)
             content, response = self.__chatgpt_json_response(
-                model, OPENAI_TITLE_PARSER_DEFAULT_PROMPT, '{ "title": "%s" }' % (title)
+                model, OPENAI_TITLE_PARSER_DEFAULT_PROMPT, '{ "title": "%s" }' % (
+                    title)
             )
             if response.usage:
                 stats.update_title_parser_stats(prompt_tokens=response.usage.prompt_tokens,
