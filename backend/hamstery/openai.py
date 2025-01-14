@@ -118,6 +118,7 @@ class OpenAIManager:
         if self.enable_handle_title is False:
             return None, None
         episode_number = None
+        content = None
         response = None
         error = None
         settings = settings_manager.settings
