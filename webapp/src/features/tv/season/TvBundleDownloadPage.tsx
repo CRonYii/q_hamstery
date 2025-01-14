@@ -4,12 +4,12 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { IFileInfo, ISeasonDownload, ITvDownload, ITvEpisode, ITvSeason, ITvShow } from '../../../app/entities';
 import { useAppDispatch } from '../../../app/hook';
-import { filePathsToTree, formatBytes, getEpNumber, secondsToDhms, treeSelectNode, treeToCascaderOptions } from '../../../app/utils';
+import { filePathsToTree, formatBytes, secondsToDhms, treeSelectNode, treeToCascaderOptions } from '../../../app/utils';
+import hamstery from '../../api/hamstery';
 import { hamsterySlice } from '../../api/hamsterySlice';
 import ApiLoading from '../../general/ApiLoading';
 import { indexerActions } from '../../indexers/indexerSlice';
 import { bundleActions } from './bundleSlice';
-import hamstery from '../../api/hamstery';
 
 const { Text } = Typography;
 
