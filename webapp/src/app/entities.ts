@@ -156,7 +156,7 @@ export interface ITitleParserLog {
     id: number,
     model: string,
     title: string,
-    episode_number: number,
+    result: Record<string, any>,
     exception: string,
     tokens_used: number,
     time: string,

@@ -33,7 +33,7 @@ class HamsteryStats(SingletonModel):
 class OpenAITitleParserLogs(models.Model):
     model = models.CharField(max_length=128)
     title = models.CharField(max_length=256)
-    episode_number = models.IntegerField(default=0)
+    result = models.JSONField(blank=True, null=True)
     exception = models.CharField(max_length=512, blank=True, default='')
     tokens_used = models.IntegerField(default=0)
     time = models.DateTimeField(auto_now_add=True)

@@ -116,7 +116,7 @@ class OpenAIManager:
 
     def get_episode_number_from_title(self, title: str) -> int:
         if self.enable_handle_title is False:
-            return None
+            return None, None
         episode_number = None
         response = None
         error = None
@@ -153,8 +153,8 @@ class OpenAIManager:
             model=model,
             title=title,
         )
-        if episode_number:
-            log.episode_number = episode_number
+        if content:
+            log.result = content
         if response and response.usage:
             log.tokens_used = response.usage.total_tokens
         if error:

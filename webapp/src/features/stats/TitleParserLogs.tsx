@@ -21,11 +21,10 @@ const columns: ColumnsType<ITitleParserLog> = [
         dataIndex: 'episode_number',
         key: 'episode_number',
         filters: [{ text: 'Success', value: true }, { text: "Failed", value: false }],
-        onFilter: (value, entry) => value ? entry.episode_number !== 0 : entry.episode_number === 0,
         render: (_, entry) => {
-            if (entry.episode_number) {
+            if (entry.result) {
                 return <>
-                    <CheckCircleTwoTone twoToneColor="#52c41a" /> {entry.episode_number}
+                    <CheckCircleTwoTone twoToneColor="#52c41a" /> <Typography.Text code>{JSON.stringify(entry.result)}</Typography.Text>
                 </>
             } else {
                 return <>
