@@ -20,7 +20,7 @@ from django import forms
 from django.core.exceptions import ValidationError
 from django.http import (HttpResponseBadRequest, HttpResponseNotFound,
                          JsonResponse)
-from rest_framework import status
+from rest_framework import status, serializers
 from rest_framework.response import Response
 
 tz = tzlocal.get_localzone()
@@ -196,6 +196,22 @@ def validate_params(Form: forms.Form):
             if form.is_valid() is False:
                 return JsonResponse(dict(form.errors.items()), status=400)
             request.data = form.cleaned_data
+            return api(request, *args, **kwargs)
+        return _wrapped_wrapped_api
+    return _wrapped_api
+
+
+def validate_rest_params(Form: serializers.Serializer):
+    def _wrapped_api(api):
+        @wraps(api)
+        def _wrapped_wrapped_api(request, *args, **kwargs):
+            if request.method == 'GET':
+                form = Form(data=request.query_params)
+            else:
+                form = Form(data=request.data)
+            if not form.is_valid():
+                return JsonResponse(dict(form.errors.items()), status=400)
+            request.validated_data = form.validated_data
             return api(request, *args, **kwargs)
         return _wrapped_wrapped_api
     return _wrapped_api

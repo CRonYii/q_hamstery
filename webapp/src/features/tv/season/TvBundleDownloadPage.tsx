@@ -9,6 +9,7 @@ import { hamsterySlice } from '../../api/hamsterySlice';
 import ApiLoading from '../../general/ApiLoading';
 import { indexerActions } from '../../indexers/indexerSlice';
 import { bundleActions } from './bundleSlice';
+import hamstery from '../../api/hamstery';
 
 const { Text } = Typography;
 
@@ -97,10 +98,17 @@ const TVSeasonSubscriptionListItem: React.FC<{ download: ISeasonDownload, season
 }
 
 async function guessEpisodeFromFiles(files: IFileInfo[]) {
-  return Promise.all(files.map(async ({ name, file_index }) => {
-    const episode_number = await getEpNumber(name)
-    return { file_index, episode_number }
-  }))
+  if (!files.length)
+    return []
+  const { data: episodesMapping } = await hamstery.getEpisodesMapping(files.map(f => f.name))
+  const episodes: Record<number, number> = {}
+  for (const episode in episodesMapping) {
+    const file_index = files.find((f) => f.name === episodesMapping[episode].entity)?.file_index
+    if (file_index) {
+      episodes[episode] = file_index
+    }
+  }
+  return episodes
 }
 
 const TVSeasonBundleSelector: React.FC<{
@@ -120,11 +128,7 @@ const TVSeasonBundleSelector: React.FC<{
         return
       }
       guessEpisodeFromFiles(files)
-        .then(episode_numbers => {
-          const episodes: Record<number, number> = {}
-          episode_numbers.forEach(episode => {
-            episodes[episode.episode_number] = episode.file_index
-          })
+        .then(episodes => {
           setGuessedEpisode(episodes)
         })
         .finally(() => setReady(true))

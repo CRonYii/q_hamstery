@@ -33,8 +33,14 @@ class ListMediaForm(forms.Form):
     path = forms.CharField(required=False)
 
 
-class EpisodeNumberForm(forms.Form):
-    title = forms.CharField(required=True)
+class EpisodeNumberForm(serializers.Serializer):
+    title = serializers.CharField(required=True)
+
+class StringListField(serializers.ListField):
+    child = serializers.CharField()
+
+class EpisodeNumberBatchForm(serializers.Serializer):
+    titles = StringListField()
 
 
 class LogRqeustForm(forms.Form):
