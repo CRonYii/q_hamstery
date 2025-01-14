@@ -120,6 +120,7 @@ class OpenAIManager:
         if self.enable_handle_title is False:
             return None, None
         episode_number = None
+        score = None
         content = None
         response = None
         error = None
