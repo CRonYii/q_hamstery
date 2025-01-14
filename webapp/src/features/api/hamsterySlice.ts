@@ -384,6 +384,7 @@ export const hamsterySlice = createApi({
             }),
             // OpenAITitleParserLogs
             getTitleParserLogs: title_parser.getAll,
+            getTitleParserPage: title_parser.getPage,
             getTitleParserLog: title_parser.get,
         }
     }

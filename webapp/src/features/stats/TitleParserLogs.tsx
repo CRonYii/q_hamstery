@@ -3,6 +3,7 @@ import { Divider, Table, Typography } from 'antd';
 import { ColumnsType } from 'antd/es/table';
 import React from 'react';
 import { ITitleParserLog } from '../../app/entities';
+import { IPageNumberResult } from '../api/hamsterySlice';
 
 const columns: ColumnsType<ITitleParserLog> = [
     {
@@ -42,18 +43,20 @@ const columns: ColumnsType<ITitleParserLog> = [
         title: 'Time',
         dataIndex: 'time',
         key: 'time',
-        sorter: (a, b) => {
-            const ta = new Date(a.time)
-            const tb = new Date(b.time)
-            return ta.getTime() - tb.getTime()
-        }
     },
 ];
 
-const TitleParserLogs: React.FC<{ logs: ITitleParserLog[] }> = ({ logs }) => {
+const TitleParserLogs: React.FC<{
+    logs: IPageNumberResult<ITitleParserLog>,
+    onPageChange: (page: number, pageSize: number) => void,
+}> = ({ logs, onPageChange }) => {
     return <>
         <Typography.Title level={5}>Logs</Typography.Title>
-        <Table columns={columns} dataSource={logs} />
+        <Table columns={columns} dataSource={logs.results} pagination={{
+            total: logs.count,
+            current: logs.page,
+            onChange: onPageChange,
+        }} />
         <Divider />
     </>
 }

@@ -3,7 +3,7 @@ import React, { useState } from 'react'
 import { IHamsteryStats, ITitleParserLog } from '../../app/entities'
 import { useAppDispatch } from '../../app/hook'
 import hamstery from '../api/hamstery'
-import { hamsterySlice } from '../api/hamsterySlice'
+import { hamsterySlice, IPageNumberResult } from '../api/hamsterySlice'
 import ApiLoading from '../general/ApiLoading'
 import TitleParserLogs from './TitleParserLogs'
 
@@ -56,18 +56,22 @@ const Stats: React.FC<{ stats: IStat[] }> = ({ stats }) => {
 
 const StatsPage: React.FC = () => {
     const dispatch = useAppDispatch()
+    const [page, setPage] = useState({ page: 1, page_size: 25 })
     const resetStats = () => {
         dispatch(hamsterySlice.util.invalidateTags([{ type: 'stats', id: '1' }]))
     }
 
     return <ApiLoading getters={{
         'stats': () => hamsterySlice.useGetStatsQuery('1'),
-        'title_parser_logs': hamsterySlice.useGetTitleParserLogsQuery,
+        'title_parser_logs': () => hamsterySlice.useGetTitleParserPageQuery({
+            ordering: '-id',
+            ...page,
+        }),
     }}>
         {
             ({ values }) => {
                 const stats: IHamsteryStats = values.stats.data
-                const titleParserLogs: ITitleParserLog[] = values.title_parser_logs.data
+                const titleParserLogs: IPageNumberResult<ITitleParserLog> = values.title_parser_logs.data
                 return <div>
                     <Stats stats={[
                         {
@@ -82,7 +86,12 @@ const StatsPage: React.FC = () => {
                             }
                         },
                     ]} />
-                    <TitleParserLogs logs={titleParserLogs} />
+                    <TitleParserLogs
+                        logs={titleParserLogs}
+                        onPageChange={(page, pageSize) => {
+                            setPage({ page, page_size: pageSize })
+                        }}
+                    />
                 </div>
             }
         }
