@@ -33,7 +33,7 @@ def extract_episode_number_from_title_view(request):
 
     return JsonResponse({'episode_number': episode_number, 'score': score})
 
-@api_view(['GET'])
+@api_view(['POST'])
 @validate_rest_params(EpisodeNumberBatchForm)
 def get_best_episodes_mapping(request):
     titles = request.validated_data['titles']
