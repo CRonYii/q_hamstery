@@ -141,6 +141,7 @@ class TvShowManager(models.Manager):
         logger.info('saved show %s' % (name))
         seasons = details['seasons']
         await show.scan_seasons(seasons)
+        return success(show.id)
 
     TITLE_YEAR_REGEX = re.compile(r'(.*?)\s*\((\d{4})\)?')
 

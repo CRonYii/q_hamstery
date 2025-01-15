@@ -2,7 +2,7 @@ import { TagDescription } from '@reduxjs/toolkit/dist/query/endpointDefinitions'
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import Cookies from 'js-cookie';
 import flatten from 'lodash/flatten';
-import { IDjangoOptions, IHamsterySettings, IHamsteryStats, IIndexer, IParamOptions, ISeasonSearchResult, IShowSubscription, ITitleParserLog, ITorznab, ITvDownload, ITvEpisode, ITvLibrary, ITvSeason, ITvShow, ITvStorage } from '../../app/entities';
+import { IAddShowResponse, IDjangoOptions, IHamsterySettings, IHamsteryStats, IIndexer, IParamOptions, ISeasonSearchResult, IShowSubscription, ITitleParserLog, ITorznab, ITvDownload, ITvEpisode, ITvLibrary, ITvSeason, ITvShow, ITvStorage } from '../../app/entities';
 
 type TagTypes = 'stats' |
     'settings' |
@@ -236,7 +236,7 @@ export const hamsterySlice = createApi({
             getTvShow: tvshow.get,
             getTvShows: tvshow.getAll,
             getTvShowsPage: tvshow.getPage,
-            addTvShowToStorage: builder.mutation<void, { id: string, tmdb_id: string, }>({
+            addTvShowToStorage: builder.mutation<IAddShowResponse, { id: string, tmdb_id: string, }>({
                 query: ({ id, tmdb_id }) => ({
                     method: 'POST',
                     url: `/tvstorage/${id}/add-show/`,

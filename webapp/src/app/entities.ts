@@ -39,6 +39,8 @@ export interface ITvShow {
     warn_removed: boolean,
 }
 
+export interface IAddShowResponse { id: number }
+
 export interface ITvSeason {
     id: number,
     show: number,

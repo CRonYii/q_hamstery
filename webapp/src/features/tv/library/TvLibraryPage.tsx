@@ -1,7 +1,7 @@
 import { PlusOutlined, ReloadOutlined } from '@ant-design/icons';
 import { Button, Col, Empty, Input, Modal, Pagination, Row, notification } from 'antd';
 import React, { useState } from 'react';
-import { useParams, useSearchParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { ITvLibrary, ITvShow } from '../../../app/entities';
 import { IPageNumberResult, hamsterySlice } from '../../api/hamsterySlice';
 import ApiLoading from '../../general/ApiLoading';
@@ -10,6 +10,7 @@ import AddShowForm from './AddShowForm';
 
 const TvLibraryPage: React.FC = () => {
     const params = useParams()
+    const navigate = useNavigate();
     const [searchParams, setSearchParams] = useSearchParams()
     const library_id = params.library_id as string
     const [addShowOpen, setAddShowOpen] = useState(false)
@@ -92,7 +93,8 @@ const TvLibraryPage: React.FC = () => {
                         <AddShowForm library={library} onFinish={async (task) => {
                             setAddShowLoading(true)
                             try {
-                                await task
+                                const { id } = await task
+                                navigate(`/tvshows/${library_id}/${id}`)
                                 setAddShowOpen(false)
                             } catch (e: any) {
                                 notification.error({ message: 'Failed to add show to library' });

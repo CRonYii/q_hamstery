@@ -1,7 +1,7 @@
 import { Form, Select } from 'antd';
 import debounce from 'lodash/debounce';
 import React, { useState } from 'react';
-import { ITvLibrary, ITvStorage } from '../../../app/entities';
+import { IAddShowResponse, ITvLibrary, ITvStorage } from '../../../app/entities';
 import { hamsterySlice } from '../../api/hamsterySlice';
 import TMDB from '../../api/TMDB';
 import ApiLoading from '../../general/ApiLoading';
@@ -12,7 +12,7 @@ interface TMDBTVShowSearchResult {
 
 const AddShowForm: React.FC<{
     library: ITvLibrary,
-    onFinish?: (task: Promise<any>) => void,
+    onFinish?: (task: Promise<IAddShowResponse>) => void,
 }> = ({ library, onFinish }) => {
     const [form] = Form.useForm()
     const [searchResults, setSearchResults] = useState<TMDBTVShowSearchResult[]>([])

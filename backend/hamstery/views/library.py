@@ -39,9 +39,12 @@ class TvStorageView(viewsets.ModelViewSet):
         tmdb_id = form.cleaned_data['tmdb_id']
         if storage.shows.filter(tmdb_id__exact=tmdb_id).exists():
             return Response('Show already exists', status=status.HTTP_400_BAD_REQUEST)
-        async_to_sync(TvShow.objects.create_or_update_by_tmdb_id)(
+        res = async_to_sync(TvShow.objects.create_or_update_by_tmdb_id)(
             storage, tmdb_id)
-        return Response('Ok')
+        if not res.success:
+            return Response(res.data(), status=status.HTTP_400_BAD_REQUEST)
+        show_id = res.data()
+        return Response({"id": show_id})
 
 
 class TvShowView(viewsets.GenericViewSet):
