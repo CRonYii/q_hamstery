@@ -176,7 +176,7 @@ const TVSeasonBundleSelector: React.FC<{
                   </Form.Item>
                   <Form.Item label={<span>EP{episode.episode_number} - {episode.name}</span>}
                     name={[index, 'file_index']} initialValue={existing ? existing.file_index : guess}>
-                    <Select>
+                    <Select allowClear={true}>
                       {
                         files
                           .map((d) => {
