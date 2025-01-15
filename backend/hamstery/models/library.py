@@ -614,16 +614,16 @@ class TvEpisode(models.Model):
                 'Error when importing supplemental file "%s": %s' % (sup_file, str(e)))
         return True
 
-    def cancel_related_downloads(self, type: str):
-        if type == 'all':
+    def cancel_related_downloads(self, download_type: str):
+        if download_type == 'all':
             downloads = self.downloads.all()
-        elif type == 'downloading':
+        elif download_type == 'downloading':
             downloads = self.downloads.filter(
                 Q(monitoredtvdownload__isnull=False) | Q(done=False))
-        elif type == 'done':
+        elif download_type == 'done':
             downloads = self.downloads.filter(done=True)
         for download in downloads:
-            logger.info('Deleted download "%s"' % download.filename)
+            logger.info('Deleted <"%s"> download "%s"' % (download_type, download.filename))
             download.cancel()
 
     def get_formatted_file_destination(self, name, option='full'):

@@ -205,7 +205,7 @@ class TvDownload(PolymorphicModel):
 
         return utils.success('Parsed files')
 
-    def organize(self, task, manually=False):
+    def organize(self, task, manually=True):
         if self.file_index == -1:
             return self.fail('Does not have file fetched')
 
@@ -328,7 +328,7 @@ class MonitoredTvDownload(TvDownload):
             self.cancel()
             return utils.failure('Monitored download is already downloaded/imported')
 
-        return super().organize(task, manually=True)
+        return super().organize(task, manually=False)
 
 
 class SeasonDownload(models.Model):
