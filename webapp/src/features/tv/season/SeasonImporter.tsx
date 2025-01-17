@@ -40,9 +40,8 @@ const SeasonImporter: React.FC<{
   const [loading_episode_numbers, setLoadingEpisodeNumbers] = useState<boolean>(false)
   const [localImport, { isLoading }] = hamsterySlice.useImportTvEpisodeMutation()
 
-  const missingEps = useMemo(() => new Set(episodes
-    .filter((e) => e.status === TvEpisodeStatus.MISSING)
-    .map(e => e.episode_number)), [episodes])
+  const missingEps = useMemo(() => episodes
+    .filter((e) => e.status === TvEpisodeStatus.MISSING), [episodes])
 
   useEffect(() => {
     setLoadingEpisodeNumbers(true)
@@ -52,7 +51,7 @@ const SeasonImporter: React.FC<{
     })).then(episode_numbers => {
       const import_episode_numbers: Record<string, number> = {}
       episode_numbers.forEach(episode => {
-        if (!missingEps.has(episode.episode_number)) {
+        if (!missingEps.some((e) => e.episode_number === episode.episode_number)) {
           return
         }
         import_episode_numbers[episode.title] = episode.episode_number
@@ -149,7 +148,7 @@ const SeasonImporter: React.FC<{
                   <Select>
                     {
                       [...missingEps.values()]
-                        .map((n) => <Select.Option key={n} value={n}>EP {n}</Select.Option>)
+                        .map(({ episode_number, name }) => <Select.Option key={episode_number} value={episode_number}>EP{episode_number} - {name}</Select.Option>)
                     }
                   </Select>
                 </Form.Item>
